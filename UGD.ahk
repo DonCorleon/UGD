@@ -95,15 +95,15 @@ URLDownloadToVar( url, Method:="GET" ){
 	hObject.Send()
 	return hObject.ResponseText
 }
+#Include Classes\Class_Console.ahk
 #Include Classes\Class_XML.ahk
 #Include Functions\API-Login.ahk
 #Include Functions\GetCookies.ahk
 #Include Functions\Headers.ahk
 #Include Functions\HTTP-GetUserInfo.ahk
 #Include Functions\HTTP-Login.ahk
+#Include Functions\Resources.ahk
 #Include Functions\RSS_Get.ahk
+#Include Functions\Update.ahk
 #Include Lib\HTTPRequest.ahk
 #Include Lib\OAuth.ahk
-#Include C:\AutoHotKey Studio\Projects\Ultimate GoG Downloader\Classes\Class_Console.ahk
-#Include C:\AutoHotKey Studio\Projects\Ultimate GoG Downloader\Functions\Update.ahk
-#Include C:\AutoHotKey Studio\Projects\Ultimate GoG Downloader\Functions\Resources.ahk
