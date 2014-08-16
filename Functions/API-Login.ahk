@@ -2,10 +2,13 @@ API_Login(Username, Password){
 	global DEBUG_API
 	global API
 	tt("API:`tLogin Started")
+	ter("API:`tLogin Started")
 	; Step one : Get the URL's and a few other bits of info
 	HTTPRequest(API.oauth_get_urls "/",InOutData:="",InOutHeader:="")
 	if (DEBUG_API) ;----------- DEBUG
-		m("API:Step 1",API.oauth_get_urls,InOutHeader),m("API:Step 1",InOutData)
+		m("API:Step 1",API.oauth_get_urls,InOutHeader)
+	if (DEBUG_API>1) ;----------- DEBUG
+		m("API:Step 1",InOutData)
 	for a,b in ["status","version","url","mac_signature","mac_length","mac_sparkle_bundle","current_timestamp","oauth_get_temp_token","oauth_authorize_temp_token","oauth_get_token","get_user_details","get_user_games","get_game_details","get_installer_link","get_extra_link","set_app_status","error_log_endpoint","status_update_timer","link_expiration"]{
 		RegExMatch(InOutData,"U)\b" b "\b.*:(.*)(,|})",found)
 		value:=RegExReplace(found1,"(" Chr(34) "|\\)")
@@ -22,7 +25,9 @@ API_Login(Username, Password){
 	URL := OAuth_Authorization( Basic_Credentials "`n" Specific_Credentials, API.oauth_get_temp_token "/", "", "GET" )
 	HTTPRequest(URL,InOutData:="",InOutHeader:="")
 	if (DEBUG_API) ;----------- DEBUG
-		m("API:Step 2",URL,InOutHeader),m("API:Step 2",InOutData)
+		m("API:Step 2",URL,InOutHeader)
+	if (DEBUG_API>1) ;----------- DEBUG
+		m("API:Step 2",InOutData)
 	While(Pos:=RegExMatch(InOutData,"U)oauth_(.*)=(.*)(&|$)",Oauth,(Pos ? Pos+1 : 1)))
 	{
 		oauth1:="Temp_" oauth1
@@ -38,7 +43,9 @@ API_Login(Username, Password){
 	URL := OAuth_Authorization( Basic_Credentials "`n" Specific_Credentials, API.oauth_authorize_temp_token "/", "&password=" Password "&username=" Username, "GET" )
 	HTTPRequest(URL,InOutData:="",InOutHeader:="")
 	if (Debug_API) ;----------- DEBUG
-		m("API:`tStep 3",URL,InOutHeader),m("API:`tStep 3",InOutData)
+		m("API:`tStep 3",URL,InOutHeader)
+	if (DEBUG_API>1) ;----------- DEBUG
+		m("API:`tStep 3",InOutData)
 	While(Pos:=RegExMatch(InOutData,"U)oauth_(.*)=(.*)(&|$)",Oauth,(Pos ? Pos+1 : 1)))
 		oauth1:="Temp_" oauth1,API[oauth1]:=oauth2
 	If (API.Temp_Token&&API.Temp_Token_Secret&&API.Temp_Verifier)
@@ -60,6 +67,7 @@ API_Login(Username, Password){
 	else
 		return,0 tt("ERROR:`tStep 4. Did NOT confirm Temp Token or find Token Secret key")	
 	tt("API:`tLogin Successful")
+	ter("API:`tLogin Successful")
 	Api.Specific_Credentials := "oauth_token=" API.Token "`noauth_token_secret=" API.Token_Secret
 	return,1
 }

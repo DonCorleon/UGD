@@ -1,11 +1,14 @@
 HTTP_Login(UserName,UserPass){
 	global DEBUG_HTTP,Cookie:=""
 	tt("HTTP:`tLogin Started")
+	ter("HTTP:`tLogin Started")
 	Options := "+Flag: INTERNET_FLAG_NO_COOKIES`n+NO_AUTO_REDIRECT"
 	. (A_IsUnicode ? "`nCharset: UTF-8" : "")
 	HTTPRequest(url:="https://secure.gog.com/", InOutData := "", InOutHeader := Headers(), Options "`nMETHOD:POST") ; first request to get a gutm and game Ids for initial login request
-	if DEBUG_HTTP ;--------------- DEBUG
-		m("HTTP:Step 1",URL,cookie,InOutHeader),m("HTTP:Step 1",InOutData)
+	if (DEBUG_HTTP) ;--------------- DEBUG
+		tt("HTTP:Step 1","URL : "URL,"Cookie : "cookie,"Header`n"InOutHeader)
+	if (DEBUG_HTTP>1) ;----------- DEBUG
+		m("HTTP:Step 1",InOutData)
 	if !(RegExMatch(InOutData,"U)id=""auth_url"" value=""(.*)"" />",Auth_URL))
 		Return tt("ERROR:`tNo AUTH_URL Found")
 	If !(RegExMatch(InOutData,"U)id=""gutm"" value=""(.*)"" />",gutm))
@@ -19,11 +22,13 @@ HTTP_Login(UserName,UserPass){
 	;*************** Step 2
 	StringReplace,Clean_Auth_URL,Auth_URL1,&amp;,&,All
 	url := Clean_Auth_URL
-	Cookie:=GetCookies(InOutHeader)
+	Cookie:= GetCookies(InOutHeader)
 	redo2: ;----------------- Redirect
 	HTTPRequest(url, InOutData := "", InOutHeader := Headers() , Options)
 	if (DEBUG_HTTP) ;--------------- DEBUG
-		m("HTTP:Step 2",URL,cookie,InOutHeader),m("HTTP:Step 2",InOutData)
+		tt("HTTP:Step 2","URL : "URL,"Cookie : "cookie,"Header`n"InOutHeader)
+	if (DEBUG_HTTP>1) ;----------- DEBUG
+		m("HTTP:Step 2",InOutData)
 	Found:=RegExMatch(InOutHeader,"U)Location: (.*)\n",New_URL)
 	if (found){ ;----------------- Check for Redirect
 		url:=New_URL1
@@ -47,7 +52,9 @@ HTTP_Login(UserName,UserPass){
 	Redo3: ;----------------- Redirect
 	HTTPRequest(url, InOutData := data, InOutHeader := Headers(Referer), Options "`nMethod:POST")
 	if (DEBUG_HTTP) ;--------------- DEBUG
-		m("HTTP:Step 3",URL,cookie,InOutHeader),m("HTTP:Step 3",InOutData)
+		tt("HTTP:Step 3","URL : "URL,"Data : " data ,"Cookie : "cookie,"Header`n"InOutHeader)
+	if (DEBUG_HTTP>1) ;----------- DEBUG
+		m("HTTP:Step 3",InOutData)
 	Found:=RegExMatch(InOutHeader,"U)Location: (.*)`n",New_URL)
 	if (found){ ;----------------- Check for Redirect
 		url:=New_URL1
@@ -69,10 +76,12 @@ HTTP_Login(UserName,UserPass){
 	)
 	HTTPRequest(URL:="http://www.gog.com/user/ajax", InOutData := data, InOutHeader:=Headers("http://www.gog.com/"), Options "`nx-requested-with: XMLHttpRequest`nMethod: POST")
 	if (DEBUG_HTTP) ;--------------- DEBUG
-		m("HTTP:Step 4",URL,cookie,InOutHeader),m("HTTP:Step 4",InOutData)
+		tt("HTTP:Step 4","URL : "URL,"Cookie : "cookie,"Header`n"InOutHeader)
+	if (DEBUG_HTTP>1) ;----------- DEBUG
+		m("HTTP:Step 4",InOutData)
 	If RegExMatch(InOutData, """xywka"":""\K[^""]+", NickName)
 		tt("HTTP:`tPhase 4 passed"),tt("Welcome " NickName)
 	else
-		Return tt("HTTP:`tLogin Failed"),tt("HTTP Error:`tSkipping API login")
-	return,1 tt("HTTP:`tLogin Successful")
+		Return tt("HTTP:`tLogin Failed"),ter("HTTP:`tLogin Failed"),tt("HTTP Error:`tSkipping API login")
+	return,1 tt("HTTP:`tLogin Successful"),ter("HTTP:`tLogin Successful")
 }

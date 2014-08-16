@@ -28,13 +28,14 @@ class scConsole
 		this.numC 			:= o["Line Number Color"] ? o["Line Number Color"] : "aqua"
 		this.guiF 			:= o["Font"] ? o["Font"] : "Consolas"
 		this.regexColorData := RegExColor[1] ? RegExColor : [["(scConsole)","[yellow]$1[/]"]]
-		guiN				:= this.guiNumber
+		guiN				:= "Main" ;this.guiNumber
 		guiW 				:= this.guiW
 		guiH 				:= this.guiH
 		guiC 				:= this.guiC
 		guiF 				:= this.guiF
-		Gui, %guiN%:+ToolWindow -caption +border +OwnerMain
-		Gui, %guiN%: Add, ActiveX, w%guiW% h%guiH% vmsHTML x0 y0 +HScroll, MSHTML:
+		;Gui, %guiN%:+ToolWindow -caption +border +OwnerMain
+		;Gui, %guiN%: Add, ActiveX, w%guiW% h%guiH% vmsHTML x0 y0 +HScroll, MSHTML:
+		Gui, %guiN%: Add, ActiveX, w%guiW% h%guiH% vmsHTML x0 +HScroll, MSHTML:
 		htmlData 			=
 		(	<DOCTYPE !HTML>
 			<html><head>
