@@ -15,7 +15,15 @@ Resources(){
 	
 	;---- Config File
 	IfNotExist %A_ScriptDir%\Resources\Config.ini
-		m("No configuration file found.`nDo you want to create one?")
+	{
+		m("No Config File Found`nPlease create one")
+		;MsgBox,No configuration file found.`nDo you want to create one?
+		;IfmsgBox Yes
+		;Gui_Config()
+		;IfMsgBox, No
+		;m("Config creation cancelled")
+	}
+	
 	Else ;---- Readin config File Here
 	{
 		IniRead,Username,%A_ScriptDir%\Resources\Config.ini,Credentials,Username
