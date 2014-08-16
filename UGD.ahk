@@ -2,7 +2,7 @@ version=;auto_version
 #SingleInstance,force
 SetBatchLines = -1
 ;******** Global Vars
-Global Cookie,status
+Global Cookie,status,UpdateType
 
 ; Create the Basic API Object
 API:=Object("Consumer_Key","1f444d14ea8ec776585524a33f6ecc1c413ed4a5"
@@ -20,11 +20,29 @@ Gui,Main:Add,Edit,xp-130 yp+35 w200 vUsername,% Config.Username
 Gui,Main:Add,Edit,xp+210 w200 vPassword,% Config.Password
 Gui,Main:Add,Button,xp+210 vButtonLogin gButtonLogin,Login
 Gui,Main:Add,Button,yp-35 vButtonUpdate gButtonUpdate,Update
+gui,Main:Add,Checkbox,xp-80 y0 vGetScript gChangeCheckS,Script
+gui,Main:Add,Checkbox,xp y15 vGetExe gChangeCheckE,Executable
+GuiControl,,GetScript,1
+
 ;Gui,Main:Add,ListBox,xp-420 yp+75 w460 r22 +VScroll +Border vStatus,Idle
 myConsole:= new scConsole({"Control Width": 490, "Control Height": 90,"Font":Courier New,"Line Number Color":"yellow"})
 Gui,Main:Show,h155
 DoLog(1,"LogFile:Log.txt","Downloader Started")
 Return
+ChangeCheckS:
+{
+	Gui,Submit,NoHide
+	GuiControl,,GetExe,0
+	UpdateType:="SCRIPT"
+	Return
+}
+ChangeCheckE:
+{
+	Gui,Submit,NoHide
+	GuiControl,,GetScript,0
+	UpdateType:="EXE"
+	Return
+}
 ConfigWindow:
 {
 	Gui_Config()

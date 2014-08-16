@@ -3,7 +3,7 @@ Gui_Config(){
 	static Languages,Platforms,Downloads,UserID,PassID
 	Gui,Main:+Disabled
 	Gui,Config:New,+ToolWindow +OwnerMain,Configuration
-	Gui,Config:Add,TreeView, w300 r10 vConfigs gConfigCheckClick checked +Wrap
+	Gui,Config:Add,TreeView, w300 r10 gConfigCheckClick checked +Wrap
 	Gui,Config:Add,Button,gConfigSave,Save
 	Gui,Config:Add,Button,xp+40 yp gConfigCancel,Cancel
 	Credentials:=TV_Add("Credentials")

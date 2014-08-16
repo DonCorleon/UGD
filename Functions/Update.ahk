@@ -1,5 +1,6 @@
 Update(){
-	global version
+	global version,UpdateType
+	UpdateType:="Script"
 	GuiControl,Main:Disable,ButtonUpdate
 	HTTPRequest(URL:="http://doncorleon.no-ip.org/ahk/ugd/ugd.text",InOutData,InOutHeader)
 	GuiControl,Main:Enable,ButtonUpdate
@@ -18,10 +19,14 @@ Update(){
 	}
 	IfMsgBox Yes
 	{
-		FileMove,UGD.exe,UGD-Old.exe,1
-		HttpRequest(URL:="http://doncorleon.no-ip.org/ahk/ugd/ugd.exe",InOutData,InOutHeader,options:="SAVEAS:UGD.exe`nCallBack:UpdateProgress")
+		if UpdateType="EXE"
+			Filename:="UGD.exe"
+		if UpdateType="Script"
+			Filename:="UGD.ahk"
+		FileMove,%Filename%,%FileName%.old,1
+		HttpRequest(URL:="http://doncorleon.no-ip.org/ahk/ugd/" Filename,InOutData,InOutHeader,options:="SAVEAS:" Filename "`nCallBack:UpdateProgress")
 		Progress,Off
-		Run,UGD.exe
+		Run,%FileName%
 	}
 	IfMsgBox No
 		m("Update cancelled."),tt("Update cancelled.")
