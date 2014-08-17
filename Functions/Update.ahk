@@ -1,8 +1,9 @@
 Update(){
-	global version,UpdateType
-	UpdateType:="Script"
+	global version
+	static BaseURL:="http://doncorleon.no-ip.org"
+	;static BaseURL:="10.1.1.52:8081"
 	GuiControl,Main:Disable,ButtonUpdate
-	HTTPRequest(URL:="http://doncorleon.no-ip.org/ahk/ugd/ugd.text",InOutData,InOutHeader)
+	HTTPRequest(URL:=BaseURL "/ahk/ugd/ugd.text",InOutData,InOutHeader)
 	GuiControl,Main:Enable,ButtonUpdate
 	UpdateText:=StrSplit(InOutData,"`n","`r`n")
 	if !UpdateText.1
@@ -11,26 +12,39 @@ Update(){
 		Return	
 	}
 	if (UpdateText.1=Version)
-		m("No update is available"),tt("No update is available")
-	Else
-	{
-		tt("Version " UpdateText.1 " is available.")
-		MsgBox,4388,Update Available, % "Version " UpdateText.1 " is available.`nUpdate to new version?"
-	}
-	IfMsgBox Yes
-	{
-		if UpdateType="EXE"
-			Filename:="UGD.exe"
-		if UpdateType="Script"
-			Filename:="UGD.ahk"
-		FileMove,%Filename%,%FileName%.old,1
-		HttpRequest(URL:="http://doncorleon.no-ip.org/ahk/ugd/" Filename,InOutData,InOutHeader,options:="SAVEAS:" Filename "`nCallBack:UpdateProgress")
-		Progress,Off
-		Run,%FileName%
-	}
-	IfMsgBox No
-		m("Update cancelled."),tt("Update cancelled.")
+		return m("No update is available"),tt("No update is available")
+	
+	Gui,Update:New,+ToolWindow +OwnerMain,Update Available
+	Gui,Update:Add,Text,,% "Version " UpdateText.1 " is available.`nSelect your update type."
+	Gui,Update:Add,Button,gUpdateScript,UGD.ahk
+	Gui,Update:Add,Button,xp+60 gUpdateExe,UGD.exe
+	Gui,Update:Add,Button,xp+60 gUpdateCancel,Cancel
+	Gui,Update:Show
+	Gui,Main:+Disabled
+	tt("Version " UpdateText.1 " is available.")
 	Return
+	UpdateGuiClose:
+	UpdateCancel:
+	Gui,Main:-Disabled
+	Gui,Update:Destroy
+	m("Update cancelled."),tt("Update cancelled.")
+	Return
+	UpdateScript:
+	FileMove,UGD.ahk,UGD.ahk.old,1
+	HttpRequest(URL:=BaseURL "/ahk/ugd/UGD.ahk",InOutData,InOutHeader,options:="SAVEAS:UGD.ahk`nCallBack:UpdateProgress")
+	Progress,Off
+	Gui,Main:-Disabled
+	Gui,Update:Destroy
+	Run,UGD.ahk
+	ExitApp
+	UpdateExe:
+	FileMove,UGD.exe,UGD.exe.old,1
+	HttpRequest(URL:=BaseURL "/ahk/ugd/UGD.exe",InOutData,InOutHeader,options:="SAVEAS:UGD.exe`nCallBack:UpdateProgress")
+	Progress,Off
+	Gui,Main:-Disabled
+	Gui,Update:Destroy
+	Run,UGD.exe
+	ExitApp
 }
 UpdateProgress(Percentage,Param2){
 	Progress,% Round(Percentage*100,0),% Round(Percentage*100,0) "%",Updating. Please Wait,Update
