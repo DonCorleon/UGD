@@ -13,17 +13,17 @@ API:=Object("Consumer_Key","1f444d14ea8ec776585524a33f6ecc1c413ed4a5"
 ; Create the Basic Test Gui
 Config:=Resources()
 Gui,Main:New,+OwnDialogs +Resize,Ultimate GoG Downloader v%Version%
-gui,Main:Add,Checkbox,x0 y0 vDebug_HTTP gDoSubmit,Debug_HTTP
-gui,Main:Add,Checkbox,x0 y15 vDebug_API gDoSubmit,Debug_API
-gui,Main:Add,Button,x150 y0 vConfigWindow gConfigWindow,Configure
-Gui,Main:Add,Edit,xp-130 yp+35 w200 vUsername,% Config.Username
-Gui,Main:Add,Edit,xp+210 w200 vPassword,% Config.Password
-Gui,Main:Add,Button,xp+210 vButtonLogin gButtonLogin,Login
-Gui,Main:Add,Button,yp-35 vButtonUpdate gButtonUpdate,Update
+gui,Main:Add,DropDownList,x0 y0 w40 vDebug_HTTP gDoSubmit,0||1|2
+gui,Main:Add,DropDownList,x0 y20 w40 vDebug_API gDoSubmit,0||1|2
+gui,Main:Add,Text,x45 y5,Debug Level : HTTP 
+gui,Main:Add,Text,x45 y25,Debug Level : API 
+Gui,Main:Add,Button,x270 y0 w60 vButtonLogin gButtonLogin,Login
+gui,Main:Add,Button,x350 y0 w60 vConfigWindow gConfigWindow,Configure
+Gui,Main:Add,Button,x430 y0 w60 vButtonUpdate gButtonUpdate,Update
 
 ;Gui,Main:Add,ListBox,xp-420 yp+75 w460 r22 +VScroll +Border vStatus,Idle
-myConsole:= new scConsole({"Control Width": 490, "Control Height": 90,"Font":Courier New,"Line Number Color":"yellow"})
-Gui,Main:Show,h155
+myConsole:= new scConsole({"Control Width": 490, "Control Height": 85,"Font":Courier New,"Line Number Color":"yellow"})
+Gui,Main:Show,h140
 DoLog(1,"LogFile:Log.txt","Downloader Started")
 Return
 ConfigWindow:
@@ -43,17 +43,18 @@ ButtonUpdate:
 }
 ButtonLogin:
 {
-	if !IsObject(myConsole)
+	Username:=Config.Username
+	Password:=Config.Password
+	if (!Username||!Password)
 	{
-		myConsole:= new scConsole({"Control Width": 600, "Control Height": 250,"Font":Courier New,"Line Number Color":"yellow"})
-		;MyConsole.Hide()
+		tt("[Red]Username[/] or [Red]Password[/] isn't set."),tt("Set your Credentials in [red]Configuration[/].")
+		Return
 	}
-	Gui,Main:Submit,NoHide
 	Success:=HTTP_Login(Username,Password)
 	if (Success)
 		Success:=API_Login(Username,Password)
 	if (Success)
-		tt("Logged in to HTTP and API Successfully","Getting a list of your games...."),ter("Logged in to HTTP and API Successfully","Getting a list of your games...."),List:=HTTP_GetUserInfo()	
+		tt("Logged in to [Yellow]HTTP[/] and [Yellow]API[/] Successfully"),tt("Getting a list of your games...."),ter("Logged in to HTTP and API Successfully","Getting a list of your games...."),List:=HTTP_GetUserInfo()	
 	if (List.Updates.1)
 		tt("Updated games as follows:")
 	for a,b in List.Updates
@@ -62,15 +63,8 @@ ButtonLogin:
 			badge:="New Game"
 		if b.notify="bdg_update"
 			badge:="Update Available"
-		tt(A_index ".`t" b.Folder " - " badge)
+		tt(A_index ".`t[03F]" b.Folder "[/] - [Yellow]" badge "[/]")
 	}
-	;for a,b in List
-	;{
-	;if (!b.name||a="Updates")
-	;tt(a)
-	;Else
-	;tt(b.name)
-	;}
 	Return
 }
 MainGuiClose:

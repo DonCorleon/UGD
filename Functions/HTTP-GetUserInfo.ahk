@@ -16,7 +16,7 @@ HTTP_GetUserInfo(){
 		DLCFound:=RegExMatch( b, "U)shelf-game-dlc-counter\\""> \+(.*) DLC", DLC)
 		Badges:=RegExMatch( b, "U)class=\\""shelf_badges\\""> <i class=\\""(.*)\\",Badge)
 		If (FoundFolder && FoundGameID){
-			StringReplace, GameBox1, GameBox1,`\,,All
+			StringReplace, GameBox1, GameBox1,\,,All
 			List[GameFolder1] := Object( "DisplayName", ""
 			,"Name",""			
 			,"ServerName", GameName1
@@ -28,7 +28,7 @@ HTTP_GetUserInfo(){
 			,"DLC", DLC1
 			,"GameID", GameID1
 			,"OrderID", OrderID1
-			,"GameCard", "http://www.gog.com/game/" Game_Folder
+			,"GameCard", "http://www.gog.com/game/" GameFolder1
 			,"Icon", Icon_Link
 			,"Game_Box", "http://static.gog.com" GameBox1)
 		}

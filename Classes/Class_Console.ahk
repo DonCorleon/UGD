@@ -41,9 +41,9 @@ class scConsole
 			<html><head>
 				<style type="text/css">
 				body { background-color: #%guiC%; }
-				body * { padding: 0px; margin: 0px; }
+				body * { border: 0px; padding: 0px; margin: 0px; }
 				p { color: #FFF; font-family: %guiF%; font-size: 12px; } .num { color: #33A; padding: 0px; margin: 0px; }
-				.num { padding-right: 30px; } .padLeft { padding-left: 60px; } .padRight { padding-right: 60px; }
+				.num { padding-right: 30px; } .padLeft { padding-left: 30px; } .padRight { padding-right: 30px; }
 				.red { color: #D00; } .blue { color: #00D; } .green { color: #0D0; }
 				.grey { color: #AAA; } .aqua { color: #0DD; } .yellow { color: #DD0; }
 				.bred { background-color: #D00; } .bblue { background-color: #00D; } .bgreen { background-color: #0D0; }
