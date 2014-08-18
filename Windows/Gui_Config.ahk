@@ -1,12 +1,12 @@
 Gui_Config(){
-	global Config
+	global Config,ConfigTree,ConfigSave,ConfigCancel
 	static Languages,Platforms,Downloads,UserID,PassID
 	Main_GuiHeight:=A_GuiHeight,Main_GuiWidth:=A_GuiWidth
 	Gui,Main:+Disabled
-	Gui,Config:New,+ToolWindow +Resize +OwnerMain,Configuration
-	Gui,Config:Add,TreeView, w300 r10 gConfigCheckClick checked +Wrap
-	Gui,Config:Add,Button,gConfigSave,Save
-	Gui,Config:Add,Button,xp+40 yp gConfigCancel,Cancel
+	Gui,Config:New,+ToolWindow +Resize +OwnerMain +MinSize200x200,Configuration
+	Gui,Config:Add,TreeView,x0 y0 vConfigTree gConfigCheckClick checked +Wrap
+	Gui,Config:Add,Button,vconfigsave gConfigSave,Save
+	Gui,Config:Add,Button,vConfigCancel gConfigCancel,Cancel
 	Credentials:=TV_Add("Credentials")
 	UserID:=TV_Add("User = " Config.Username,Credentials)
 	PassID:=TV_Add("Pass = " Config.Password,Credentials)
@@ -19,12 +19,15 @@ Gui_Config(){
 	Languages:=TV_Add("Languages")
 	for a,b in Config.Languages
 		TV_Add(a,Languages,"vLanguage_%b% +check" b)
-	Gui,Config:Show
-	m(Main_GuiWidth,Main_GuiHeight,A_GuiWidth,A_GuiHeight)
+	Gui,Config:Show, w200 h200,Configuration
 	Return
 	ConfigGuiSize:
 	{
-		TrayTip,Configuration,% "Resized `nW " A_GuiWidth "`nH " A_GuiHeight
+		Gui,Config:Default
+		GuiControl,Config:MoveDraw,Configsave,% "y" A_Guiheight-30 " w" A_GuiWidth*.48
+		GuiControl,Config:MoveDraw,ConfigCancel,% "x" A_Guiwidth*.52 " y" A_Guiheight-30 " w" A_GuiWidth*.48
+		GuiControl,Config:MoveDraw,ConfigTree,% "w" A_Guiwidth " h" A_GuiHeight-35
+		TrayTip,Config,% "w" A_Guiwidth " h" A_GuiHeight
 		return
 	}
 	ConfigSave:

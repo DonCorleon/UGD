@@ -8,27 +8,31 @@ Global Cookie,status
 API:=Object("Consumer_Key","1f444d14ea8ec776585524a33f6ecc1c413ed4a5"
 ,"Consumer_Secret","20d175147f9db9a10fc0584aa128090217b9cf88"
 ,"oauth_get_urls","https://api.gog.com/en/downloader2/status/stable")
-
+guiwidth:=350
+guiHeight:=200
 
 ; Create the Basic Test Gui
 Config:=Resources()
-Gui,Main:New,+OwnDialogs +Resize,Ultimate GoG Downloader v%Version%
+Gui,Main:New,+OwnDialogs +Resize +MinSize350x200,Ultimate GoG Downloader v%Version%
 gui,Main:Add,DropDownList,x0 y0 w40 vDebug_HTTP gDoSubmit,0||1|2
 gui,Main:Add,DropDownList,x0 y20 w40 vDebug_API gDoSubmit,0||1|2
 gui,Main:Add,Text,x45 y5,Debug Level : HTTP 
 gui,Main:Add,Text,x45 y25,Debug Level : API 
-Gui,Main:Add,Button,x270 y0 w60 vButtonLogin gButtonLogin,Login
-gui,Main:Add,Button,x350 y0 w60 vConfigWindow gConfigWindow,Configure
-Gui,Main:Add,Button,x430 y0 w60 vButtonUpdate gButtonUpdate,Update
+Gui,Main:Add,Button,% "x" guiWidth-200 " y0 w60 vButtonLogin gButtonLogin",Login
+gui,Main:Add,Button,% "x" guiWidth-130 " y0 w60 vConfigWindow gConfigWindow",Configure
+Gui,Main:Add,Button,% "x" guiWidth-60 " y0 w60 vButtonUpdate gButtonUpdate",Update
 ;Gui, Main: Add, ActiveX, x0 y50 w790 h585 vmsHTML +HScroll, Hello
 
 ;Gui,Main:Add,ListBox,xp-420 yp+75 w460 r22 +VScroll +Border vStatus,Idle
-myConsole:= new scConsole({"PosX":"p-430","PosY":"50","Gui Number":"Main","Control Width": 790, "Control Height": 585,"Font":Courier New,"Line Number Color":"yellow"})
-Gui,Main:Show,h640
+myConsole:= new scConsole({"PosX":"1","PosY":"50","Gui Number":"Main","Control Width": guiwidth, "Control Height": guiheight,"Font":Courier New,"Line Number Color":"yellow"})
+Gui,Main:Show,h%guiHeight%
 DoLog(1,"LogFile:Log.txt","Downloader Started")
 Return
 MainGuiSize:
 {
+	GuiControl,Main:MoveDraw,ButtonLogin,% "x"A_Guiwidth*.44
+	GuiControl,Main:MoveDraw,configWindow,% "x"A_Guiwidth*.63
+	GuiControl,Main:MoveDraw,ButtonUpdate,% "x"A_Guiwidth*.82
 	myConsole.Resize(A_GuiWidth,A_GuiHeight)
 	Return
 }
