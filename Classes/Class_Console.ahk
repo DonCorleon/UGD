@@ -41,7 +41,8 @@ class scConsole
 		
 		;Gui, %guiN%:+ToolWindow -caption +border +OwnerMain
 		;Gui, %guiN%: Add, ActiveX, w%guiW% h%guiH% vmsHTML x0 y0 +HScroll, MSHTML:
-		Gui, %guiN%: Add, ActiveX, x%guiX% y%guiY% w%guiW% h%guiH% vmsHTML +HScroll, MSHTML:
+		Gui, %guiN%: Add, ActiveX, HwndHwnd x%guiX% y%guiY% w%guiW% h%guiH% vmsHTML hwndhwnd +HScroll, MSHTML:
+		this.hwnd:=hwnd
 		htmlData 			=
 		(	<DOCTYPE !HTML>
 			<html><head>
@@ -139,10 +140,7 @@ class scConsole
 		GuiNumber:=this.guiNumber
 		Gui,%GuiNumber%:Show
 	}
-	Resize(width,height)
-	{
-		ControlVar:=this.var,guiN:= this.guiNumber
-		ControlMove,Main:ControlVar,,,% width,% height
-		;GuiControl, %guiN%: Move, % this.var, % "w" width " h" height " x0 y0"
+	Resize(width,height){
+		GuiControl,% this.guinumber ": Move",% this.hwnd, % "w" width " h" height-this.guiy
 	}
 }
