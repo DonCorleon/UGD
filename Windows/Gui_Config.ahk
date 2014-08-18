@@ -3,7 +3,7 @@ Gui_Config(){
 	static Languages,Platforms,Downloads,UserID,PassID
 	Main_GuiHeight:=A_GuiHeight,Main_GuiWidth:=A_GuiWidth
 	Gui,Main:+Disabled
-	Gui,Config:New,+ToolWindow +Resize +OwnerMain +MinSize200x200,Configuration
+	Gui,Config:New,+hwndhwnd +ToolWindow +Resize +OwnerMain +MinSize200x200,Configuration
 	Gui,Config:Add,TreeView,x0 y0 vConfigTree gConfigCheckClick checked +Wrap
 	Gui,Config:Add,Button,vconfigsave gConfigSave,Save
 	Gui,Config:Add,Button,vConfigCancel gConfigCancel,Cancel
@@ -20,6 +20,15 @@ Gui_Config(){
 	for a,b in Config.Languages
 		TV_Add(a,Languages,"vLanguage_%b% +check" b)
 	Gui,Config:Show, w200 h200,Configuration
+	List:=[Credentials,UserID,PassID,Downloads,Platforms,Languages]
+	VarSetCapacity(tvitem,28)
+	for index,id in list{ ;loop through the array of id numbers
+		info:=A_PtrSize=4?{0:8,4:id,12:0xf000}:{0:8,8:id,20:0xf000} ;there are 2 different offsets for x32 and x64.  This will account for both
+		for offset,value in info
+			NumPut(value,tvitem,offset)
+		SendMessage,4415,0,&tvitem,SysTreeView321,ahk_id%hwnd%
+		;4415 is tvm_setitemw which is tv_first=0x1100 + 63
+	}
 	Return
 	ConfigGuiSize:
 	{
