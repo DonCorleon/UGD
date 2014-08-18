@@ -1,8 +1,9 @@
 Gui_Config(){
 	global Config
 	static Languages,Platforms,Downloads,UserID,PassID
+	Main_GuiHeight:=A_GuiHeight,Main_GuiWidth:=A_GuiWidth
 	Gui,Main:+Disabled
-	Gui,Config:New,+ToolWindow +OwnerMain,Configuration
+	Gui,Config:New,+ToolWindow +Resize +OwnerMain,Configuration
 	Gui,Config:Add,TreeView, w300 r10 gConfigCheckClick checked +Wrap
 	Gui,Config:Add,Button,gConfigSave,Save
 	Gui,Config:Add,Button,xp+40 yp gConfigCancel,Cancel
@@ -19,8 +20,13 @@ Gui_Config(){
 	for a,b in Config.Languages
 		TV_Add(a,Languages,"vLanguage_%b% +check" b)
 	Gui,Config:Show
+	m(Main_GuiWidth,Main_GuiHeight,A_GuiWidth,A_GuiHeight)
 	Return
-	
+	ConfigGuiSize:
+	{
+		TrayTip,Configuration,% "Resized `nW " A_GuiWidth "`nH " A_GuiHeight
+		return
+	}
 	ConfigSave:
 	{
 		;Gui,Config:Submit,NoHide

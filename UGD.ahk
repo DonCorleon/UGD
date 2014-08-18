@@ -20,12 +20,18 @@ gui,Main:Add,Text,x45 y25,Debug Level : API
 Gui,Main:Add,Button,x270 y0 w60 vButtonLogin gButtonLogin,Login
 gui,Main:Add,Button,x350 y0 w60 vConfigWindow gConfigWindow,Configure
 Gui,Main:Add,Button,x430 y0 w60 vButtonUpdate gButtonUpdate,Update
+;Gui, Main: Add, ActiveX, x0 y50 w790 h585 vmsHTML +HScroll, Hello
 
 ;Gui,Main:Add,ListBox,xp-420 yp+75 w460 r22 +VScroll +Border vStatus,Idle
-myConsole:= new scConsole({"Control Width": 490, "Control Height": 85,"Font":Courier New,"Line Number Color":"yellow"})
-Gui,Main:Show,h140
+myConsole:= new scConsole({"PosX":"p-430","PosY":"50","Gui Number":"Main","Control Width": 790, "Control Height": 585,"Font":Courier New,"Line Number Color":"yellow"})
+Gui,Main:Show,h640
 DoLog(1,"LogFile:Log.txt","Downloader Started")
 Return
+MainGuiSize:
+{
+	myConsole.Resize(A_GuiWidth,A_GuiHeight)
+	Return
+}
 ConfigWindow:
 {
 	Gui_Config()
@@ -54,7 +60,7 @@ ButtonLogin:
 	if (Success)
 		Success:=API_Login(Username,Password)
 	if (Success)
-		tt("Logged in to [Yellow]HTTP[/] and [Yellow]API[/] Successfully"),tt("Getting a list of your games...."),ter("Logged in to HTTP and API Successfully","Getting a list of your games...."),List:=HTTP_GetUserInfo()	
+		tt("Logged in to [Yellow]HTTP[/] and [Yellow]API[/] Successfully"),tt("Getting a list of your games...."),List:=HTTP_GetUserInfo()	
 	if (List.Updates.1)
 		tt("Updated games as follows:")
 	for a,b in List.Updates
@@ -87,12 +93,6 @@ tt(x*){
 	for a,b in x
 		list.=b "`n"
 	myConsole.addItem("[Green]" List "[/]",1)
-	Return
-}
-ter(x*){
-	for a,b in x
-		list.=b "|"
-	GuiControl,Main:,Status,%list%|
 	Return
 }
 URLDownloadToVar( url, Method:="GET" ){

@@ -42,7 +42,7 @@ HTTP_GetUserInfo(){
 	TotalOwned +=TotalGames1 ;----Add the the number of games found to the total number
 	if TotalGames1 >= 45 ;----If its greater than 45 then check the next page
 		goto HTTPnextpage
-	tt("INFO:`tYou Own " TotalOwned " Games & " DLCs " DLC Addons."),ter("INFO:`tYou Own " TotalOwned " Games & " DLCs " DLC Addons.")
+	tt("INFO:`tYou Own " TotalOwned " Games & " DLCs " DLC Addons.")
 	
 	if Updates.MaxIndex()
 		tt("You Have " Updates.MaxIndex() " New/Update Notifications")

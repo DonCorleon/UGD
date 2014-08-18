@@ -15,7 +15,7 @@ Update(){
 	
 	Gui,Update:New,+ToolWindow +OwnerMain,Update Available
 	Gui,Update:Add,Text,,% "Version " UpdateText.1 " is available.`nSelect your update type."
-	Gui,Update:Add,Button,gUpdateScript,UGD.ahk
+	Gui,Update:Add,Button,disabled gUpdateScript,UGD.ahk
 	Gui,Update:Add,Button,xp+60 gUpdateExe,UGD.exe
 	Gui,Update:Add,Button,xp+60 gUpdateCancel,Cancel
 	Gui,Update:Show

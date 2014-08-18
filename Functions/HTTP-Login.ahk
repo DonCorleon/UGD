@@ -1,20 +1,19 @@
 HTTP_Login(UserName,UserPass){
 	global DEBUG_HTTP,Cookie:=""
 	tt("HTTP:`tLogin Started")
-	ter("HTTP:`tLogin Started")
 	Options := "+Flag: INTERNET_FLAG_NO_COOKIES`n+NO_AUTO_REDIRECT"
 	. (A_IsUnicode ? "`nCharset: UTF-8" : "")
 	HTTPRequest(url:="https://secure.gog.com/", InOutData := "", InOutHeader := Headers(), Options "`nMETHOD:POST") ; first request to get a gutm and game Ids for initial login request
 	if (DEBUG_HTTP) ;--------------- DEBUG
 		tt("HTTP:Step 1","URL : "URL,"Cookie : "cookie,"Header`n"InOutHeader)
 	if (DEBUG_HTTP>1) ;----------- DEBUG
-		m("HTTP:Step 1",InOutData)
+		tt("HTTP:Step 1",InOutData)
 	if !(RegExMatch(InOutData,"U)id=""auth_url"" value=""(.*)"" />",Auth_URL))
-		Return tt("ERROR:`tNo AUTH_URL Found")
+		Return tt("[red]ERROR[/]:`tNo AUTH_URL Found")
 	If !(RegExMatch(InOutData,"U)id=""gutm"" value=""(.*)"" />",gutm))
-		Return tt("ERROR:`tNo GUTM Found")
+		Return tt("[red]ERROR[/]:`tNo GUTM Found")
 	If !(RegExMatch(InOutData,"U)id=""uqid"" value=""(.*)"" />",uqid))
-		Return tt("ERROR:`tNo UQID Found")
+		Return tt("[red]ERROR[/]:`tNo UQID Found")
 	tt("HTTP:`tPhase 1 passed")
 	While, (Pos:=RegExMatch(InOutData,"data-gameid=""\K\d+",gameid,Pos+StrLen(gameid)))
 		games .= "," gameid
@@ -28,7 +27,7 @@ HTTP_Login(UserName,UserPass){
 	if (DEBUG_HTTP) ;--------------- DEBUG
 		tt("HTTP:Step 2","URL : "URL,"Cookie : "cookie,"Header`n"InOutHeader)
 	if (DEBUG_HTTP>1) ;----------- DEBUG
-		m("HTTP:Step 2",InOutData)
+		tt("HTTP:Step 2",InOutData)
 	Found:=RegExMatch(InOutHeader,"U)Location: (.*)\n",New_URL)
 	if (found){ ;----------------- Check for Redirect
 		url:=New_URL1
@@ -36,7 +35,7 @@ HTTP_Login(UserName,UserPass){
 	}
 	Found:=RegExMatch(InOutData,"U)name=""login\[_token\]"" value=""(.*)"" \/\>",Login_Token)
 	if !Found
-		Return tt("ERROR:`tNo login[token] Found")
+		Return tt("[red]ERROR[/]:`tNo login[token] Found")
 	tt("HTTP:`tPhase 2 passed")
 	Cookie.=GetCookies(InOutHeader)
 	;**************** Step 3
@@ -54,7 +53,7 @@ HTTP_Login(UserName,UserPass){
 	if (DEBUG_HTTP) ;--------------- DEBUG
 		tt("HTTP:Step 3","URL : "URL,"Data : " data ,"Cookie : "cookie,"Header`n"InOutHeader)
 	if (DEBUG_HTTP>1) ;----------- DEBUG
-		m("HTTP:Step 3",InOutData)
+		tt("HTTP:Step 3",InOutData)
 	Found:=RegExMatch(InOutHeader,"U)Location: (.*)`n",New_URL)
 	if (found){ ;----------------- Check for Redirect
 		url:=New_URL1
@@ -78,10 +77,10 @@ HTTP_Login(UserName,UserPass){
 	if (DEBUG_HTTP) ;--------------- DEBUG
 		tt("HTTP:Step 4","URL : "URL,"Cookie : "cookie,"Header`n"InOutHeader)
 	if (DEBUG_HTTP>1) ;----------- DEBUG
-		m("HTTP:Step 4",InOutData)
+		tt("HTTP:Step 4",InOutData)
 	If RegExMatch(InOutData, """xywka"":""\K[^""]+", NickName)
 		tt("HTTP:`tPhase 4 passed"),tt("Welcome " NickName)
 	else
-		Return tt("HTTP:`tLogin Failed"),ter("HTTP:`tLogin Failed"),tt("HTTP Error:`tSkipping API login")
-	return,1 tt("HTTP:`tLogin Successful"),ter("HTTP:`tLogin Successful")
+		Return tt("HTTP:`tLogin Failed"),tt("HTTP Error:`tSkipping API login")
+	return,1 tt("HTTP:`tLogin Successful")
 }
