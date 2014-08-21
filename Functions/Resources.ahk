@@ -16,16 +16,13 @@ Resources(){
 	;---- Config File
 	IfNotExist %A_ScriptDir%\Resources\Config.ini
 	{
-		m("No Config File Found`nPlease create one")
-		;MsgBox,No configuration file found.`nDo you want to create one?
-		;IfmsgBox Yes
-		;Gui_Config()
-		;IfMsgBox, No
-		;m("Config creation cancelled")
+		tt("No Config File Found. Opening Configuration page....")
+		Config.ConfigFound:=0
 	}
 	
 	Else ;---- Readin config File Here
 	{
+		Config.ConfigFound:=1		
 		IniRead,Username,%A_ScriptDir%\Resources\Config.ini,Credentials,Username
 		IniRead,Password,%A_ScriptDir%\Resources\Config.ini,Credentials,Password
 		Config.Username:=Username

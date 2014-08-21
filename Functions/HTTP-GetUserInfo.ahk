@@ -32,7 +32,6 @@ HTTP_GetUserInfo(){
 			,"Icon", Icon_Link
 			,"Game_Box", "http://static.gog.com" GameBox1)
 		}
-		
 		if (Badges&&Badge1!="bdg_soon") ;---- Only increment the update if the badge is not a Coming Soon notification
 			Updates[Gamefolder1]:=List[GameFolder1]
 		IF DLCFound ; Increment the number of DLC's owned if found 
@@ -42,8 +41,9 @@ HTTP_GetUserInfo(){
 	TotalOwned +=TotalGames1 ;----Add the the number of games found to the total number
 	if TotalGames1 >= 45 ;----If its greater than 45 then check the next page
 		goto HTTPnextpage
-	tt("INFO:`tYou Own " TotalOwned " Games & " DLCs " DLC Addons.")
-	
+	tt("INFO:`tYou Own " TotalOwned " Games")
+	if DLCs
+		tt("& " DLCs " DLC Addons.")
 	if Updates.MaxIndex()
 		tt("You Have " Updates.MaxIndex() " New/Update Notifications")
 	List["Updates"]:=Updates

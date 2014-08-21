@@ -4,23 +4,23 @@ Gui_Config(){
 	Main_GuiHeight:=A_GuiHeight,Main_GuiWidth:=A_GuiWidth
 	Gui,Main:+Disabled
 	Gui,Config:New,+hwndhwnd +ToolWindow +Resize +OwnerMain +MinSize200x200,Configuration
-	Gui,Config:Add,TreeView,x0 y0 vConfigTree gConfigCheckClick checked +Wrap
+	Gui,Config:Add,TreeView,AltSubmit x0 y0 vConfigTree gConfigCheckClick checked +Wrap
 	Gui,Config:Add,Button,vconfigsave gConfigSave,Save
 	Gui,Config:Add,Button,vConfigCancel gConfigCancel,Cancel
 	Credentials:=TV_Add("Credentials")
 	UserID:=TV_Add("User = " Config.Username,Credentials)
 	PassID:=TV_Add("Pass = " Config.Password,Credentials)
-	Downloads:=TV_Add("What To Download")
+	Downloads:=TV_Add("Downloads")
 	for a,b in Config.Downloads
-		TV_Add(a,Downloads,"vDownload_%b% +check" b)
+		TV_Add(a,Downloads,"vDownload_%b% +check" b " +Vis"),Config.DownloadCount:=A_Index ;----Create initial count for select all status
 	Platforms:=TV_Add("Platforms")
 	for a,b in Config.Platforms
-		TV_Add(a,Platforms,"vPlatform_%b% +check" b)
+		TV_Add(a,Platforms,"vPlatform_%b% +check" b " +Vis" b),Config.PlatformCount:=A_Index ;----Create initial count for select all status
 	Languages:=TV_Add("Languages")
 	for a,b in Config.Languages
-		TV_Add(a,Languages,"vLanguage_%b% +check" b)
+		TV_Add(a,Languages,"vLanguage_%b% +check" b " +Vis" b),Config.LanguageCount:=A_Index ;----Create initial count for select all status
 	Gui,Config:Show, w200 h200,Configuration
-	List:=[Credentials,UserID,PassID,Downloads,Platforms,Languages]
+	List:=[Credentials,UserID,PassID,Downloads,Platforms,Languages] ; taken from Maestrith >> http://www.autohotkey.com/board/topic/96840-ahk-11-hide-individual-checkboxes-in-a-treeview-x32x64/
 	VarSetCapacity(tvitem,28)
 	for index,id in list{ ;loop through the array of id numbers
 		info:=A_PtrSize=4?{0:8,4:id,12:0xf000}:{0:8,8:id,20:0xf000} ;there are 2 different offsets for x32 and x64.  This will account for both
@@ -32,16 +32,16 @@ Gui_Config(){
 	Return
 	ConfigGuiSize:
 	{
+		if !ConfigGuiSizeFirstRun
+			ConfigGuiSizeFirstRun:=1
 		Gui,Config:Default
 		GuiControl,Config:MoveDraw,Configsave,% "y" A_Guiheight-30 " w" A_GuiWidth*.48
 		GuiControl,Config:MoveDraw,ConfigCancel,% "x" A_Guiwidth*.52 " y" A_Guiheight-30 " w" A_GuiWidth*.48
 		GuiControl,Config:MoveDraw,ConfigTree,% "w" A_Guiwidth " h" A_GuiHeight-35
-		TrayTip,Config,% "w" A_Guiwidth " h" A_GuiHeight
 		return
 	}
 	ConfigSave:
 	{
-		;Gui,Config:Submit,NoHide
 		TreeItemID:=Languages
 		Loop
 		{
@@ -80,11 +80,40 @@ Gui_Config(){
 	}
 	ConfigCheckClick:
 	{
+		if !ConfigCheckClickFirstRun
+			ConfigCheckClickFirstRun:=1
 		if(A_GuiEvent="DoubleClick"&&A_EventInfo=UserID)
 			Goto ConfigUsername
-		if(A_GuiEvent="DoubleClick"&&A_EventInfo=PassID)
+		else if(A_GuiEvent="DoubleClick"&&A_EventInfo=PassID)
 			Goto ConfigPassword
-		Return
+		Else
+		{
+			if ( TV_GetParent(A_EventInfo)=Downloads){ ;---- Count the checks in the Downloads Section
+				TotalChecked:=0
+				for a,b in Config.Downloads
+					TotalChecked+=Config.Downloads[a]
+			}
+			if ( TV_GetParent(A_EventInfo)=Platforms){ ;---- Count the checks in the Platforms section
+				TotalChecked:=0
+				for a,b in Config.Platforms
+					TotalChecked+=Config.Platforms[a]
+			}
+			if ( TV_GetParent(A_EventInfo)=Languages){ ;---- Count the checks in the Languages section
+				for a,b in Config.Languages
+					TotalChecked+=Config.Languages[a]
+			}
+			TV_Modify(A_EventInfo)
+			IsChecked:=,ClickedItem:=
+			TV_GetText(Parent,TV_GetParent(A_EventInfo))
+			if Parent
+			{
+				TV_GetText(ClickedItem,A_EventInfo)
+				IsChecked:=TV_Get(A_EventInfo,"Check")?1:0
+				;if (Config[Parent][ClickedItem]!=IsChecked)
+				tr(Parent "/" ClickedItem " Toggled`nOriginal State - " Config[Parent][ClickedItem],"Current State - " IsChecked)
+			}
+			Return
+		}
 	}
 	ConfigUsername:
 	{

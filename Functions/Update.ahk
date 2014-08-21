@@ -1,6 +1,7 @@
 Update(){
 	global version
 	static BaseURL:="http://doncorleon.no-ip.org"
+	;static BaseURL:="http://10.1.1.52:8081" ;----for local testing only
 	GuiControl,Main:Disable,ButtonUpdate
 	HTTPRequest(URL:=BaseURL "/ahk/ugd/ugd.text",InOutData,InOutHeader)
 	GuiControl,Main:Enable,ButtonUpdate
@@ -15,7 +16,7 @@ Update(){
 	
 	Gui,Update:New,+ToolWindow +OwnerMain,Update Available
 	Gui,Update:Add,Text,,% "Version " UpdateText.1 " is available.`nSelect your update type."
-	Gui,Update:Add,Button,disabled gUpdateScript,UGD.ahk
+	Gui,Update:Add,Button,gUpdateScript,UGD.ahk
 	Gui,Update:Add,Button,xp+60 gUpdateExe,UGD.exe
 	Gui,Update:Add,Button,xp+60 gUpdateCancel,Cancel
 	Gui,Update:Show

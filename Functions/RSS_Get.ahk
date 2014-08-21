@@ -1,4 +1,4 @@
-URL:=URLDownloadToVar("Http://www.gog.com/frontpage/rss/feed.xml")
+;URL:=URLDownloadToVar("Http://www.gog.com/frontpage/rss/feed.xml")
 RSS_Get(URL){
 	
 	;url:="http://www.gog.com/frontpage/rss"

@@ -4,6 +4,8 @@ SetBatchLines = -1
 ;******** Global Vars
 Global Cookie,status
 
+;Create the basic HTTP Object
+HTTP:=Object("GoGCookie","")
 ; Create the Basic API Object
 API:=Object("Consumer_Key","1f444d14ea8ec776585524a33f6ecc1c413ed4a5"
 ,"Consumer_Secret","20d175147f9db9a10fc0584aa128090217b9cf88"
@@ -27,9 +29,13 @@ Gui,Main:Add,Button,% "x" guiWidth-60 " y0 w60 vButtonUpdate gButtonUpdate",Upda
 myConsole:= new scConsole({"PosX":"1","PosY":"50","Gui Number":"Main","Control Width": guiwidth, "Control Height": guiheight,"Font":Courier New,"Line Number Color":"yellow"})
 Gui,Main:Show,h%guiHeight%
 DoLog(1,"LogFile:Log.txt","Downloader Started")
+if !(Config.ConfigFound) ;---- If there is no configuration file, go straight to the config window
+	Gui_Config()
 Return
 MainGuiSize:
 {
+	if !MainGuiSizeFirstRun
+		MainGuiSizeFirstRun:=1
 	GuiControl,Main:MoveDraw,ButtonLogin,% "x"A_Guiwidth*.44
 	GuiControl,Main:MoveDraw,configWindow,% "x"A_Guiwidth*.63
 	GuiControl,Main:MoveDraw,ButtonUpdate,% "x"A_Guiwidth*.82
@@ -64,7 +70,7 @@ ButtonLogin:
 	if (Success)
 		Success:=API_Login(Username,Password)
 	if (Success)
-		tt("Logged in to [Yellow]HTTP[/] and [Yellow]API[/] Successfully"),tt("Getting a list of your games...."),List:=HTTP_GetUserInfo()	
+		List:=HTTP_GetUserInfo(),tt("Logged in to [Yellow]HTTP[/] and [Yellow]API[/] Successfully"),tt("Getting a list of your games....")	
 	if (List.Updates.1)
 		tt("Updated games as follows:")
 	for a,b in List.Updates
@@ -75,6 +81,7 @@ ButtonLogin:
 			badge:="Update Available"
 		tt(A_index ".`t[03F]" b.Folder "[/] - [Yellow]" badge "[/]")
 	}
+	Get_GameInfo("warsow")
 	Return
 }
 MainGuiClose:
@@ -90,6 +97,12 @@ t(x*){
 	for a,b in x
 		list.=b "`n"
 	ToolTip,%list%
+	Return
+}
+tr(x*){
+	for a,b in x
+		list.=b "`n"
+	TrayTip,Info,%list%,1
 	Return
 }
 tt(x*){
@@ -120,3 +133,4 @@ URLDownloadToVar( url, Method:="GET" ){
 #Include Lib\HTTPRequest.ahk
 #Include Lib\OAuth.ahk
 #Include Windows\Gui_Config.ahk
+#Include Functions\Get_GameInfo.ahk
