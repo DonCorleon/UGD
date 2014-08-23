@@ -12,13 +12,13 @@ Gui_Config(){
 	PassID:=TV_Add("Pass = " Config.Password,Credentials)
 	Downloads:=TV_Add("Downloads")
 	for a,b in Config.Downloads
-		TV_Add(a,Downloads,"vDownload_%b% +check" b " +Vis"),Config.DownloadCount:=A_Index ;----Create initial count for select all status
+		TV_Add(a,Downloads,"vDownload_%b% +check" b),Config.DownloadCount:=A_Index ;----Create initial count for select all status
 	Platforms:=TV_Add("Platforms")
 	for a,b in Config.Platforms
-		TV_Add(a,Platforms,"vPlatform_%b% +check" b " +Vis" b),Config.PlatformCount:=A_Index ;----Create initial count for select all status
+		TV_Add(a,Platforms,"vPlatform_%b% +check" b),Config.PlatformCount:=A_Index ;----Create initial count for select all status
 	Languages:=TV_Add("Languages")
 	for a,b in Config.Languages
-		TV_Add(a,Languages,"vLanguage_%b% +check" b " +Vis" b),Config.LanguageCount:=A_Index ;----Create initial count for select all status
+		TV_Add(a,Languages,"vLanguage_%b% +check" b),Config.LanguageCount:=A_Index ;----Create initial count for select all status
 	Gui,Config:Show, w200 h200,Configuration
 	List:=[Credentials,UserID,PassID,Downloads,Platforms,Languages] ; taken from Maestrith >> http://www.autohotkey.com/board/topic/96840-ahk-11-hide-individual-checkboxes-in-a-treeview-x32x64/
 	VarSetCapacity(tvitem,28)
@@ -105,7 +105,7 @@ Gui_Config(){
 			TV_Modify(A_EventInfo)
 			IsChecked:=,ClickedItem:=
 			TV_GetText(Parent,TV_GetParent(A_EventInfo))
-			if Parent
+			if (Parent&&Parent!="Credentials")
 			{
 				TV_GetText(ClickedItem,A_EventInfo)
 				IsChecked:=TV_Get(A_EventInfo,"Check")?1:0
@@ -117,7 +117,7 @@ Gui_Config(){
 	}
 	ConfigUsername:
 	{
-		InputBox,ConfigUsername,Credentials,Enter your GoG.com Username
+		InputBox,ConfigUsername,Credentials,Enter your GoG.com Username,,,,,,,,% Config.Username
 		TV_Modify(UserID,,"User = " ConfigUserName)
 		Config.Username:=ConfigUsername
 		IniWrite,%ConfigUsername%,%A_ScriptDir%\Resources\Config.ini,Credentials,Username
@@ -125,7 +125,7 @@ Gui_Config(){
 	}
 	ConfigPassword:
 	{
-		InputBox,ConfigPassword,Credentials,Enter your GoG.com Password
+		InputBox,ConfigPassword,Credentials,Enter your GoG.com Password,,,,,,,,% Config.Password
 		TV_Modify(PassID,,"Pass = " ConfigPassword)
 		Config.Password:=ConfigPassword
 		IniWrite,%ConfigPassword%,%A_ScriptDir%\Resources\Config.ini,Credentials,Password

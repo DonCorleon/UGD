@@ -20,8 +20,8 @@ API_Login(Username, Password){
 	if (API.oauth_get_temp_token)
 		tt("API:`tPhase 1 passed")
 	; Step two : Get the temp keys
-	Basic_Credentials :="oauth_consumer_secret=" API.Consumer_Secret	"`noauth_consumer_key=" API.Consumer_Key
-	URL := OAuth_Authorization( Basic_Credentials "`n" Specific_Credentials, API.oauth_get_temp_token "/", "", "GET" )
+	API.Basic_Credentials :="oauth_consumer_secret=" API.Consumer_Secret "`noauth_consumer_key=" API.Consumer_Key
+	URL := OAuth_Authorization( API.Basic_Credentials "`n" API.Specific_Credentials, API.oauth_get_temp_token "/", "", "GET" )
 	HTTPRequest(URL,InOutData:="",InOutHeader:="")
 	if (DEBUG_API) ;----------- DEBUG
 		tt("API:Step 2",URL,InOutHeader)
@@ -38,8 +38,8 @@ API_Login(Username, Password){
 		Return tt("ERROR:`tStep 2. We did not get the Temp token or the Temp Token Secret")
 	; Step three : Get the verifier token
 	Username:=OAuth__URIEncode(Username)
-	Specific_Credentials := "oauth_token=" API.Temp_Token "`noauth_token_secret=" API.Temp_Token_Secret
-	URL := OAuth_Authorization( Basic_Credentials "`n" Specific_Credentials, API.oauth_authorize_temp_token "/", "&password=" Password "&username=" Username, "GET" )
+	Api.Specific_Credentials := "oauth_token=" API.Temp_Token "`noauth_token_secret=" API.Temp_Token_Secret
+	URL := OAuth_Authorization( API.Basic_Credentials "`n" API.Specific_Credentials, API.oauth_authorize_temp_token "/", "&password=" Password "&username=" Username, "GET" )
 	HTTPRequest(URL,InOutData:="",InOutHeader:="")
 	if (Debug_API) ;----------- DEBUG
 		tt("API:`tStep 3",URL,InOutHeader)
@@ -52,8 +52,8 @@ API_Login(Username, Password){
 	else
 		return tt("ERROR:`tStep 3. Did NOT confirm Temp Token or find Verifier Key")
 	; Step Four : Final Verification to get the token secret key
-	Specific_Credentials := "oauth_token=" API.Temp_Token "`noauth_token_secret=" API.Temp_Token_Secret	"`noauth_verifier=" API.Temp_Verifier
-	URL := OAuth_Authorization( Basic_Credentials "`n" Specific_Credentials, API.oauth_get_token "/", "", "GET" )
+	Api.Specific_Credentials := "oauth_token=" API.Temp_Token "`noauth_token_secret=" API.Temp_Token_Secret	"`noauth_verifier=" API.Temp_Verifier
+	URL := OAuth_Authorization( API.Basic_Credentials "`n" API.Specific_Credentials, API.oauth_get_token "/", "", "GET" )
 	HTTPRequest(URL,InOutData:="",InOutHeader:="")
 	if (DEBUG_API){
 		tt("API:Step 4",URL,InOutHeader)

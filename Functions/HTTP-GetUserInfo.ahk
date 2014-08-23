@@ -1,9 +1,9 @@
 HTTP_GetUserInfo(){
-	Global API,Cookie,Updates:=[]
+	Global API,Cookie,Updates:=[],myConsole
 	page:=0,IndexNum:=0,TotalOwned:=0,UpdateNotifications:=0,List:=[]
+	tt("INFO:`tRetrieving Page " page+1)
 	HTTPnextpage:
 	page++	; increment the page number we are trying to get
-	tt("INFO:`tRetrieving Page " page)
 	HTTPRequest(url:="https://secure.gog.com/account/ajax?a=gamesShelfMore&s=title&q=&t=0&p=" page, InOutData := "", InOutHeader := Headers(), Options)
 	Fields:=StrSplit(InOutData,"<div class=\""shelf_game\")
 	for a,b in Fields
@@ -17,20 +17,7 @@ HTTP_GetUserInfo(){
 		Badges:=RegExMatch( b, "U)class=\\""shelf_badges\\""> <i class=\\""(.*)\\",Badge)
 		If (FoundFolder && FoundGameID){
 			StringReplace, GameBox1, GameBox1,\,,All
-			List[GameFolder1] := Object( "DisplayName", ""
-			,"Name",""			
-			,"ServerName", GameName1
-			,"Folder",GameFolder1
-			,"Size",""
-			,"Installer", Game_Installers
-			,"Extras",""
-			,"Notify",Badge1
-			,"DLC", DLC1
-			,"GameID", GameID1
-			,"OrderID", OrderID1
-			,"GameCard", "http://www.gog.com/game/" GameFolder1
-			,"Icon", Icon_Link
-			,"Game_Box", "http://static.gog.com" GameBox1)
+			List[GameFolder1] := Object( "DisplayName", "","Name","","ServerName", GameName1,"Folder",GameFolder1,"Size","","Installer", Game_Installers,"Extras","","Notify",Badge1,"DLC", DLC1,"GameID", GameID1,"OrderID", OrderID1,"GameCard", "http://www.gog.com/game/" GameFolder1,"Icon", Icon_Link,"Game_Box", "http://static.gog.com" GameBox1)
 		}
 		if (Badges&&Badge1!="bdg_soon") ;---- Only increment the update if the badge is not a Coming Soon notification
 			Updates[Gamefolder1]:=List[GameFolder1]
@@ -39,11 +26,14 @@ HTTP_GetUserInfo(){
 	}
 	RegExMatch( InOutData, "U)count"":(.*)\,",  TotalGames)	; get the number of games returned in the last call
 	TotalOwned +=TotalGames1 ;----Add the the number of games found to the total number
-	if TotalGames1 >= 45 ;----If its greater than 45 then check the next page
+	if (TotalGames1 >= 45){ ;----If its greater than 45 then check the next page	
+		myConsole.changeLine("[Green]INFO:`tRetrieving Page " page+1 "[/]", myConsole.currentLine )
 		goto HTTPnextpage
-	tt("INFO:`tYou Own " TotalOwned " Games")
+	}
 	if DLCs
-		tt("& " DLCs " DLC Addons.")
+		tt("INFO:`tYou Own " TotalOwned " Games & " DLCs " DLC Addons.")
+	Else
+		tt("INFO:`tYou Own " TotalOwned " Games")
 	if Updates.MaxIndex()
 		tt("You Have " Updates.MaxIndex() " New/Update Notifications")
 	List["Updates"]:=Updates

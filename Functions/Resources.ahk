@@ -1,7 +1,7 @@
 Resources(){
 	Config:=[]
 	;---- Ini Vars
-	LanguageList:=Object("Arabic",0,"Chinese",0,"Czech",0,"Danish",0,"Dutch",0,"English",0,"Finnish",0,"French",0,"German",0,"Hungarian",0,"Italian",0,"Japanese",0,"Norwegian",0,"Polish",0,"Russian",0,"Spanish",0,"Swedish",0,"Turkish",0)
+	LanguageList:=Object("Arabic",0,"Bulgarian",0,"Chinese",0,"Czech",0,"Danish",0,"Dutch",0,"English",0,"Finnish",0,"French",0,"German",0,"Greek",0,"Hungarian",0,"Italian",0,"Japanese",0,"Korean",0,"Norwegian",0,"Polish",0,"Portuguese",0,"Romanian",0,"Russian",0,"Serbian",0,"Slovac",0,"Spanish",0,"Swedish",0,"Turkish",0,"Ukranian",0)
 	TypeList:=Object("Installers",0,"Patches",0,"Downloadable_Content",0,"Language_Packs",0,"Extras",0,"Artwork",0,"Covers",0,"Videos",0)
 	PlatformList:=Object("Windows",0,"MacOS",0,"Linux",0)
 	

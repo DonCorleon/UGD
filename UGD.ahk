@@ -59,6 +59,9 @@ ButtonUpdate:
 }
 ButtonLogin:
 {
+	GuiControl,Main:Disable,ButtonLogin
+	GuiControl,Main:Disable,configWindow
+	GuiControl,Main:Disable,ButtonUpdate
 	Username:=Config.Username
 	Password:=Config.Password
 	if (!Username||!Password)
@@ -70,7 +73,7 @@ ButtonLogin:
 	if (Success)
 		Success:=API_Login(Username,Password)
 	if (Success)
-		List:=HTTP_GetUserInfo(),tt("Logged in to [Yellow]HTTP[/] and [Yellow]API[/] Successfully"),tt("Getting a list of your games....")	
+		tt("Logged in to [Yellow]HTTP[/] and [Yellow]API[/] Successfully"),tt("Getting a list of your games...."),List:=HTTP_GetUserInfo()
 	if (List.Updates.1)
 		tt("Updated games as follows:")
 	for a,b in List.Updates
@@ -81,7 +84,26 @@ ButtonLogin:
 			badge:="Update Available"
 		tt(A_index ".`t[03F]" b.Folder "[/] - [Yellow]" badge "[/]")
 	}
-	Get_GameInfo("warsow")
+	for a in List
+		TotalEntries++
+	tt("Found " TotalEntries -1 " Games.")
+	tt("")
+	tock:=A_TickCount
+	For a,b in List
+	{
+		game:=a
+		tick:=A_TickCount
+		Get_GameInfo(game)
+		;tt("[Green]"A_Index "/" TotalEntries-1 "`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1 "[/]") " seconds")
+		myConsole.changeLine("[blue]" Round((100/TotalEntries)*A_Index,0) "%[/] [red]"A_Index "/" TotalEntries-1 "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/]", myConsole.currentLine )
+	}	
+	tt("Process Complete. Collection time was " Round((a_tickcount - tock)/1000,1) " seconds")
+	for a,b in List
+		TotalFiles+=b.Extras.MaxIndex() + b.DLC.MaxIndex()
+	tt("Total Files counted and added was [yellow]" TotalFiles "[/]")
+	GuiControl,Main:Enable,ButtonLogin
+	GuiControl,Main:Enable,ConfigWindow
+	GuiControl,Main:Enable,ButtonUpdate
 	Return
 }
 MainGuiClose:
@@ -108,7 +130,8 @@ tr(x*){
 tt(x*){
 	global myconsole
 	for a,b in x
-		list.=b "`n"
+		list.=b "<br>"
+	;StringTrimRight,List,List,42
 	myConsole.addItem("[Green]" List "[/]",1)
 	Return
 }
@@ -122,6 +145,7 @@ URLDownloadToVar( url, Method:="GET" ){
 #Include Classes\Class_GUIWindow.ahk
 #Include Classes\Class_XML.ahk
 #Include Functions\API-Login.ahk
+#Include Functions\Get_GameInfo.ahk
 #Include Functions\GetCookies.ahk
 #Include Functions\Headers.ahk
 #Include Functions\HTTP-GetUserInfo.ahk
@@ -133,4 +157,3 @@ URLDownloadToVar( url, Method:="GET" ){
 #Include Lib\HTTPRequest.ahk
 #Include Lib\OAuth.ahk
 #Include Windows\Gui_Config.ahk
-#Include Functions\Get_GameInfo.ahk
