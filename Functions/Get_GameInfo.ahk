@@ -10,10 +10,10 @@ Get_GameInfo(GameName){
 	URL := "https://secure.gog.com/en/account/ajax?a=gamesListDetails&g=" . List[GameName].GameId
 	HTTPRequest(url, InOutData := "", InOutHeader := Headers(), Options)
 	StringReplace,InOutData,InOutData,\,,All
-	;FileDelete,Extras-%Name%.txt
-	;FileAppend,%InOutData%,Extras-%Name%.txt
-	ExtraNum := 0
 	StringReplace, InOutData, InOutData, a>, a>`n, All
+	FileDelete,GameInfo-%Name%.txt
+	FileAppend,%InOutData%,GameInfo-%Name%.txt
+	ExtraNum := 0
 	LangOption:=Object("ar","Arabic","bl","Bulgarian","cn","Chinese","cz","Czech","da","Danish","nl","Dutch","en","English","fi","Finnish","fr","French","de","German","gk","Greek","hu","Hungarian","it","Italian","jp","Japanese","ko","Korean","no","Norwegian","pl","Polish","pt","Portuguese","ro","Romanian","ru","Russian","sb","Serbian","sk","Slovac","es","Spanish","sv","Swedish","tr","Turkish","uk","Ukranian")
 	Loop, Parse, InOutData, `n
 	{
@@ -34,46 +34,60 @@ Get_GameInfo(GameName){
 			FoundID := RegExMatch(A_LoopField, "U)secure.gog.com\/downlink\/file\/(.*)\/(.*)""", ExtraID)
 			FoundName := RegExMatch(A_LoopField, "U)details-underline"">(.*)<", ExtraName)
 			FoundSize := RegExMatch(A_LoopField, "U)size"">(.*) (M|G)B<", ExtraSize)
-			If (FoundID&&FoundName&&FoundSize)
-			{
-				Link := API.get_extra_link . "/" . Extras[j].Folder . "/" . Extras[j].ID
+			If (FoundID&&FoundName&&FoundSize){
 				ExtraNum ++
-				Extras[ExtraNum] := Object("Folder", ExtraId1, "ID", ExtraId2, "Name", ExtraName1, "FileName", FileName, "Size", ExtraSize1, "Link", Link)
+				Extras[ExtraNum] := Object("Folder", ExtraId1, "ID", ExtraId2, "Name", ExtraName1, "FileName", FileName, "Size", ExtraSize1, "Link", API.get_extra_link . "/" . ExtraID1 . "/" ExtraID2)
 			}
 		}
 		If (Found_DLC&&Config.Downloads.Downloadable_Content)
 		{
-			;Intsaller RegExMatchs
-			;Link:="U)list_game_item"" href=""(.*)"">"
-			;Size:="U)size""> (.*) (M|G)B <"
-			
-			FoundFolder := RegExMatch(A_LoopField, "U)data-gameindex=""(.*)""", DLCFolder)
-			FoundLink := RegExMatch( A_LoopField, "U)list_game_item"" href=""(.*)"">", DLCLink)	;	1 = Link to get DLC Link. Add to API_get_installer_link
-			FoundSize := RegExMatch( A_LoopField, "U)size""> (.*) (M|G)B <", DLCSize)	;	1 DLC Size
-			FoundDLC := RegExMatch( A_LoopField, "U)""details-header""> DLC: (.*) <i", DLCName)	; 	1= Name of the DLC
-			FoundPlatform := RegExMatch( A_LoopField, "U)details-underline""> (.*)\, (.*) <", DLCPlatform) ;	1 = Platform	2 = Language
-			FoundName := RegExMatch( A_LoopField, "U)details-underline""> (.*)<", DLCName)
-			FoundLanguage := RegExMatch( A_LoopField, "U)class=""lang-item lang_(.*)( invisible)?""", DLCLanguage)
-			If FoundFolder
+			FoundFolder		:= RegExMatch( A_LoopField, "U)data-gameindex=""(.*)""", DLCFolder)
+			FoundLink 		:= RegExMatch( A_LoopField, "U)list_game_item"" href=""(.*)"">", DLCLink)	;	1 = Link to get DLC Link. Add to API_get_installer_link
+			FoundSize 		:= RegExMatch( A_LoopField, "U)size""> (.*) (M|G)B <", DLCSize)	;	1 DLC Size
+			FoundDLC 			:= RegExMatch( A_LoopField, "U)details-header""> DLC: (.*) <i", DLCName)	; 	1= Name of the DLC
+			FoundPlatform 		:= RegExMatch( A_LoopField, "U)details-underline""> (.*)\, (.*) <", DLCPlatform) ;	1 = Platform	2 = Language
+			FoundName 		:= RegExMatch( A_LoopField, "U)details-underline""> (.*)<", DLCName)
+			FoundLanguage 		:= RegExMatch( A_LoopField, "U)class=""lang-item lang_(.*)( invisible)?""", DLCLanguage)
+			FoundLanguagePack 	:= RegExMatch( A_LoopField, "U)""name"":""Language Pack""", LanguagePack)	; 	1= Platform 	2= Language
+			Type:="Installer"
+			If (FoundDLC||DLCFolder1!=GameFolder)
+				Type:="DLC"
+			IfInString, DLCLink1, patch
+			{
+				DLCPlatform1 := Last_Platform
+				Type := "Patch"
+				DLCLanguage1 := Last_Language
+			}
+			if FoundLanguagePack
+			{
+				DLCPlatform2 := Last_Platform
+				Type := "Language_Pack"
+				DLCLanguage1 := Last_Language
+			}
+			If FoundLink
 			{
 				If not FoundDLC
 					DLCName1 := PreviousDLCName
 				PreviousDLCName := DLCName1
-				;StringReplace, DLCLink1, DLCLink1, \/, /, All
-				StringReplace, Platform, DLCPlatform1, %A_Space%Installer, , All
 				IfInString, DLCSize, GB
 					DLCSize1 := Round(DLCSize1*1000, 0)
 				SplitPath, DLCLink1, DLCID
-				;If ( DLCFolder1 != GameFolder && Language_%DLCPlatform2% = 1 && Platform_%Platform% = 1) 
 				if FoundLink
 				{
 					DLCNum++
-					ExistingDLC_Folder := DLCFolder1
+					If !DLCFolder1
+						DLCFolder1:=ExistingFolder
+					ExistingFolder := DLCFolder1
 					if LangOption[DLCLanguage1]
 						DLCLanguage1:=LangOption[DLCLanguage1]
 					Else
-						m(DLCLanguage1 " NotFound")
-					DLC[DLCNum] := Object("Name", DLCName1, "FileName", "Not Available", "ID", DLCID, "MainFolder", GameFolder, "Folder", DLCFolder1, "Size", DLCSize1, "Platform", Platform, "Language", DLCLanguage1, "Link", DLCLink1)
+						DLCLanguage1:=DLCLanguage1
+					
+					StringReplace, Platform, DLCPlatform1, %A_Space%Installer, , All
+					DLC[DLCNum] := Object("Name", DLCName1, "Type",Type,"FileName", "Not Available", "ID", DLCID, "MainFolder", GameFolder, "Folder", DLCFolder1, "Size", DLCSize1, "Platform", Platform, "Language", DLCLanguage1, "Link", API.get_installer_link . "/" . DLCFolder1 . "/" . DLCID . "/")
+					Last_Language := DLCLanguage1
+					Last_Platform := Platform
+					
 				}
 			}
 		}

@@ -89,18 +89,46 @@ ButtonLogin:
 	tt("Found " TotalEntries -1 " Games.")
 	tt("")
 	tock:=A_TickCount
-	For a,b in List
+	
+	For a,b in List ;Test Getting all the games base info for every game
 	{
+		if a=updates
+			continue
+		Counter++
 		game:=a
 		tick:=A_TickCount
 		Get_GameInfo(game)
 		;tt("[Green]"A_Index "/" TotalEntries-1 "`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1 "[/]") " seconds")
-		myConsole.changeLine("[blue]" Round((100/TotalEntries)*A_Index,0) "%[/] [red]"A_Index "/" TotalEntries-1 "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/]", myConsole.currentLine )
+		myConsole.changeLine("[blue]" Round((100/(TotalEntries-1))*Counter,0) "%[/] [red]" Counter "/" TotalEntries-1 "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/]", myConsole.currentLine )
+		if A_Index>15
+			break
 	}	
 	tt("Process Complete. Collection time was " Round((a_tickcount - tock)/1000,1) " seconds")
 	for a,b in List
 		TotalFiles+=b.Extras.MaxIndex() + b.DLC.MaxIndex()
 	tt("Total Files counted and added was [yellow]" TotalFiles "[/]")
+	
+	For a,b in List ;----Get the Links for Every installer including patches, language packs and DLC's then grab the extras links
+	{
+		for c in b.DLC
+		{
+			Link:=Get_ApiLink(b.DLC[c].Link)
+			b.DLC[c].Link:=Link.Link
+			b.DLC[c].Filename:=Link.FileName
+			tt("Grabbed link to [red]"b.DLC[c].Language "[/] - [white]" b.DLC[c].Platform "[/] - [red]" b.DLC[c].Type "[/] ./" a "/" Link.Filename)	
+		}
+		for d in b.Extras
+		{
+			Link:=Get_ApiLink(b.Extras[d].Link)
+			b.Extras[d].Link:=Link.Link
+			b.Extras[d].Filename:=Link.FileName
+			tt("Grabbed link to [aqua]Extra[/] ./" a "/" Link.Filename)	
+		}
+		if A_Index>15
+			break
+		
+	}
+	tt("Grabbed all links")
 	GuiControl,Main:Enable,ButtonLogin
 	GuiControl,Main:Enable,ConfigWindow
 	GuiControl,Main:Enable,ButtonUpdate
@@ -157,3 +185,4 @@ URLDownloadToVar( url, Method:="GET" ){
 #Include Lib\HTTPRequest.ahk
 #Include Lib\OAuth.ahk
 #Include Windows\Gui_Config.ahk
+#Include Functions\Get_APILink.ahk
