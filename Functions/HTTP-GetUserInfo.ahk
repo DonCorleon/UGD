@@ -28,7 +28,7 @@ HTTP_GetUserInfo(){
 	TotalOwned +=TotalGames1 ;----Add the the number of games found to the total number
 	if (TotalGames1 >= 45){ ;----If its greater than 45 then check the next page	
 		myConsole.changeLine("[Green]INFO:`tRetrieving Page " page+1 "[/]", myConsole.currentLine )
-		;goto HTTPnextpage
+		goto HTTPnextpage
 	}
 	if DLCs
 		tt("INFO:`tYou Own " TotalOwned " Games & " DLCs " DLC Addons.")

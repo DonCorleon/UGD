@@ -100,8 +100,8 @@ ButtonLogin:
 		Get_GameInfo(game)
 		;tt("[Green]"A_Index "/" TotalEntries-1 "`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1 "[/]") " seconds")
 		myConsole.changeLine("[blue]" Round((100/(TotalEntries-1))*Counter,0) "%[/] [red]" Counter "/" TotalEntries-1 "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/]", myConsole.currentLine )
-		if A_Index>15
-			break
+		;if A_Index>15
+			;break
 	}	
 	tt("Process Complete. Collection time was " Round((a_tickcount - tock)/1000,1) " seconds")
 	for a,b in List
@@ -124,8 +124,8 @@ ButtonLogin:
 			b.Extras[d].Filename:=Link.FileName
 			tt("Grabbed link to [aqua]Extra[/] ./" a "/" Link.Filename)	
 		}
-		if A_Index>15
-			break
+		;if A_Index>15
+			;break
 		
 	}
 	tt("Grabbed all links")
