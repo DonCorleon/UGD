@@ -11,13 +11,12 @@ Get_GameInfo(GameName){
 	HTTPRequest(url, InOutData := "", InOutHeader := Headers(), Options)
 	StringReplace,InOutData,InOutData,\,,All
 	StringReplace, InOutData, InOutData, a>, a>`n, All
-	FileDelete,GameInfo-%Name%.txt
-	FileAppend,%InOutData%,GameInfo-%Name%.txt
+	;FileDelete,GameInfo-%Name%.txt
+	;FileAppend,%InOutData%,GameInfo-%Name%.txt
 	ExtraNum := 0
 	LangOption:=Object("ar","Arabic","bl","Bulgarian","cn","Chinese","cz","Czech","da","Danish","nl","Dutch","en","English","fi","Finnish","fr","French","de","German","gk","Greek","hu","Hungarian","it","Italian","jp","Japanese","ko","Korean","no","Norwegian","pl","Polish","pt","Portuguese","ro","Romanian","ru","Russian","sb","Serbian","sk","Slovac","es","Spanish","sv","Swedish","tr","Turkish","uk","Ukranian")
 	Loop, Parse, InOutData, `n
 	{
-		; *************  Get Extras Info *************
 		IfInString, A_LoopField, bonus_content_list browser		
 		{
 			Found_DLC = 0
@@ -39,7 +38,7 @@ Get_GameInfo(GameName){
 				Extras[ExtraNum] := Object("Folder", ExtraId1, "ID", ExtraId2, "Name", ExtraName1, "FileName", FileName, "Size", ExtraSize1, "Link", API.get_extra_link . "/" . ExtraID1 . "/" ExtraID2)
 			}
 		}
-		If (Found_DLC&&Config.Downloads.Downloadable_Content)
+		If (Found_DLC&&(Config.Downloads.Downloadable_Content||Config.Downloads.Installers||Config.Downloads.LanguagePacks||Config.Downloads.Patches))
 		{
 			FoundFolder		:= RegExMatch( A_LoopField, "U)data-gameindex=""(.*)""", DLCFolder)
 			FoundLink 		:= RegExMatch( A_LoopField, "U)list_game_item"" href=""(.*)"">", DLCLink)	;	1 = Link to get DLC Link. Add to API_get_installer_link
@@ -49,15 +48,21 @@ Get_GameInfo(GameName){
 			FoundName 		:= RegExMatch( A_LoopField, "U)details-underline""> (.*)<", DLCName)
 			FoundLanguage 		:= RegExMatch( A_LoopField, "U)class=""lang-item lang_(.*)( invisible)?""", DLCLanguage)
 			FoundLanguagePack 	:= RegExMatch( A_LoopField, "U)""name"":""Language Pack""", LanguagePack)	; 	1= Platform 	2= Language
-			Type:="Installer"
-			If (FoundDLC||DLCFolder1!=GameFolder)
+			IfInstring,DLCName,Tarball
+				Type:="Tarball Archive",DLCPlatform1:="Linux"
+			Else IfInString,DLCName,Linux
+				Type:="Debian Package",DLCPlatform1:="Linux"
+			Else 
+				Type:="Installer"
+			If (FoundDLC)
 				Type:="DLC"
-			IfInString, DLCLink1, patch
-			{
-				DLCPlatform1 := Last_Platform
-				Type := "Patch"
-				DLCLanguage1 := Last_Language
-			}
+			If (Type="Installer")
+				IfInString, DLCLink1, patch
+				{
+					DLCPlatform1 := Last_Platform
+					Type := "Patch"
+					DLCLanguage1 := Last_Language
+				}
 			if FoundLanguagePack
 			{
 				DLCPlatform2 := Last_Platform
@@ -81,7 +86,7 @@ Get_GameInfo(GameName){
 					if LangOption[DLCLanguage1]
 						DLCLanguage1:=LangOption[DLCLanguage1]
 					Else
-						DLCLanguage1:=DLCLanguage1
+						DLCLanguage1:=Last_Language
 					
 					StringReplace, Platform, DLCPlatform1, %A_Space%Installer, , All
 					DLC[DLCNum] := Object("Name", DLCName1, "Type",Type,"FileName", "Not Available", "ID", DLCID, "MainFolder", GameFolder, "Folder", DLCFolder1, "Size", DLCSize1, "Platform", Platform, "Language", DLCLanguage1, "Link", API.get_installer_link . "/" . DLCFolder1 . "/" . DLCID . "/")
@@ -94,22 +99,6 @@ Get_GameInfo(GameName){
 		IfInString, A_LoopField, list_det_links
 			break
 	}
-	;For j in Extras ;---- Loop Throughthe Extras for the game and get the required info
-	;{
-	;URL := OAuth_Authorization( API.Basic_Credentials "`n" API.Specific_Credentials, API.get_extra_link . "/" . Extras[j].Folder . "/" . Extras[j].ID, "", "GET" )
-	;HTTPRequest(URL,InOutData:="",InOutHeader:="")
-	;if (DEBUG_GetGames){
-	;tt("Get_GameInfo:" Extras[j].ID,"URL: " URL,"Header: " InOutHeader)
-	;tt("Get_GameInfo:" Extras[j].ID,"Response: " InOutData)
-	;}
-	;StringReplace, InOutData, InOutData, \/, /, All
-	;RegExMatch(InOutData, "U)link"":""(.*)""", Link)
-	;RegExMatch( Link1, "(.*)\?", ExtraFileName )
-	;SplitPath, ExtraFileName1, FileName
-	;
-	;Extras[j].Link := Link1
-	;Extras[j].FileName := FileName
-	;}
 	List[GameName].DLC := DLC
 	List[GameName].Extras := Extras ;----Put the new info into the Object
 	return, Success

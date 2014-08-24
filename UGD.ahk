@@ -1,8 +1,12 @@
+Testing:=0
+
 version=;auto_version
 #SingleInstance,force
 SetBatchLines = -1
 ;******** Global Vars
 Global Cookie,status
+
+DEBUG_Times:=0
 
 ;Create the basic HTTP Object
 HTTP:=Object("GoGCookie","")
@@ -10,36 +14,38 @@ HTTP:=Object("GoGCookie","")
 API:=Object("Consumer_Key","1f444d14ea8ec776585524a33f6ecc1c413ed4a5"
 ,"Consumer_Secret","20d175147f9db9a10fc0584aa128090217b9cf88"
 ,"oauth_get_urls","https://api.gog.com/en/downloader2/status/stable")
-guiwidth:=350
-guiHeight:=200
 
 ; Create the Basic Test Gui
 Config:=Resources()
-Gui,Main:New,+OwnDialogs +Resize +MinSize350x200,Ultimate GoG Downloader v%Version%
+Gui,Main:New,+OwnDialogs +Resize +MinSize350x200 +hwndhwnd,Ultimate GoG Downloader v%Version%
+Config.Mainhwnd:=hwnd
 gui,Main:Add,DropDownList,x0 y0 w40 vDebug_HTTP gDoSubmit,0||1|2
 gui,Main:Add,DropDownList,x0 y20 w40 vDebug_API gDoSubmit,0||1|2
 gui,Main:Add,Text,x45 y5,Debug Level : HTTP 
 gui,Main:Add,Text,x45 y25,Debug Level : API 
-Gui,Main:Add,Button,% "x" guiWidth-200 " y0 w60 vButtonLogin gButtonLogin",Login
-gui,Main:Add,Button,% "x" guiWidth-130 " y0 w60 vConfigWindow gConfigWindow",Configure
-Gui,Main:Add,Button,% "x" guiWidth-60 " y0 w60 vButtonUpdate gButtonUpdate",Update
+Gui,Main:Add,Button,% "x" Config.MainW-200 " y0 w60 vButtonLogin gButtonLogin",&Login
+gui,Main:Add,Button,% "x" Config.MainW-130 " y0 w60 vConfigWindow gConfigWindow",&Configure
+Gui,Main:Add,Button,% "x" Config.MainW-60 " y0 w60 vButtonUpdate gButtonUpdate",&Update
 ;Gui, Main: Add, ActiveX, x0 y50 w790 h585 vmsHTML +HScroll, Hello
 
 ;Gui,Main:Add,ListBox,xp-420 yp+75 w460 r22 +VScroll +Border vStatus,Idle
-myConsole:= new scConsole({"PosX":"1","PosY":"50","Gui Number":"Main","Control Width": guiwidth, "Control Height": guiheight,"Font":Courier New,"Line Number Color":"yellow"})
-Gui,Main:Show,h%guiHeight%
+myConsole:= new scConsole({"PosX":"1","PosY":"50","Gui Number":"Main","Control Width": Config.MainW, "Control Height": Config.MainH-50,"Font":Courier New,"Line Number Color":"yellow"})
+Gui,Main:Show,% "x" Config.MainX " y" Config.MainY " w" Config.MainW " h" Config.MainH
 DoLog(1,"LogFile:Log.txt","Downloader Started")
 if !(Config.ConfigFound) ;---- If there is no configuration file, go straight to the config window
 	Gui_Config()
 Return
 MainGuiSize:
 {
-	if !MainGuiSizeFirstRun
+	if (!MainGuiSizeFirstRun){
 		MainGuiSizeFirstRun:=1
+		Return
+	}
 	GuiControl,Main:MoveDraw,ButtonLogin,% "x"A_Guiwidth*.44
 	GuiControl,Main:MoveDraw,configWindow,% "x"A_Guiwidth*.63
 	GuiControl,Main:MoveDraw,ButtonUpdate,% "x"A_Guiwidth*.82
 	myConsole.Resize(A_GuiWidth,A_GuiHeight)
+	
 	Return
 }
 ConfigWindow:
@@ -64,16 +70,23 @@ ButtonLogin:
 	GuiControl,Main:Disable,ButtonUpdate
 	Username:=Config.Username
 	Password:=Config.Password
-	if (!Username||!Password)
-	{
+	if (!Username||!Password){
 		tt("[Red]Username[/] or [Red]Password[/] isn't set."),tt("Set your Credentials in [red]Configuration[/].")
 		Return
 	}
-	Success:=HTTP_Login(Username,Password)
-	if (Success)
+	if (!Loggedin)
+		Success:=HTTP_Login(Username,Password)
+	if (!LoggedIn&&Success)
 		Success:=API_Login(Username,Password)
-	if (Success)
-		tt("Logged in to [Yellow]HTTP[/] and [Yellow]API[/] Successfully"),tt("Getting a list of your games...."),List:=HTTP_GetUserInfo()
+	if (!LoggedIn&&Success){
+		LoggedIn:=1
+		tt("Logged in to [Yellow]HTTP[/] and [Yellow]API[/] Successfully")
+		tt("Getting a list of your games....")
+	}
+	If (LoggedIn)
+		List:=HTTP_GetUserInfo()
+	Else
+		Return
 	if (List.Updates.1)
 		tt("Updated games as follows:")
 	for a,b in List.Updates
@@ -98,10 +111,10 @@ ButtonLogin:
 		game:=a
 		tick:=A_TickCount
 		Get_GameInfo(game)
-		;tt("[Green]"A_Index "/" TotalEntries-1 "`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1 "[/]") " seconds")
-		myConsole.changeLine("[blue]" Round((100/(TotalEntries-1))*Counter,0) "%[/] [red]" Counter "/" TotalEntries-1 "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/]", myConsole.currentLine )
-		;if A_Index>15
-			;break
+		;tt(" [blue]" Round((100/(TotalEntries-1))*Counter,0) "%[/] [red]" Counter "/" TotalEntries-1 "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/]")
+		myConsole.changeLine("[blue]" Round((100/(TotalEntries-1))*Counter,0) "%[/] [red]" Counter "/" TotalEntries-1 "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/] " Convert_Seconds(Round((a_tickcount - tock)/1000,0)), myConsole.currentLine )
+		if (Testing&&A_Index>15)
+			break
 	}	
 	tt("Process Complete. Collection time was " Round((a_tickcount - tock)/1000,1) " seconds")
 	for a,b in List
@@ -110,32 +123,49 @@ ButtonLogin:
 	
 	For a,b in List ;----Get the Links for Every installer including patches, language packs and DLC's then grab the extras links
 	{
-		for c in b.DLC
-		{
+		tt("working on [yellow]" a "[/] " Convert_seconds(Round((a_tickcount - tick)/1000,0)))
+		for c in b.DLC ;---- Check against Platform parameters ;---- Check against Language parameters ;---- Check against Downloads parameters
+		if (Config.Platforms[b.DLC[c].Platform]&&Config.Languages[b.DLC[c].Language]&&((Config.Downloads[b.DLC[c].Type "s"]||Config.Downloads[b.DLC[c].Type "es"]||Config.Linux[b.DLC[c].Type]))){
 			Link:=Get_ApiLink(b.DLC[c].Link)
 			b.DLC[c].Link:=Link.Link
 			b.DLC[c].Filename:=Link.FileName
 			tt("Grabbed link to [red]"b.DLC[c].Language "[/] - [white]" b.DLC[c].Platform "[/] - [red]" b.DLC[c].Type "[/] ./" a "/" Link.Filename)	
 		}
-		for d in b.Extras
+		Else
 		{
-			Link:=Get_ApiLink(b.Extras[d].Link)
-			b.Extras[d].Link:=Link.Link
-			b.Extras[d].Filename:=Link.FileName
-			tt("Grabbed link to [aqua]Extra[/] ./" a "/" Link.Filename)	
+			tt("[red]" a "[/]Not Selected")
+			for f,g in b.DLC[c]
+				tt("[blue]" f "[/] - [yellow]" g "[/]")
+			Errors++
 		}
-		;if A_Index>15
-			;break
+		if (Config.Downloads.Extras)
+			for d in b.Extras
+			{
+				Link:=Get_ApiLink(b.Extras[d].Link)
+				b.Extras[d].Link:=Link.Link
+				b.Extras[d].Filename:=Link.FileName
+				tt("Grabbed link to [aqua]Extra[/] ./" a "/" Link.Filename)	
+			}
+		if (Testing&&A_Index>15)
+			break
 		
 	}
 	tt("Grabbed all links")
+	if errors
+		tt("Encountered [red]" Errors "[/] Errors!!")
 	GuiControl,Main:Enable,ButtonLogin
 	GuiControl,Main:Enable,ConfigWindow
 	GuiControl,Main:Enable,ButtonUpdate
 	Return
 }
 MainGuiClose:
+WinGetPos,X,Y,W,H,% "ahk_id" Config.MainHwnd
+IniWrite,%X%,%A_ScriptDir%\Resources\Config.ini,MainGui,X
+IniWrite,%Y%,%A_ScriptDir%\Resources\Config.ini,MainGui,Y
+IniWrite,% W-16,%A_ScriptDir%\Resources\Config.ini,MainGui,W
+IniWrite,% H-38,%A_ScriptDir%\Resources\Config.ini,MainGui,H
 ExitApp
+
 ;****** Time Saver Functions
 m(x*){
 	for a,b in x
@@ -169,10 +199,22 @@ URLDownloadToVar( url, Method:="GET" ){
 	hObject.Send()
 	return hObject.ResponseText
 }
+Convert_Seconds(Seconds){
+	vSec60 := Mod( Seconds, 60 )
+	vMin60 := Mod( (Floor( Seconds / 60 )), 60)
+	vHrsxx := (Floor( Seconds / 3600 ))
+	If ( vSec60 < 10 )    ; pad with zeros
+		vSec60 = 0%vSec60%
+	If ( vMin60 < 10 )
+		vMin60 = 0%vMin60%
+	vTime = %vHrsxx%:%vMin60%:%vSec60%
+	Return, vtime	
+}
 #Include Classes\Class_Console.ahk
 #Include Classes\Class_GUIWindow.ahk
 #Include Classes\Class_XML.ahk
 #Include Functions\API-Login.ahk
+#Include Functions\Get_APILink.ahk
 #Include Functions\Get_GameInfo.ahk
 #Include Functions\GetCookies.ahk
 #Include Functions\Headers.ahk
@@ -185,4 +227,3 @@ URLDownloadToVar( url, Method:="GET" ){
 #Include Lib\HTTPRequest.ahk
 #Include Lib\OAuth.ahk
 #Include Windows\Gui_Config.ahk
-#Include Functions\Get_APILink.ahk

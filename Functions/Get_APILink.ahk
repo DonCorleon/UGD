@@ -1,16 +1,17 @@
 Get_APILink(link){
-	global API
+	global API,DEBUG_Times
 	DEBUG_GetAPILink:=0
-	URL := OAuth_Authorization( API.Basic_Credentials "`n" API.Specific_Credentials, link, "", "GET" )
-	HTTPRequest(URL,InOutData:="",InOutHeader:="")
-	if (DEBUG_GetAPILink){
-		tt("Get_GameInfo:","URL: " URL,"Header: " InOutHeader)
-		tt("Get_GameInfo:","Response: " InOutData)
-	}
-	StringReplace, InOutData, InOutData, \/,/, All
+	If (DEBUG_Times)
+		tick:=A_tickcount
+	HTTPRequest(URL := OAuth_Authorization( API.Basic_Credentials "`n" API.Specific_Credentials, link, "", "GET" ),InOutData:="",InOutHeader:="")
+	if (ErrorLevel!=200)
+		tt("Get_APILink:`tError code ""[red]" ErrorLevel "[/]""")
+	StringReplace, InOutData, InOutData, \,, All
+	if DEBUG_GetAPILink
+		tt("Get_APILink:","URL: " URL,"Header: " InOutHeader),tt("Get_APILink:","Response: " InOutData)
 	RegExMatch(InOutData, "U)link"":""(.*)""", Link)
-	RegExMatch( Link1, "(.*)\?", LinkFileName )
-	SplitPath, LinkFileName1, FileName
-	NewLink:=Object("FileName",Filename,"Link",Link1)
-	Return,NewLink	
+	RegExMatch( Link1, "([^/]*)\?", LinkFileName )
+	If (DEBUG_Times)
+		tt("Retrieved in " A_TickCount-tick " ms")
+	Return {"FileName":LinkFileName1,"Link":Link1}
 }
