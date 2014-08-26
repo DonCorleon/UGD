@@ -26,6 +26,8 @@ gui,Main:Add,Text,x45 y25,Debug Level : API
 Gui,Main:Add,Button,% "x" Config.MainW-200 " y0 w60 vButtonLogin gButtonLogin",&Login
 gui,Main:Add,Button,% "x" Config.MainW-130 " y0 w60 vConfigWindow gConfigWindow",&Configure
 Gui,Main:Add,Button,% "x" Config.MainW-60 " y0 w60 vButtonUpdate gButtonUpdate",&Update
+Gui,Main:Add,Button,% "x" Config.MainW-200 " y22 w60 Disabled vButtonSelectGames gButtonSelectGames",&SelectGames
+Gui,Main:Add,Button,% "x" Config.MainW-130 " y22 w60 Disabled vButtonGetGames gButtonGetGames",&GetGames
 ;Gui, Main: Add, ActiveX, x0 y50 w790 h585 vmsHTML +HScroll, Hello
 
 ;Gui,Main:Add,ListBox,xp-420 yp+75 w460 r22 +VScroll +Border vStatus,Idle
@@ -35,6 +37,73 @@ DoLog(1,"LogFile:Log.txt","Downloader Started")
 if !(Config.ConfigFound) ;---- If there is no configuration file, go straight to the config window
 	Gui_Config()
 Return
+ButtonGetGames:
+{
+	ToTalEntries:=0
+	for a,b in List
+		if b.Selected
+			TotalEntries++
+	tt("Found " TotalEntries " selections.")
+	tt("")
+	tock:=A_TickCount
+	
+	Counter:=0
+	For a,b in List ;Test Getting all the games base info for every game
+	{
+		if b.Selected
+		{
+			if a=updates
+				continue
+			Counter++
+			game:=a
+			tick:=A_TickCount
+			Get_GameInfo(game)
+			;tt(" [blue]" Round((100/(TotalEntries-1))*Counter,0) "%[/] [red]" Counter "/" TotalEntries-1 "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/]")
+			myConsole.changeLine("[blue]" Round((100/(TotalEntries-1))*Counter,0) "%[/] [red]" Counter "/" TotalEntries-1 "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/] " Convert_Seconds(Round((a_tickcount - tock)/1000,0)), myConsole.currentLine )
+			if (Testing&&A_Index>15)
+				break
+		}
+	}	
+	tt("Process Complete. Collection time was " Round((a_tickcount - tock)/1000,1) " seconds")
+	for a,b in List
+		TotalFiles+=b.Extras.MaxIndex() + b.DLC.MaxIndex()
+	tt("Total Files counted and added was [yellow]" TotalFiles "[/]")
+	
+	For a,b in List ;----Get the Links for Every installer including patches, language packs and DLC's then grab the extras links
+	{
+		if b.Selected
+		{
+			tt("working on [yellow]" a "[/] " Convert_seconds(Round((a_tickcount - tick)/1000,0)))
+			for c in b.DLC ;---- Check against Platform parameters ;---- Check against Language parameters ;---- Check against Downloads parameters
+				if (Config.Platforms[b.DLC[c].Platform]&&Config.Languages[b.DLC[c].Language]&&((Config.Downloads[b.DLC[c].Type "s"]||Config.Downloads[b.DLC[c].Type "es"]||Config.Linux[b.DLC[c].Type])))
+				{
+					Link:=Get_ApiLink(b.DLC[c].Link)
+					b.DLC[c].Link:=Link.Link
+					b.DLC[c].Filename:=Link.FileName
+					tt("Grabbed link to [red]"b.DLC[c].Language "[/] - [white]" b.DLC[c].Platform "[/] - [red]" b.DLC[c].Type "[/] ./" a "/" Link.Filename)	
+				}
+			if (Config.Downloads.Extras)
+				for d in b.Extras
+				{
+					Link:=Get_ApiLink(b.Extras[d].Link)
+					b.Extras[d].Link:=Link.Link
+					b.Extras[d].Filename:=Link.FileName
+					tt("Grabbed link to [aqua]Extra[/] ./" a "/" Link.Filename)	
+				}
+		}
+	}
+	tt("Grabbed all links")
+	if errors
+		tt("Encountered [red]" Errors "[/] Errors!!")
+	
+	
+	Return
+}
+ButtonSelectGames:
+{
+	Gui_SelectGames()
+	Return
+}
 MainGuiSize:
 {
 	if (!MainGuiSizeFirstRun){
@@ -44,6 +113,8 @@ MainGuiSize:
 	GuiControl,Main:MoveDraw,ButtonLogin,% "x"A_Guiwidth*.44
 	GuiControl,Main:MoveDraw,configWindow,% "x"A_Guiwidth*.63
 	GuiControl,Main:MoveDraw,ButtonUpdate,% "x"A_Guiwidth*.82
+	GuiControl,Main:MoveDraw,ButtonSelectGames,% "x"A_Guiwidth*.44
+	GuiControl,Main:MoveDraw,ButtonGetGames,% "x"A_Guiwidth*.63
 	myConsole.Resize(A_GuiWidth,A_GuiHeight)
 	
 	Return
@@ -66,26 +137,27 @@ ButtonUpdate:
 ButtonLogin:
 {
 	GuiControl,Main:Disable,ButtonLogin
+	GuiControl,Main:-Redraw,configWindow
 	GuiControl,Main:Disable,configWindow
+	GuiControl,Main:+Redraw,configWindow
 	GuiControl,Main:Disable,ButtonUpdate
+	GuiControl,Main:+Redraw,ButtonUpdate
+	Sleep,10
 	Username:=Config.Username
 	Password:=Config.Password
-	if (!Username||!Password){
-		tt("[Red]Username[/] or [Red]Password[/] isn't set."),tt("Set your Credentials in [red]Configuration[/].")
-		Return
-	}
-	if (!Loggedin)
+	if (!Username||!Password) ;----Break if no Username or password
+		tt("[Red]Username[/] or [Red]Password[/] isn't set."),tt("Set your Credentials in [red]Configuration[/]."),Return
+	if (!Loggedin) ;---- Do The Http login if not already logged in
 		Success:=HTTP_Login(Username,Password)
-	if (!LoggedIn&&Success)
+	if (!LoggedIn&&Success) ;---- Do the Api login if not already logged in
 		Success:=API_Login(Username,Password)
 	if (!LoggedIn&&Success){
 		LoggedIn:=1
 		tt("Logged in to [Yellow]HTTP[/] and [Yellow]API[/] Successfully")
 		tt("Getting a list of your games....")
-	}
-	If (LoggedIn)
 		List:=HTTP_GetUserInfo()
-	Else
+	}
+	If !LoggedIn
 		Return
 	if (List.Updates.1)
 		tt("Updated games as follows:")
@@ -97,67 +169,13 @@ ButtonLogin:
 			badge:="Update Available"
 		tt(A_index ".`t[03F]" b.Folder "[/] - [Yellow]" badge "[/]")
 	}
-	for a in List
-		TotalEntries++
-	tt("Found " TotalEntries -1 " Games.")
-	tt("")
-	tock:=A_TickCount
-	
-	For a,b in List ;Test Getting all the games base info for every game
-	{
-		if a=updates
-			continue
-		Counter++
-		game:=a
-		tick:=A_TickCount
-		Get_GameInfo(game)
-		;tt(" [blue]" Round((100/(TotalEntries-1))*Counter,0) "%[/] [red]" Counter "/" TotalEntries-1 "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/]")
-		myConsole.changeLine("[blue]" Round((100/(TotalEntries-1))*Counter,0) "%[/] [red]" Counter "/" TotalEntries-1 "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/] " Convert_Seconds(Round((a_tickcount - tock)/1000,0)), myConsole.currentLine )
-		if (Testing&&A_Index>15)
-			break
-	}	
-	tt("Process Complete. Collection time was " Round((a_tickcount - tock)/1000,1) " seconds")
-	for a,b in List
-		TotalFiles+=b.Extras.MaxIndex() + b.DLC.MaxIndex()
-	tt("Total Files counted and added was [yellow]" TotalFiles "[/]")
-	
-	For a,b in List ;----Get the Links for Every installer including patches, language packs and DLC's then grab the extras links
-	{
-		tt("working on [yellow]" a "[/] " Convert_seconds(Round((a_tickcount - tick)/1000,0)))
-		for c in b.DLC ;---- Check against Platform parameters ;---- Check against Language parameters ;---- Check against Downloads parameters
-		if (Config.Platforms[b.DLC[c].Platform]&&Config.Languages[b.DLC[c].Language]&&((Config.Downloads[b.DLC[c].Type "s"]||Config.Downloads[b.DLC[c].Type "es"]||Config.Linux[b.DLC[c].Type]))){
-			Link:=Get_ApiLink(b.DLC[c].Link)
-			b.DLC[c].Link:=Link.Link
-			b.DLC[c].Filename:=Link.FileName
-			tt("Grabbed link to [red]"b.DLC[c].Language "[/] - [white]" b.DLC[c].Platform "[/] - [red]" b.DLC[c].Type "[/] ./" a "/" Link.Filename)	
-		}
-		Else
-		{
-			tt("[red]" a "[/]Not Selected")
-			for f,g in b.DLC[c]
-				tt("[blue]" f "[/] - [yellow]" g "[/]")
-			Errors++
-		}
-		if (Config.Downloads.Extras)
-			for d in b.Extras
-			{
-				Link:=Get_ApiLink(b.Extras[d].Link)
-				b.Extras[d].Link:=Link.Link
-				b.Extras[d].Filename:=Link.FileName
-				tt("Grabbed link to [aqua]Extra[/] ./" a "/" Link.Filename)	
-			}
-		if (Testing&&A_Index>15)
-			break
-		
-	}
-	tt("Grabbed all links")
-	if errors
-		tt("Encountered [red]" Errors "[/] Errors!!")
+	GuiControl,Main:Enable,ButtonSelectGames
 	GuiControl,Main:Enable,ButtonLogin
 	GuiControl,Main:Enable,ConfigWindow
 	GuiControl,Main:Enable,ButtonUpdate
 	Return
 }
+MainGuiEscape:
 MainGuiClose:
 WinGetPos,X,Y,W,H,% "ahk_id" Config.MainHwnd
 IniWrite,%X%,%A_ScriptDir%\Resources\Config.ini,MainGui,X
@@ -227,3 +245,4 @@ Convert_Seconds(Seconds){
 #Include Lib\HTTPRequest.ahk
 #Include Lib\OAuth.ahk
 #Include Windows\Gui_Config.ahk
+#Include Windows\Gui_SelectGames.ahk

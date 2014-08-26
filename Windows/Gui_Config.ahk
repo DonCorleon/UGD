@@ -1,11 +1,11 @@
 Gui_Config(){
 	global Config,ConfigTree,ConfigSave,ConfigCancel
 	static Languages,Platforms,Linux,Downloads,UserID,PassID
-	IniRead,ConfigX,%A_ScriptDir%\Resources\Config.ini,ConfigGui,X,0
-	IniRead,ConfigY,%A_ScriptDir%\Resources\Config.ini,ConfigGui,Y,0
-	IniRead,ConfigW,%A_ScriptDir%\Resources\Config.ini,ConfigGui,W,200
-	IniRead,ConfigH,%A_ScriptDir%\Resources\Config.ini,ConfigGui,H,200
-	Config.ConfigX:=ConfigX,Config.ConfigY:=ConfigY,Config.ConfigW:=ConfigW,Config.ConfigH:=ConfigH
+	IniRead,X,%A_ScriptDir%\Resources\Config.ini,ConfigGui,X,% Config.MainX
+	IniRead,Y,%A_ScriptDir%\Resources\Config.ini,ConfigGui,Y,% Config.MainY
+	IniRead,W,%A_ScriptDir%\Resources\Config.ini,ConfigGui,W,200
+	IniRead,H,%A_ScriptDir%\Resources\Config.ini,ConfigGui,H,200
+	Config.ConfigX:=X,Config.ConfigY:=Y,Config.ConfigW:=W,Config.ConfigH:=H
 	Gui,Main:+Disabled
 	Gui,Config:New,+hwndhwnd -DPIScale +ToolWindow +Resize +OwnerMain +MinSize200x200,Configuration
 	Config.ConfigHwnd:=hwnd
@@ -31,7 +31,7 @@ Gui_Config(){
 		TV_Add(a,Languages,"vLanguage_%b% +check" b),Config.LanguageCount:=A_Index ;----Create initial count for select all status
 	For a,b in Config.Linux
 		TV_Add(a,Linux,"vPlatform_Tarballs +check" Config.Linux[a])
-	Gui,Config:Show, x%ConfigX% y%ConfigY% w%ConfigW% h%ConfigH%,Configuration
+	Gui,Config:Show,% "x" Config.ConfigX " y" Config.ConfigY " w" Config.ConfigW " h"  Config.ConfigH,Configuration
 	UncheckList:=[Credentials,UserID,PassID,Downloads,Platforms,Languages] ; taken from Maestrith >> http://www.autohotkey.com/board/topic/96840-ahk-11-hide-individual-checkboxes-in-a-treeview-x32x64/
 	VarSetCapacity(tvitem,28)
 	for index,id in UncheckList{ ;loop through the array of id numbers
@@ -44,12 +44,10 @@ Gui_Config(){
 	Return
 	ConfigGuiSize:
 	{
-		;tt(A_GuiWidth "x" A_GuiHeight,Config.ConfigW "x" Config.ConfigH)
 		if !ConfigGuiSizeFirstRun{
 			ConfigGuiSizeFirstRun:=1
 			Return
 		}
-		Gui,Config:Default
 		GuiControl,Config:MoveDraw,Configsave,% "y" A_Guiheight-30 " w" A_GuiWidth*.48
 		GuiControl,Config:MoveDraw,ConfigCancel,% "x" A_Guiwidth*.52 " y" A_Guiheight-30 " w" A_GuiWidth*.48
 		GuiControl,Config:MoveDraw,ConfigTree,% "w" A_Guiwidth " h" A_GuiHeight-35
@@ -102,8 +100,8 @@ Gui_Config(){
 		ConfigGuiClose:
 		ConfigCancel:
 		WinGetPos,X,Y,W,H,% "ahk_id" Config.ConfigHwnd
-		IniWrite,%X%,%A_ScriptDir%\Resources\Config.ini,ConfigGui,X
-		IniWrite,%Y%,%A_ScriptDir%\Resources\Config.ini,ConfigGui,Y
+		IniWrite,% X,%A_ScriptDir%\Resources\Config.ini,ConfigGui,X
+		IniWrite,% Y,%A_ScriptDir%\Resources\Config.ini,ConfigGui,Y
 		IniWrite,% W-16,%A_ScriptDir%\Resources\Config.ini,ConfigGui,W
 		IniWrite,% H-34,%A_ScriptDir%\Resources\Config.ini,ConfigGui,H
 		Gui,Main:-Disabled

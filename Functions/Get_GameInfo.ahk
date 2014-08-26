@@ -17,6 +17,9 @@ Get_GameInfo(GameName){
 	LangOption:=Object("ar","Arabic","bl","Bulgarian","cn","Chinese","cz","Czech","da","Danish","nl","Dutch","en","English","fi","Finnish","fr","French","de","German","gk","Greek","hu","Hungarian","it","Italian","jp","Japanese","ko","Korean","no","Norwegian","pl","Polish","pt","Portuguese","ro","Romanian","ru","Russian","sb","Serbian","sk","Slovac","es","Spanish","sv","Swedish","tr","Turkish","uk","Ukranian")
 	Loop, Parse, InOutData, `n
 	{
+		FoundPurchaseDate:=RegExMatch(A_LoopField,"U)""list_purchased""> Purchased on (.*)<",PurchaseDate)
+		If FoundPurchaseDate
+			List[GameName].Purchased:=PurchaseDate1
 		IfInString, A_LoopField, bonus_content_list browser		
 		{
 			Found_DLC = 0
@@ -45,52 +48,38 @@ Get_GameInfo(GameName){
 			FoundSize 		:= RegExMatch( A_LoopField, "U)size""> (.*) (M|G)B <", DLCSize)	;	1 DLC Size
 			FoundDLC 			:= RegExMatch( A_LoopField, "U)details-header""> DLC: (.*) <i", DLCName)	; 	1= Name of the DLC
 			FoundPlatform 		:= RegExMatch( A_LoopField, "U)details-underline""> (.*)\, (.*) <", DLCPlatform) ;	1 = Platform	2 = Language
-			FoundName 		:= RegExMatch( A_LoopField, "U)details-underline""> (.*)<", DLCName)
-			FoundLanguage 		:= RegExMatch( A_LoopField, "U)class=""lang-item lang_(.*)( invisible)?""", DLCLanguage)
-			FoundLanguagePack 	:= RegExMatch( A_LoopField, "U)""name"":""Language Pack""", LanguagePack)	; 	1= Platform 	2= Language
+			FoundName 		:= RegExMatch( A_LoopField, "U)details-underline""> (.*) <", DLCName)
 			IfInstring,DLCName,Tarball
 				Type:="Tarball Archive",DLCPlatform1:="Linux"
 			Else IfInString,DLCName,Linux
 				Type:="Debian Package",DLCPlatform1:="Linux"
 			Else 
 				Type:="Installer"
-			If (FoundDLC)
+			If (FoundDLC||DLCFolder1!=GameName)
 				Type:="DLC"
-			If (Type="Installer")
-				IfInString, DLCLink1, patch
-				{
-					DLCPlatform1 := Last_Platform
-					Type := "Patch"
-					DLCLanguage1 := Last_Language
-				}
-			if FoundLanguagePack
-			{
-				DLCPlatform2 := Last_Platform
-				Type := "Language_Pack"
-				DLCLanguage1 := Last_Language
-			}
+			IfInString, DLCLink1, patch
+				Type := "Patch"
+			IfInstring,DLCLink1, LangPack
+				Type := "Language Pack"
 			If FoundLink
 			{
 				If not FoundDLC
-					DLCName1 := PreviousDLCName
+					DLCName1 := list[gamename].name
 				PreviousDLCName := DLCName1
 				IfInString, DLCSize, GB
 					DLCSize1 := Round(DLCSize1*1000, 0)
 				SplitPath, DLCLink1, DLCID
 				if FoundLink
 				{
+					
 					DLCNum++
 					If !DLCFolder1
 						DLCFolder1:=ExistingFolder
 					ExistingFolder := DLCFolder1
-					if LangOption[DLCLanguage1]
-						DLCLanguage1:=LangOption[DLCLanguage1]
-					Else
-						DLCLanguage1:=Last_Language
-					
-					StringReplace, Platform, DLCPlatform1, %A_Space%Installer, , All
-					DLC[DLCNum] := Object("Name", DLCName1, "Type",Type,"FileName", "Not Available", "ID", DLCID, "MainFolder", GameFolder, "Folder", DLCFolder1, "Size", DLCSize1, "Platform", Platform, "Language", DLCLanguage1, "Link", API.get_installer_link . "/" . DLCFolder1 . "/" . DLCID . "/")
-					Last_Language := DLCLanguage1
+					TempPlatform:=Object(1,"Windows",2,"Mac OS X",3,"Linux")
+					Platform:=TempPlatform[SubStr(DLCID,3,1)]
+					Language:=LangOption[SubStr(DLCID,1,2)]
+					DLC[DLCNum] := Object("Name", DLCName1, "Type",Type,"FileName", "Not Available", "ID", DLCID, "MainFolder", GameFolder, "Folder", DLCFolder1, "Size", DLCSize1, "Platform", Platform, "Language", Language, "Link", API.get_installer_link . "/" . DLCFolder1 . "/" . DLCID . "/")
 					Last_Platform := Platform
 					
 				}

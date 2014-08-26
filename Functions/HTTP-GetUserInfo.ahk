@@ -1,5 +1,5 @@
 HTTP_GetUserInfo(){
-	Global API,Cookie,Updates:=[],myConsole
+	Global API,Cookie,Updates:=[],myConsole,Testing
 	page:=0,IndexNum:=0,TotalOwned:=0,UpdateNotifications:=0,List:=[]
 	tt("INFO:`tRetrieving Page " page+1)
 	HTTPnextpage:
@@ -17,7 +17,7 @@ HTTP_GetUserInfo(){
 		Badges:=RegExMatch( b, "U)class=\\""shelf_badges\\""> <i class=\\""(.*)\\",Badge)
 		If (FoundFolder && FoundGameID){
 			StringReplace, GameBox1, GameBox1,\,,All
-			List[GameFolder1] := Object( "DisplayName", "","Name","","ServerName", GameName1,"Folder",GameFolder1,"Size","","Installer", Game_Installers,"Extras","","Notify",Badge1,"DLC", DLC1,"GameID", GameID1,"OrderID", OrderID1,"GameCard", "http://www.gog.com/game/" GameFolder1,"Icon", Icon_Link,"Game_Box", "http://static.gog.com" GameBox1)
+			List[GameFolder1] := Object( "DisplayName", "","Name","","ServerName", GameName1,"Folder",GameFolder1,"Size","","Installer", Game_Installers,"Extras","","Notify",Badge1,"DLC", DLC1,"GameID", GameID1,"OrderID", OrderID1,"GameCard", "http://www.gog.com/game/" GameFolder1,"Icon", Icon_Link,"Game_Box", "http://static.gog.com" GameBox1,"Selected",Testing)
 		}
 		if (Badges&&Badge1!="bdg_soon") ;---- Only increment the update if the badge is not a Coming Soon notification
 			Updates[Gamefolder1]:=List[GameFolder1]
@@ -44,6 +44,7 @@ HTTP_GetUserInfo(){
 	{
 		RegExMatch(A_LoopField,"Ui)rename (\w*)\b " Chr(34) "(.*)\(((january|february|march|april|may|june|july|august|september|october|november|december).*)\)(| \[DLC\])" Chr(34),found)
 		List[Found1].Name:=Found2
+		;m(found1, found2)
 	}
 	;***********************************************
 	return, List
