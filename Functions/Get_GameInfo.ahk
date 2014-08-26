@@ -2,17 +2,17 @@ Get_GameInfo(GameName){
 	/*
 		This Needs to be refined and add the gather DLC, Installers, LanguagePacks,
 	*/
-	global List,Config,API
+	global List,Config,HTTP,API
 	DEBUG_GetGames:=0 ;---- Set to debug this module
 	Extras:=[],DLC:=[]
 	Name := List[GameName].Folder
 	GameFolder := List[GameName].Folder
 	URL := "https://secure.gog.com/en/account/ajax?a=gamesListDetails&g=" . List[GameName].GameId
-	HTTPRequest(url, InOutData := "", InOutHeader := Headers(), Options)
+	HTTPRequest(url, InOutData := "", InOutHeader := Headers(Http.GoGCookie),Options)
 	StringReplace,InOutData,InOutData,\,,All
 	StringReplace, InOutData, InOutData, a>, a>`n, All
-	;FileDelete,GameInfo-%Name%.txt
-	;FileAppend,%InOutData%,GameInfo-%Name%.txt
+	FileDelete,GameInfo-%Name%.txt
+	FileAppend,%InOutData%,GameInfo-%Name%.txt
 	ExtraNum := 0
 	LangOption:=Object("ar","Arabic","bl","Bulgarian","cn","Chinese","cz","Czech","da","Danish","nl","Dutch","en","English","fi","Finnish","fr","French","de","German","gk","Greek","hu","Hungarian","it","Italian","jp","Japanese","ko","Korean","no","Norwegian","pl","Polish","pt","Portuguese","ro","Romanian","ru","Russian","sb","Serbian","sk","Slovac","es","Spanish","sv","Swedish","tr","Turkish","uk","Ukranian")
 	Loop, Parse, InOutData, `n

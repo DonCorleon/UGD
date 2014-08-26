@@ -1,10 +1,10 @@
 HTTP_GetUserInfo(){
-	Global API,Cookie,Updates:=[],myConsole,Testing
+	Global API,HTTP,Updates:=[],myConsole,Testing
 	page:=0,IndexNum:=0,TotalOwned:=0,UpdateNotifications:=0,List:=[]
 	tt("INFO:`tRetrieving Page " page+1)
 	HTTPnextpage:
 	page++	; increment the page number we are trying to get
-	HTTPRequest(url:="https://secure.gog.com/account/ajax?a=gamesShelfMore&s=title&q=&t=0&p=" page, InOutData := "", InOutHeader := Headers(), Options)
+	HTTPRequest(url:="https://secure.gog.com/account/ajax?a=gamesShelfMore&s=title&q=&t=0&p=" page, InOutData := "", InOutHeader := Headers(Http.GoGCookie), Http.GoGOptions)
 	Fields:=StrSplit(InOutData,"<div class=\""shelf_game\")
 	for a,b in Fields
 	{

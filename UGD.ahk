@@ -8,10 +8,8 @@ Global Cookie,status
 
 DEBUG_Times:=0
 
-;Create the basic HTTP Object
-HTTP:=Object("GoGCookie","")
-; Create the Basic API Object
-API:=Object("Consumer_Key","1f444d14ea8ec776585524a33f6ecc1c413ed4a5"
+HTTP:=Object("GoGCookie","") ;----Create the basic HTTP Object
+API:=Object("Consumer_Key","1f444d14ea8ec776585524a33f6ecc1c413ed4a5" ; Create the Basic API Object
 ,"Consumer_Secret","20d175147f9db9a10fc0584aa128090217b9cf88"
 ,"oauth_get_urls","https://api.gog.com/en/downloader2/status/stable")
 
@@ -42,45 +40,50 @@ ButtonGetGames:
 	ToTalEntries:=0
 	for a,b in List
 		if b.Selected
+		{
+			if (a="updates")
+				continue
 			TotalEntries++
+		}
 	tt("Found " TotalEntries " selections.")
 	tt("")
 	tock:=A_TickCount
 	
 	Counter:=0
-	For a,b in List ;Test Getting all the games base info for every game
+	For a,b in List ;----Get all the games base info for the selected games
 	{
 		if b.Selected
 		{
-			if a=updates
+			if (a="updates")
 				continue
-			Counter++
-			game:=a
-			tick:=A_TickCount
+			Counter++,game:=a,tick:=A_TickCount
 			Get_GameInfo(game)
 			;tt(" [blue]" Round((100/(TotalEntries-1))*Counter,0) "%[/] [red]" Counter "/" TotalEntries-1 "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/]")
-			myConsole.changeLine("[blue]" Round((100/(TotalEntries-1))*Counter,0) "%[/] [red]" Counter "/" TotalEntries-1 "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/] " Convert_Seconds(Round((a_tickcount - tock)/1000,0)), myConsole.currentLine )
-			if (Testing&&A_Index>15)
-				break
+			myConsole.changeLine("[blue]" Round((100/(TotalEntries))*Counter,0) "%[/] [red]" Counter "/" TotalEntries "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/] " Convert_Seconds(Round((a_tickcount - tock)/1000,0)), myConsole.currentLine )
 		}
 	}	
 	tt("Process Complete. Collection time was " Round((a_tickcount - tock)/1000,1) " seconds")
+	TotalFiles:=0 ;---- Reset Var so multiple runs always starts at 0
 	for a,b in List
 		TotalFiles+=b.Extras.MaxIndex() + b.DLC.MaxIndex()
 	tt("Total Files counted and added was [yellow]" TotalFiles "[/]")
 	
-	For a,b in List ;----Get the Links for Every installer including patches, language packs and DLC's then grab the extras links
+	For a,b in List ;----Get the Links for installers, patches, language packs and DLC's then grab the extras links
 	{
-		if b.Selected
+		if (a="updates") ;----Skip the Updates data
+			continue
+		if b.Selected ;----Only Process if it has been selected
 		{
 			tt("working on [yellow]" a "[/] " Convert_seconds(Round((a_tickcount - tick)/1000,0)))
-			for c in b.DLC ;---- Check against Platform parameters ;---- Check against Language parameters ;---- Check against Downloads parameters
+			for c in b.DLC ;---- Check against Platform, Language Downloads type parameters
 				if (Config.Platforms[b.DLC[c].Platform]&&Config.Languages[b.DLC[c].Language]&&((Config.Downloads[b.DLC[c].Type "s"]||Config.Downloads[b.DLC[c].Type "es"]||Config.Linux[b.DLC[c].Type])))
 				{
 					Link:=Get_ApiLink(b.DLC[c].Link)
 					b.DLC[c].Link:=Link.Link
 					b.DLC[c].Filename:=Link.FileName
-					tt("Grabbed link to [red]"b.DLC[c].Language "[/] - [white]" b.DLC[c].Platform "[/] - [red]" b.DLC[c].Type "[/] ./" a "/" Link.Filename)	
+					;---- Insert Download Function Here
+					DownloadFile(b.DLC[c].Link,A_ScriptDir "\" b.DLC[c].Folder "\" b.DLC[c].Filename)
+					;tt("Grabbed link to [red]"b.DLC[c].Language "[/] - [white]" b.DLC[c].Platform "[/] - [red]" b.DLC[c].Type "[/] .\" b.DLC[c].Folder "\" Link.Filename)	
 				}
 			if (Config.Downloads.Extras)
 				for d in b.Extras
@@ -88,15 +91,15 @@ ButtonGetGames:
 					Link:=Get_ApiLink(b.Extras[d].Link)
 					b.Extras[d].Link:=Link.Link
 					b.Extras[d].Filename:=Link.FileName
-					tt("Grabbed link to [aqua]Extra[/] ./" a "/" Link.Filename)	
+					;---- Insert Download Function Here
+					DownloadFile(b.Extras[d].Link,A_ScriptDir "\" a "\" b.Extras[d].Filename)
+					;tt("Grabbed link to [aqua]Extra[/] .\" a "\" Link.Filename)	
 				}
 		}
 	}
 	tt("Grabbed all links")
 	if errors
 		tt("Encountered [red]" Errors "[/] Errors!!")
-	
-	
 	Return
 }
 ButtonSelectGames:
@@ -142,16 +145,18 @@ ButtonLogin:
 	GuiControl,Main:+Redraw,configWindow
 	GuiControl,Main:Disable,ButtonUpdate
 	GuiControl,Main:+Redraw,ButtonUpdate
-	Sleep,10
 	Username:=Config.Username
 	Password:=Config.Password
+	ReUsingLogin:=ReUse_Login("LOAD")
 	if (!Username||!Password) ;----Break if no Username or password
 		tt("[Red]Username[/] or [Red]Password[/] isn't set."),tt("Set your Credentials in [red]Configuration[/]."),Return
-	if (!Loggedin) ;---- Do The Http login if not already logged in
-		Success:=HTTP_Login(Username,Password)
-	if (!LoggedIn&&Success) ;---- Do the Api login if not already logged in
-		Success:=API_Login(Username,Password)
-	if (!LoggedIn&&Success){
+	if (!Loggedin&&!ReUsingLogin) ;---- Do The Http login if not already logged in
+		SuccessHTTP:=HTTP_Login(Username,Password)
+	if (!LoggedIn&&SuccessHTTP) ;---- Do the Api login if not already logged in
+		SuccessAPI:=API_Login(Username,Password)
+	if ((!LoggedIn&&SuccessAPI)||ReUsingLogin){
+		if !ReUsingLogin
+			ReUse_Login("SAVE")
 		LoggedIn:=1
 		tt("Logged in to [Yellow]HTTP[/] and [Yellow]API[/] Successfully")
 		tt("Getting a list of your games....")
@@ -232,6 +237,7 @@ Convert_Seconds(Seconds){
 #Include Classes\Class_GUIWindow.ahk
 #Include Classes\Class_XML.ahk
 #Include Functions\API-Login.ahk
+#Include Functions\DownloadFile.ahk
 #Include Functions\Get_APILink.ahk
 #Include Functions\Get_GameInfo.ahk
 #Include Functions\GetCookies.ahk
@@ -240,6 +246,7 @@ Convert_Seconds(Seconds){
 #Include Functions\HTTP-Login.ahk
 #Include Functions\Log.ahk
 #Include Functions\Resources.ahk
+#Include Functions\Reuse_Login.ahk
 #Include Functions\RSS_Get.ahk
 #Include Functions\Update.ahk
 #Include Lib\HTTPRequest.ahk

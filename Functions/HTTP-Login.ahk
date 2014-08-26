@@ -1,5 +1,5 @@
 HTTP_Login(UserName,UserPass){
-	global DEBUG_HTTP,Cookie:=""
+	global DEBUG_HTTP,HTTP,Cookie:=""
 	tt("HTTP:`tLogin Started")
 	Options := "+Flag: INTERNET_FLAG_NO_COOKIES`n+NO_AUTO_REDIRECT"
 	. (A_IsUnicode ? "`nCharset: UTF-8" : "")
@@ -82,5 +82,7 @@ HTTP_Login(UserName,UserPass){
 		tt("HTTP:`tPhase 4 passed"),tt("Welcome " NickName)
 	else
 		Return tt("HTTP:`tLogin Failed"),tt("HTTP Error:`tSkipping API login")
+	HTTP.GoGCookie:=Cookie
+	HTTP.GoGOptions:=Options
 	return,1 tt("HTTP:`tLogin Successful")
 }
