@@ -7,7 +7,7 @@ Get_GameInfo(GameName){
 	Extras:=[],DLC:=[]
 	Name := List[GameName].Folder
 	GameFolder := List[GameName].Folder
-	URL := "https://secure.gog.com/en/account/ajax?a=gamesListDetails&g=" . List[GameName].GameId
+	URL := "https://www.gog.com/en/account/ajax?a=gamesListDetails&g=" . List[GameName].GameId
 	HTTPRequest(url, InOutData := "", InOutHeader := Headers(Http.GoGCookie),Options)
 	StringReplace,InOutData,InOutData,\,,All
 	StringReplace, InOutData, InOutData, a>, a>`n, All
@@ -33,7 +33,7 @@ Get_GameInfo(GameName){
 		}
 		If (Found_Extras&&Config.Downloads.Extras)
 		{
-			FoundID := RegExMatch(A_LoopField, "U)secure.gog.com\/downlink\/file\/(.*)\/(.*)""", ExtraID)
+			FoundID := RegExMatch(A_LoopField, "U)www.gog.com\/downlink\/file\/(.*)\/(.*)""", ExtraID)
 			FoundName := RegExMatch(A_LoopField, "U)details-underline"">(.*)<", ExtraName)
 			FoundSize := RegExMatch(A_LoopField, "U)size"">(.*) (M|G)B<", ExtraSize)
 			If (FoundID&&FoundName&&FoundSize){

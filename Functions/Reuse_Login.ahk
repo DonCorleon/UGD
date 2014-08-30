@@ -19,7 +19,7 @@ Reuse_Login(option)
 	if (Option="LOAD")
 	{
 		IniRead,LastLogin,%A_ScriptDir%\Resources\Config.ini,Login,LastLogin,0
-		if(LastLogin&&(A_Now-LastLogin)<10000)
+		if(LastLogin&&(A_Now-LastLogin)<1000000)
 		{
 			tt("Attempting to Reuse Last Login from " LastLogin)
 			IniRead,IniAPI,%A_ScriptDir%\Resources\Config.ini,LoginAPI

@@ -42,6 +42,8 @@ SelectGamesGuiSaveselection:
 {
 	SelectGamesGuiEscape:
 	SelectGamesGuiClose:
+	for a,b in List
+		b.Selected:=0
 	While, RowNumber := LV_GetNext(Rownumber,"Checked"){ ;Do the checking of selections here and modify List[a].Selected
 		LV_GetText(game,Rownumber)
 		List[game].Selected:=1

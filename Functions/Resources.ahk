@@ -29,10 +29,9 @@ Resources(){
 		IniRead,H,%A_ScriptDir%\Resources\Config.ini,MainGui,H,200
 		IniRead,Username,%A_ScriptDir%\Resources\Config.ini,Credentials,Username
 		IniRead,Password,%A_ScriptDir%\Resources\Config.ini,Credentials,Password
+		IniRead,BaseLocation,%A_ScriptDir%\Resources\Config.ini,Locations,Base Folder,% A_ScriptDir
 		Config.MainX:=X,Config.MainY:=Y,Config.MainW:=W,Config.MainH:=H
-		Config.Username:=Username
-		Config.Password:=Password
-		
+		Config.Username:=Username,Config.Password:=Password,Config.Location:=BaseLocation
 		For a in LanguageList
 		{
 			IniRead,Value,%A_ScriptDir%\Resources\Config.ini,Languages,%a%

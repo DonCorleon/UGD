@@ -1,6 +1,6 @@
 Gui_Config(){
 	global Config,ConfigTree,ConfigSave,ConfigCancel
-	static Languages,Platforms,Linux,Downloads,UserID,PassID
+	static Languages,Platforms,Linux,Downloads,UserID,PassID,BaseDir
 	IniRead,X,%A_ScriptDir%\Resources\Config.ini,ConfigGui,X,% Config.MainX
 	IniRead,Y,%A_ScriptDir%\Resources\Config.ini,ConfigGui,Y,% Config.MainY
 	IniRead,W,%A_ScriptDir%\Resources\Config.ini,ConfigGui,W,200
@@ -15,6 +15,7 @@ Gui_Config(){
 	Credentials:=TV_Add("Credentials")
 	UserID:=TV_Add("User = " Config.Username,Credentials)
 	PassID:=TV_Add("Pass = " Config.Password,Credentials)
+	BaseDir:=TV_Add("Location = " Config.Location,Credentials)
 	Downloads:=TV_Add("Downloads")
 	for a,b in Config.Downloads
 		TV_Add(a,Downloads,"vDownload_%b% +check" b),Config.DownloadCount:=A_Index ;----Create initial count for select all status
@@ -32,7 +33,7 @@ Gui_Config(){
 	For a,b in Config.Linux
 		TV_Add(a,Linux,"vPlatform_Tarballs +check" Config.Linux[a])
 	Gui,Config:Show,% "x" Config.ConfigX " y" Config.ConfigY " w" Config.ConfigW " h"  Config.ConfigH,Configuration
-	UncheckList:=[Credentials,UserID,PassID,Downloads,Platforms,Languages] ; taken from Maestrith >> http://www.autohotkey.com/board/topic/96840-ahk-11-hide-individual-checkboxes-in-a-treeview-x32x64/
+	UncheckList:=[Credentials,UserID,PassID,Downloads,Platforms,Languages,BaseDir] ; taken from Maestrith >> http://www.autohotkey.com/board/topic/96840-ahk-11-hide-individual-checkboxes-in-a-treeview-x32x64/
 	VarSetCapacity(tvitem,28)
 	for index,id in UncheckList{ ;loop through the array of id numbers
 		info:=A_PtrSize=4?{0:8,4:id,12:0xf000}:{0:8,8:id,20:0xf000} ;there are 2 different offsets for x32 and x64.  This will account for both
@@ -116,35 +117,26 @@ Gui_Config(){
 			Goto ConfigUsername
 		else if(A_GuiEvent="DoubleClick"&&A_EventInfo=PassID)
 			Goto ConfigPassword
-		;Else
-		;{
-		;if ( TV_GetParent(A_EventInfo)=Downloads){ ;---- Count the checks in the Downloads Section
-		;TotalChecked:=0
-		;for a,b in Config.Downloads
-		;TotalChecked+=Config.Downloads[a]
-		;}
-		;if ( TV_GetParent(A_EventInfo)=Platforms){ ;---- Count the checks in the Platforms section
-		;TotalChecked:=0
-		;for a,b in Config.Platforms
-		;TotalChecked+=Config.Platforms[a]
-		;}
-		;if ( TV_GetParent(A_EventInfo)=Languages){ ;---- Count the checks in the Languages section
-		;for a,b in Config.Languages
-		;TotalChecked+=Config.Languages[a]
-		;}
-		;TV_Modify(A_EventInfo)
-		;IsChecked:=,ClickedItem:=
-		;TV_GetText(Parent,TV_GetParent(A_EventInfo))
-		;if (Parent&&Parent!="Credentials")
-		;{
-		;TV_GetText(ClickedItem,A_EventInfo)
-		;IsChecked:=TV_Get(A_EventInfo,"Check")?1:0
-		;if (Config[Parent][ClickedItem]!=IsChecked)
-		;tr(Parent "/" ClickedItem " Toggled`nOriginal State - " Config[Parent][ClickedItem],"Current State - " IsChecked)
-		;}
-		;Return
-		;}
+		else if(A_GuiEvent="DoubleClick"&&A_EventInfo=BaseDir)
+			Goto ConfigLocation
+		;Isert code in here to do select all/none and change check box on main parent accordingly
 		Return
+	}
+	ConfigLocation:
+	{
+		FileSelectFolder,Location,,,Select a folder to save files to....
+		if Location
+		{
+			InvalidLocation:=RegExMatch(Location,"^\\\\")
+			if InvalidLocation
+				m("Network locations are not currently supported unless its is a mapped drive.`n`nComing soon to an update near you!!")
+			Config.Location:=Location
+			IniWrite,% Location,%A_ScriptDir%\Resources\Config.ini,Locations,Base Folder
+		}
+		If !Config.Location
+			Config.Location:=A_ScriptDir
+		TV_Modify(BaseDir,,"Location = " Config.Location)
+		Return	
 	}
 	ConfigUsername:
 	{

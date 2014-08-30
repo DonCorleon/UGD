@@ -1,42 +1,44 @@
 HTTP_GetUserInfo(){
 	Global API,HTTP,Updates:=[],myConsole,Testing
 	page:=0,IndexNum:=0,TotalOwned:=0,UpdateNotifications:=0,List:=[]
+	html:=ComObjCreate("htmlfile")
+	ComObjError(0)
 	tt("INFO:`tRetrieving Page " page+1)
 	HTTPnextpage:
 	page++	; increment the page number we are trying to get
-	HTTPRequest(url:="https://secure.gog.com/account/ajax?a=gamesShelfMore&s=title&q=&t=0&p=" page, InOutData := "", InOutHeader := Headers(Http.GoGCookie), Http.GoGOptions)
-	Fields:=StrSplit(InOutData,"<div class=\""shelf_game\")
-	for a,b in Fields
+	myConsole.changeLine("[Green]INFO:`tRetrieving Page " page+1 "[/]", myConsole.currentLine )
+	HTTPRequest(url:="https://www.gog.com/account/ajax?a=gamesShelfMore&s=title&q=&t=0&p=" page, InOutData := "", InOutHeader := Headers(Http.GoGCookie), Http.GoGOptions)
+	If (ErrorLevel!=200)
+		tt("Failed to Get Page with Error Code : " Errorlevel),Return
+	If Testing
 	{
-		FoundName:=RegExMatch( b, "U)data-title=..(.*)\\",  gamename)
-		FoundFolder:=RegExMatch( b, "U)data-gameindex=..(.*)\\",  gamefolder)
-		FoundGameID:=RegExMatch( b, "U)data-gameid=..(.*)\\", gameid)
-		FoundOrderID:=RegExMatch( b, "U)data-orderid=..(.*)\\", OrderId)
-		FoundBox:=RegExMatch( b, "U)shelf_game_box...src=..(.*)\\", GameBox)
-		DLCFound:=RegExMatch( b, "U)shelf-game-dlc-counter\\""> \+(.*) DLC", DLC)
-		Badges:=RegExMatch( b, "U)class=\\""shelf_badges\\""> <i class=\\""(.*)\\",Badge)
-		If (FoundFolder && FoundGameID){
-			StringReplace, GameBox1, GameBox1,\,,All
-			List[GameFolder1] := Object( "DisplayName", "","Name","","ServerName", GameName1,"Folder",GameFolder1,"Size","","Installer", Game_Installers,"Extras","","Notify",Badge1,"DLC", DLC1,"GameID", GameID1,"OrderID", OrderID1,"GameCard", "http://www.gog.com/game/" GameFolder1,"Icon", Icon_Link,"Game_Box", "http://static.gog.com" GameBox1,"Selected",Testing)
-		}
-		if (Badges&&Badge1!="bdg_soon") ;---- Only increment the update if the badge is not a Coming Soon notification
-			Updates[Gamefolder1]:=List[GameFolder1]
-		IF DLCFound ; Increment the number of DLC's owned if found 
-			DLCs+=DLC1
+		;FileDelete,%A_ScriptDir%\Testing\GetUserInfo-Page%Page%.txt
+		;FileAppend,% "Header Response:`n" InOutHeader "`n`nData :`n" InOutData,%A_ScriptDir%\Testing\GetUserInfo-Page%Page%.txt
 	}
+	StringReplace,InOutData,InOutData,\,,All
+	html.write(InOutData)
+	PageInfo:=html.all
+	while,ll:=PageInfo.item[A_Index-1]
+		if game:=ll.getattribute("data-gameindex")
+			List[ll["data-gameindex"]]:=Object("Folder",ll["data-gameindex"],"OrderID",ll["data-orderid"],"GameID",ll["data-gameid"],"HasDLC",RegExReplace(ll.childnodes.item[1].outertext,"[^0-9]",$1),"Notification",ll.lastchild.firstchild.classname,"Background","http://static.gog.com" ll["data-background"],"GameBox","http://static.gog.com" RegExReplace(RegExReplace(ll.firstchild.src,"about:"),"_bbC_20"),"Selected",Testing)
 	RegExMatch( InOutData, "U)count"":(.*)\,",  TotalGames)	; get the number of games returned in the last call
 	TotalOwned +=TotalGames1 ;----Add the the number of games found to the total number
-	if (TotalGames1 >= 45){ ;----If its greater than 45 then check the next page	
-		myConsole.changeLine("[Green]INFO:`tRetrieving Page " page+1 "[/]", myConsole.currentLine )
+	if (TotalGames1 >= 45) ;----If its greater than 45 then check the next page	
 		goto HTTPnextpage
-	}
+	DLCs:=0,Updates:=0
+	for a,b in List
+		DLCs+=(!b.HasDLC)?0:b.HasDLC,Updates+=(!b.Notification)?0:1
 	if DLCs
 		tt("INFO:`tYou Own " TotalOwned " Games & " DLCs " DLC Addons.")
 	Else
 		tt("INFO:`tYou Own " TotalOwned " Games")
-	if Updates.MaxIndex()
-		tt("You Have " Updates.MaxIndex() " New/Update Notifications")
-	List["Updates"]:=Updates
+	if Updates
+	{
+		tt("You Have " Updates " New/Update Notifications")
+		for a,b in List
+			if b.notification
+				tt("[yellow]" a "[/] has new content." )
+	}
 	;***********************************************
 	FileName:="Renamer - GOG.com Downloader Name to Folder Name (791 + 22 + 24) (20140809).bat"
 	FileRead,TempVar,%A_ScriptDir%\Resources\%Filename%
@@ -44,7 +46,6 @@ HTTP_GetUserInfo(){
 	{
 		RegExMatch(A_LoopField,"Ui)rename (\w*)\b " Chr(34) "(.*)\(((january|february|march|april|may|june|july|august|september|october|november|december).*)\)(| \[DLC\])" Chr(34),found)
 		List[Found1].Name:=Found2
-		;m(found1, found2)
 	}
 	;***********************************************
 	return, List
