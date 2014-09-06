@@ -69,7 +69,10 @@ ButtonGetGames:
 	{
 		if b.Selected ;----Only Process if it has been selected
 		{
-			tt("working on [yellow]" a "[/] " Convert_seconds(Round((a_tickcount - tick)/1000,0)))
+			If Duplicate
+				myConsole.changeLine("[green]Working on [yellow]" a "[/][/]", myConsole.currentLine )
+			else
+				tt("Working on [yellow]" a "[/]") ; Convert_seconds(Round((a_tickcount - tick)/1000,0))
 			for c in b.DLC ;---- Check against Platform, Language Downloads type parameters
 				if (Config.Platforms[b.DLC[c].Platform]&&Config.Languages[b.DLC[c].Language]&&((Config.Downloads[b.DLC[c].Type "s"]||Config.Downloads[b.DLC[c].Type "es"]||Config.Linux[b.DLC[c].Type])))
 				{
@@ -79,12 +82,17 @@ ButtonGetGames:
 					b.DLC[c].MD5:=Link.MD5
 					if FilesAlreadyDone[b.DLC[c].MD5]
 					{
-					tt("Skipping Duplicate of " FilesAlreadyDone[b.DLC[c].MD5]" Version")
+					If Duplicate
+						myConsole.changeLine("[green][Red]Duplicate[/] : " b.DLC[c].Filename "," b.DLC[c].Language " is the same as the " FilesAlreadyDone[b.DLC[c].MD5]" Version[/]", myConsole.currentLine )
+					else
+						tt("[Red]Duplicate[/] : " b.DLC[c].Filename "," b.DLC[c].Language " is the same as the " FilesAlreadyDone[b.DLC[c].MD5]" Version")
+					Duplicate:=1
 					Continue
 					}
 				If !(FileCheck(Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename,b.DLC[c].MD5))
 					DownloadFile(b.DLC[c].Link,Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename)
-				FilesAlreadyDone[b.DLC[c].MD5]:=b.DLC[c].Platform
+				FilesAlreadyDone[b.DLC[c].MD5]:=b.DLC[c].Language
+				Duplicate:=0
 				}
 			if (Config.Downloads.Extras)
 				for d in b.Extras
@@ -94,11 +102,13 @@ ButtonGetGames:
 					b.Extras[d].Filename:=Link.FileName
 					If !(FileCheck(Config.Location "\" a "\" b.Extras[d].Filename))
 						DownloadFile(b.Extras[d].Link,Config.Location "\" a "\" b.Extras[d].Filename)
+					Duplicate:=0
 				}
 			;---- Artwork and Video
 			if (Config.Downloads.Artwork||Config.Downloads.Videos)
 			{
 				Get_ArtworkAndVideo(a)
+				Duplicate:=0
 			}
 		}
 	}

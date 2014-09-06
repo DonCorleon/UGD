@@ -1,16 +1,22 @@
 FileCheck(SaveAs,MD5="",Link:=""){
+	global myConsole,Duplicate
 	;---- Insert checking for existance of file and file hashing here
 	IfExist,%SaveAs%
 	{
 		SplitPath,SaveAs,Filename
 		if (MD5){
-			tt("Checking MD5 for " Filename "....")
+			If Duplicate
+				myConsole.changeLine("[green]Checking MD5 for [yellow]" Filename "[/]....[/]", myConsole.currentLine )
+			else
+				tt("Checking MD5 for [yellow]" Filename "[/]....")
 			CheckMD5:=CheckFileMD5(SaveAs)
 			if (MD5=CheckMD5){
-				tt("Pass [aqua]" CheckMD5 "[/]")
+				;tt("Pass " SaveAs " [aqua]" CheckMD5 "[/]")
+				myConsole.changeLine("[green]Pass[/] " FileName "[green] MD5 = [/][aqua]" CheckMD5 "[/]", myConsole.currentLine )
 				Return,1
 			}else{
-				tt("[Red]Fail " CheckMD5 "[/]")
+				;tt("[Red]Fail " CheckMD5 "[/]")
+				myConsole.changeLine("[Red]Fail[/] " FileName "[red] MD5 = [/][aqua]" CheckMD5 "[/]", myConsole.currentLine )
 				Return,0
 			}
 		}else{
@@ -20,11 +26,14 @@ FileCheck(SaveAs,MD5="",Link:=""){
 			;Store the header which holds the file size in a variable:
 			ServerSize := WebRequest.GetResponseHeader("Content-Length") ;GetAllResponseHeaders()
 			FileGetSize,ExistingSize,%SaveAs%
-			Same:=ExistingSize=ServerSize?"Same":"Different"
+			Same:=ExistingSize=ServerSize?"the Same":"Different"
 			;tt("Checking MD5 for " Filename "....")
 			;CheckMD5:=CheckFileSHA1(SaveAs)
 			;tt("[yellow]" Filename "[/] exists with the checksum [aqua]" CheckMD5 "[/]")
-			tt("No MD5 available for [yellow]" Filename "[/].The File is " Same ". Server= " ServerSize "  Existing= " ExistingSize)
+			If Duplicate
+				myConsole.changeLine("[green]No MD5 available for [yellow]" Filename "[/].The File is " Same ". Server= " ServerSize "  Existing= " ExistingSize "[/]", myConsole.currentLine )
+			else
+				tt("No MD5 available for [yellow]" Filename "[/].The File is " Same ". Server= " ServerSize "  Existing= " ExistingSize)
 			Return, 1
 		}
 	}
