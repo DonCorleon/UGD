@@ -100,7 +100,7 @@ ButtonGetGames:
 					Link:=Get_ApiLink(b.Extras[d].Link)
 					b.Extras[d].Link:=Link.Link
 					b.Extras[d].Filename:=Link.FileName
-					If !(FileCheck(Config.Location "\" a "\" b.Extras[d].Filename))
+					If !(FileCheck(Config.Location "\" a "\" b.Extras[d].Filename,,b.Extras[d].Link))
 						DownloadFile(b.Extras[d].Link,Config.Location "\" a "\" b.Extras[d].Filename)
 					Duplicate:=0
 				}
