@@ -30,8 +30,10 @@ Resources(){
 		IniRead,Username,%A_ScriptDir%\Resources\Config.ini,Credentials,Username
 		IniRead,Password,%A_ScriptDir%\Resources\Config.ini,Credentials,Password
 		IniRead,BaseLocation,%A_ScriptDir%\Resources\Config.ini,Locations,Base Folder,% A_ScriptDir
+		IniRead,ArtLocation,%A_ScriptDir%\Resources\Config.ini,Locations,Artwork,% BaseLocation "\Artwork"
+		IniRead,VideoLocation,%A_ScriptDir%\Resources\Config.ini,Locations,Videos,% BaseLocation "\Videos"
 		Config.MainX:=X,Config.MainY:=Y,Config.MainW:=W,Config.MainH:=H
-		Config.Username:=Username,Config.Password:=Password,Config.Location:=BaseLocation
+		Config.Username:=Username,Config.Password:=Password,Config.Location:=BaseLocation,Config.Artwork:=ArtLocation,Config.Videos:=VideoLocation
 		For a in LanguageList
 		{
 			IniRead,Value,%A_ScriptDir%\Resources\Config.ini,Languages,%a%

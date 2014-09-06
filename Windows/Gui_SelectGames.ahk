@@ -20,7 +20,7 @@ Gui_SelectGames(){
 }
 ListViewClick:
 {
-	If (A_GuiEvent = ColClick){
+	If (A_GuiEvent = "ColClick"){
 		RowsChecked:=RowsChecked=1?0:1
 		LV_Modify(0, "+Check" RowsChecked) 
 		for a,b in List

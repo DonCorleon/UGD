@@ -15,7 +15,7 @@ DownloadFile(link,SaveAs){
 		AvgSpeed+=b
 	AvgSpeed:=Round(AvgSpeed/DLSpeed.MaxIndex(),0)
 	tt("Downloaded at an average speed of [yellow]" AvgSpeed "[/] Kb/s.")
-	Return
+	Return,InOutHeader
 }
 DownloadProgress(Percentage,Size,File){
 	global myConsole,DLSpeed

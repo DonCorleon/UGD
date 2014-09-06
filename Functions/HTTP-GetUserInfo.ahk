@@ -6,8 +6,9 @@ HTTP_GetUserInfo(){
 	tt("INFO:`tRetrieving Page " page+1)
 	HTTPnextpage:
 	page++	; increment the page number we are trying to get
-	myConsole.changeLine("[Green]INFO:`tRetrieving Page " page+1 "[/]", myConsole.currentLine )
+	myConsole.changeLine("[Green]INFO:`tRetrieving Page " page "[/]", myConsole.currentLine )
 	HTTPRequest(url:="https://www.gog.com/account/ajax?a=gamesShelfMore&s=title&q=&t=0&p=" page, InOutData := "", InOutHeader := Headers(Http.GoGCookie), Http.GoGOptions)
+	;HTTPRequest(url:="https://www.gog.com/account/ajax?a=moviesListMore&s=title&q=&t=0&p=" page, InOutData := "", InOutHeader := Headers(Http.GoGCookie), Http.GoGOptions)
 	If (ErrorLevel!=200)
 		tt("Failed to Get Page with Error Code : " Errorlevel),Return
 	If Testing

@@ -13,7 +13,7 @@ HTTP_Login(UserName,UserPass){
 		FileAppend, URL`n%URL%`n`nHeader`n%InOutHeader%`n`nCookie`n%Cookie%`n`nInOutData`n%InOutData%,HTTP-Step1.txt
 	}
 	if !(RegExMatch(InOutData,"U)GalaxyAccounts\(\'(.*)\'",Auth_URL))
-		Return tt("[red]ERROR[/]:`tNo AUTH_URL Found")
+		tt("[red]ERROR[/]:`tNo AUTH_URL Found"),goto HTTPFailed
 	;If !(RegExMatch(InOutData,"U)id=""gutm"" value=""(.*)"" />",gutm))
 	;Return tt("[red]ERROR[/]:`tNo GUTM Found")
 	;If !(RegExMatch(InOutData,"U)id=""uqid"" value=""(.*)"" />",uqid))
@@ -43,10 +43,10 @@ HTTP_Login(UserName,UserPass){
 	}
 	FoundToken:=RegExMatch(InOutData,"U)name=""login\[_token\]"" value=""(.*)"" \/\>",Login_Token)
 	if !FoundToken
-		Return tt("[red]ERROR[/]:`tNo login[token] Found")
+		tt("[red]ERROR[/]:No login[token] Found"),goto HTTPFailed
 	FoundID:=RegExMatch(URL,"U)client_id=(.*)\&",Login_ID)
-	if !FoundToken
-		Return tt("[red]ERROR[/]:`tNo login[token] Found")
+	if !FoundID
+		tt("[red]ERROR[/]:No Client ID Found"),goto HTTPFailed
 	tt("HTTP:`tPhase 2 passed")
 	;**************** Step 3
 	Referer:=URL
@@ -109,6 +109,7 @@ HTTP_Login(UserName,UserPass){
 		tt("HTTP:`tPhase 4 passed"),tt("Welcome " NickName1)
 	else
 	{
+		HTTPFailed:
 		GuiControl,Main:Enable,ButtonSelectGames
 		GuiControl,Main:Enable,ButtonLogin
 		GuiControl,Main:Enable,ConfigWindow

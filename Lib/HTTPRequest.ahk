@@ -135,8 +135,6 @@ UNKNOWNBIT|
 57002=x-iscii-de|57003=x-iscii-be|57004=x-iscii-ta|57005=x-iscii-te|57006=x-iscii-as|57007=x-iscii-or
 57008=x-iscii-ka|57009=x-iscii-ma|57010=x-iscii-gu|57011=x-iscii-pa|65000=utf-7|65001=utf-8|
 )"
-	;----Keep Gui's Responsive
-	SetTimer,Responsive,100
 	; Step 1: Initialize variables, first the static variables for unknown constants.
 	If !( PtrSize )
 	{
@@ -1002,9 +1000,4 @@ UNKNOWNBIT|
 	
 	In_Out_HEADERS := SubStr( hbuffer, 1, -1 ) . SubStr( MyErrors, 1, -1 )
 	Return size, dbuffer := "", hbuffer := "", rbuffer := "", ErrorLevel := Response_Code
-	Responsive:
-	{
-		;----Do Nothing
-		Return
-	}
 } ; HTTPRequest( URL, byref In_POST__Out_Data="", byref In_Out_HEADERS="", Options="" ) -----------------------

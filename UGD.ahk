@@ -42,7 +42,7 @@ ButtonGetGames:
 		if b.Selected
 		{
 			;if (a="updates")
-				;continue
+			;continue
 			TotalEntries++
 		}
 	tt("Found " TotalEntries " selections.")
@@ -55,11 +55,8 @@ ButtonGetGames:
 	{
 		if b.Selected
 		{
-			;if (a="updates")
-				;continue
 			Counter++,game:=a,tick:=A_TickCount
 			Get_GameInfo(game)
-			;tt(" [blue]" Round((100/(TotalEntries-1))*Counter,0) "%[/] [red]" Counter "/" TotalEntries-1 "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/]")
 			myConsole.changeLine("[blue]" Round((100/(TotalEntries))*Counter,0) "%[/] [red]" Counter "/" TotalEntries "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/] " Convert_Seconds(Round((a_tickcount - tock)/1000,0)), myConsole.currentLine )
 			TotalExtras+=b.Extras.MaxIndex()?b.Extras.MaxIndex():0
 			TotalInstallers+=b.DLC.MaxIndex()?b.DLC.MaxIndex():0
@@ -67,10 +64,9 @@ ButtonGetGames:
 	}	
 	tt("Process Complete. Collection time was " Round((a_tickcount - tock)/1000,1) " seconds")
 	tt("Total Files counted and added was [yellow]" TotalInstallers " Installers and " TotalExtras " Extras" "[/]")
+	FilesAlreadyDone:=[]
 	For a,b in List ;----Get the Links for installers, patches, language packs and DLC's then grab the extras links
 	{
-		;if (a="updates") ;----Skip the Updates data
-			;continue
 		if b.Selected ;----Only Process if it has been selected
 		{
 			tt("working on [yellow]" a "[/] " Convert_seconds(Round((a_tickcount - tick)/1000,0)))
@@ -81,10 +77,14 @@ ButtonGetGames:
 					b.DLC[c].Link:=Link.Link
 					b.DLC[c].Filename:=Link.FileName
 					b.DLC[c].MD5:=Link.MD5
-					;---- Insert Download Function Here
-					If !(FileCheck(Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename,b.DLC[c].MD5))
-						DownloadFile(b.DLC[c].Link,Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename)
-					;tt("Grabbed link to [red]"b.DLC[c].Language "[/] - [white]" b.DLC[c].Platform "[/] - [red]" b.DLC[c].Type "[/] .\" b.DLC[c].Folder "\" Link.Filename)	
+					if FilesAlreadyDone[b.DLC[c].MD5]
+					{
+					tt("Skipping Duplicate of " FilesAlreadyDone[b.DLC[c].MD5]" Version")
+					Continue
+					}
+				If !(FileCheck(Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename,b.DLC[c].MD5))
+					DownloadFile(b.DLC[c].Link,Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename)
+				FilesAlreadyDone[b.DLC[c].MD5]:=b.DLC[c].Platform
 				}
 			if (Config.Downloads.Extras)
 				for d in b.Extras
@@ -92,11 +92,14 @@ ButtonGetGames:
 					Link:=Get_ApiLink(b.Extras[d].Link)
 					b.Extras[d].Link:=Link.Link
 					b.Extras[d].Filename:=Link.FileName
-					;---- Insert Download Function Here
 					If !(FileCheck(Config.Location "\" a "\" b.Extras[d].Filename))
 						DownloadFile(b.Extras[d].Link,Config.Location "\" a "\" b.Extras[d].Filename)
-					;tt("Grabbed link to [aqua]Extra[/] .\" a "\" Link.Filename)	
 				}
+			;---- Artwork and Video
+			if (Config.Downloads.Artwork||Config.Downloads.Videos)
+			{
+				Get_ArtworkAndVideo(a)
+			}
 		}
 	}
 	tt("Grabbed all links")
@@ -256,3 +259,4 @@ Convert_Seconds(Seconds){
 #Include Lib\OAuth.ahk
 #Include Windows\Gui_Config.ahk
 #Include Windows\Gui_SelectGames.ahk
+#Include Functions\Get_ArtworkAndVideo.ahk
