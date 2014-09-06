@@ -18,6 +18,8 @@ Resources(){
 	{
 		tt("No Config File Found. Opening Configuration page....")
 		Config.ConfigFound:=0
+		Config.MainX:=200,Config.MainY:=200,Config.MainW:=350,Config.MainH:=200
+		
 	}
 	
 	Else ;---- Readin config File Here
