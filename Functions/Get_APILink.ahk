@@ -1,16 +1,16 @@
 Get_APILink(Origlink){
 	global API,DEBUG_Times
-	DEBUG_GetAPILink:=0
+	DEBUG_GetAPILink:=1
 	If (DEBUG_Times)
 		tick:=A_tickcount
 	HTTPRequest(URL := OAuth_Authorization( API.Basic_Credentials "`n" API.Specific_Credentials, Origlink, "", "GET" ),InOutData:="",InOutHeader:="")
-	if (ErrorLevel!=200){
-		tt("Get_APILink:`tError code ""[red]" ErrorLevel "[/]""")
-		Return
-	}
+	;if (ErrorLevel!=200){
+		;tt("Get_APILink:`tError code ""[red]" ErrorLevel "[/]""")
+		;if DEBUG_GetAPILink
+			;tt("Get_APILink:","URL: " URL,"Header: " InOutHeader),tt("Get_APILink:","Response: " InOutData)
+		;Return
+	;}
 	StringReplace, InOutData, InOutData, \,, All
-	if DEBUG_GetAPILink
-		tt("Get_APILink:","URL: " URL,"Header: " InOutHeader),tt("Get_APILink:","Response: " InOutData)
 	RegExMatch(InOutData, "U)link"":""(.*)""", Link)
 	RegExMatch( Link1, "([^/]*)\?", LinkFileName )
 	HTTPRequest(URL := OAuth_Authorization( API.Basic_Credentials "`n" API.Specific_Credentials, Origlink "crc/", "", "GET" ),InOutData:="",InOutHeader:="")

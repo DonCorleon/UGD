@@ -1,10 +1,10 @@
-Testing:=0
+;Testing:=0
 
 version=;auto_version
 #SingleInstance,force
 SetBatchLines = -1
 ;******** Global Vars
-Global Cookie,status
+Global Cookie,status,Config:=[]
 
 DEBUG_Times:=0
 
@@ -15,36 +15,33 @@ API:=Object("Consumer_Key","1f444d14ea8ec776585524a33f6ecc1c413ed4a5" ; Create t
 
 ; Create the Basic Test Gui
 Config:=Resources()
-Gui,Main:New,+OwnDialogs +Resize +MinSize350x200 +hwndhwnd,Ultimate GoG Downloader v%Version%
+Gui,Main:New,+OwnDialogs +Resize +MinSize350x300 +hwndhwnd,Ultimate GoG Downloader v%Version%
 Config.Mainhwnd:=hwnd
-gui,Main:Add,DropDownList,x0 y0 w40 vDebug_HTTP gDoSubmit,0||1|2
-gui,Main:Add,DropDownList,x0 y20 w40 vDebug_API gDoSubmit,0||1|2
-gui,Main:Add,Text,x45 y5,Debug Level : HTTP 
-gui,Main:Add,Text,x45 y25,Debug Level : API 
+Gui,Main:Add,Checkbox,x0 y0 vChecksums gChecksums, C&ompare Checksums
 Gui,Main:Add,Button,% "x" Config.MainW-200 " y0 w60 vButtonLogin gButtonLogin",&Login
 gui,Main:Add,Button,% "x" Config.MainW-130 " y0 w60 vConfigWindow gConfigWindow",&Configure
 Gui,Main:Add,Button,% "x" Config.MainW-60 " y0 w60 vButtonUpdate gButtonUpdate",&Update
-Gui,Main:Add,Button,% "x" Config.MainW-200 " y22 w60 Disabled vButtonSelectGames gButtonSelectGames",&SelectGames
-Gui,Main:Add,Button,% "x" Config.MainW-130 " y22 w60 Disabled vButtonGetGames gButtonGetGames",&GetGames
-;Gui, Main: Add, ActiveX, x0 y50 w790 h585 vmsHTML +HScroll, Hello
-
-;Gui,Main:Add,ListBox,xp-420 yp+75 w460 r22 +VScroll +Border vStatus,Idle
+Gui,Main:Add,Button,% "x" Config.MainW-200 " y22 w60 Disabled vButtonSelectGames gButtonSelectGames",&Selection
+Gui,Main:Add,Button,% "x" Config.MainW-130 " y22 w60 Disabled vButtonGetGames gButtonGetGames",&Download
 myConsole:= new scConsole({"PosX":"1","PosY":"50","Gui Number":"Main","Control Width": Config.MainW, "Control Height": Config.MainH-50,"Font":Courier New,"Line Number Color":"yellow"})
 Gui,Main:Show,% "x" Config.MainX " y" Config.MainY " w" Config.MainW " h" Config.MainH
 DoLog(1,"LogFile:Log.txt","Downloader Started")
 if !(Config.ConfigFound) ;---- If there is no configuration file, go straight to the config window
 	Gui_Config()
 Return
+
+Checksums:
+{
+	Gui,Submit,NoHide
+	tt("Compare Checksums-" Checksums)
+	Return
+}
 ButtonGetGames:
 {
 	ToTalEntries:=0
 	for a,b in List
 		if b.Selected
-		{
-			;if (a="updates")
-			;continue
 			TotalEntries++
-		}
 	tt("Found " TotalEntries " selections.")
 	tt("")
 	tock:=A_TickCount
@@ -61,7 +58,7 @@ ButtonGetGames:
 			TotalExtras+=b.Extras.MaxIndex()?b.Extras.MaxIndex():0
 			TotalInstallers+=b.DLC.MaxIndex()?b.DLC.MaxIndex():0
 		}
-	}	
+	}
 	tt("Process Complete. Collection time was " Round((a_tickcount - tock)/1000,1) " seconds")
 	tt("Total Files counted and added was [yellow]" TotalInstallers " Installers and " TotalExtras " Extras" "[/]")
 	FilesAlreadyDone:=[]
@@ -79,7 +76,9 @@ ButtonGetGames:
 					Link:=Get_ApiLink(b.DLC[c].Link)
 					b.DLC[c].Link:=Link.Link
 					b.DLC[c].Filename:=Link.FileName
+					
 					b.DLC[c].MD5:=Link.MD5
+					;tt(b.DLC[c].Link)
 					if FilesAlreadyDone[b.DLC[c].MD5]
 					{
 					If Duplicate
@@ -90,7 +89,7 @@ ButtonGetGames:
 					Continue
 					}
 				If !(FileCheck(Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename,b.DLC[c].MD5))
-					DownloadFile(b.DLC[c].Link,Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename)
+				DownloadFile(b.DLC[c].Link,Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename)
 				FilesAlreadyDone[b.DLC[c].MD5]:=b.DLC[c].Language
 				Duplicate:=0
 				}
@@ -100,8 +99,9 @@ ButtonGetGames:
 					Link:=Get_ApiLink(b.Extras[d].Link)
 					b.Extras[d].Link:=Link.Link
 					b.Extras[d].Filename:=Link.FileName
-					If !(FileCheck(Config.Location "\" a "\" b.Extras[d].Filename,,b.Extras[d].Link))
-						DownloadFile(b.Extras[d].Link,Config.Location "\" a "\" b.Extras[d].Filename)
+					;tt(b.Extras[d].Link)
+					If !(FileCheck(Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename,,b.Extras[d].Link))
+					DownloadFile(b.Extras[d].Link,Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename)
 					Duplicate:=0
 				}
 			;---- Artwork and Video
@@ -126,6 +126,8 @@ MainGuiSize:
 {
 	if (!MainGuiSizeFirstRun){
 		MainGuiSizeFirstRun:=1
+		if (A_ScreenWidth<(A_GuiWidth+5)||A_ScreenHeight<(A_GuiHeight+5))
+			gui,Maximize
 		Return
 	}
 	GuiControl,Main:MoveDraw,ButtonLogin,% "x"A_Guiwidth*.44
@@ -141,11 +143,6 @@ ConfigWindow:
 {
 	Gui_Config()
 	return
-}
-DoSubmit:
-{
-	Gui,Main:Submit,NoHide
-	Return
 }
 ButtonUpdate:
 {
@@ -175,7 +172,13 @@ ButtonLogin:
 		LoggedIn:=1
 		tt("Logged in to [Yellow]HTTP[/] and [Yellow]API[/] Successfully")
 		tt("Getting a list of your games....")
+		List:=[]
 		List:=HTTP_GetUserInfo()
+		Movies:=HTTP_GetUserMovieInfo()
+		for a,b in movies
+		{
+			List[a]:=b
+		}
 	}
 	If !LoggedIn
 		Return
@@ -203,7 +206,6 @@ IniWrite,%Y%,%A_ScriptDir%\Resources\Config.ini,MainGui,Y
 IniWrite,% W-16,%A_ScriptDir%\Resources\Config.ini,MainGui,W
 IniWrite,% H-38,%A_ScriptDir%\Resources\Config.ini,MainGui,H
 ExitApp
-
 ;****** Time Saver Functions
 m(x*){
 	for a,b in x
@@ -270,3 +272,4 @@ Convert_Seconds(Seconds){
 #Include Windows\Gui_Config.ahk
 #Include Windows\Gui_SelectGames.ahk
 #Include Functions\Get_ArtworkAndVideo.ahk
+#Include Functions\HTTP-GetUserMovieInfo.ahk

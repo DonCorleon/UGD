@@ -21,7 +21,7 @@ HTTP_GetUserInfo(){
 	PageInfo:=html.all
 	while,ll:=PageInfo.item[A_Index-1]
 		if game:=ll.getattribute("data-gameindex")
-			List[ll["data-gameindex"]]:=Object("Folder",ll["data-gameindex"],"OrderID",ll["data-orderid"],"GameID",ll["data-gameid"],"HasDLC",RegExReplace(ll.childnodes.item[1].outertext,"[^0-9]",$1),"Notification",ll.lastchild.firstchild.classname,"Background","http://static.gog.com" ll["data-background"],"GameBox","http://static.gog.com" RegExReplace(RegExReplace(ll.firstchild.src,"about:"),"_bbC_20"),"Selected",Testing)
+			List[ll["data-gameindex"]]:=Object("Name",ll["data-gameindex"],"Folder",ll["data-gameindex"],"OrderID",ll["data-orderid"],"GameID",ll["data-gameid"],"HasDLC",RegExReplace(ll.childnodes.item[1].outertext,"[^0-9]",$1),"Notification",ll.lastchild.firstchild.classname,"Background","http://static.gog.com" ll["data-background"],"GameBox","http://static.gog.com" RegExReplace(RegExReplace(ll.firstchild.src,"about:"),"_bbC_20"),"Selected",Testing)
 	RegExMatch( InOutData, "U)count"":(.*)\,",  TotalGames)	; get the number of games returned in the last call
 	TotalOwned +=TotalGames1 ;----Add the the number of games found to the total number
 	if (TotalGames1 >= 45) ;----If its greater than 45 then check the next page	
@@ -41,7 +41,7 @@ HTTP_GetUserInfo(){
 				tt("[yellow]" a "[/] has new content." )
 	}
 	;***********************************************
-	FileName:="Renamer - GOG.com Downloader Name to Folder Name (791 + 22 + 24) (20140809).bat"
+	FileName:="Renamer - GOG.com Downloader Name to Folder Name (773 + 22 + 59 + 23) (20140906).bat"
 	FileRead,TempVar,%A_ScriptDir%\Resources\%Filename%
 	Loop,Parse,TempVar,`r
 	{

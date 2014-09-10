@@ -5,6 +5,7 @@ Resources(){
 	TypeList:=Object("Installers",0,"Patches",0,"DLCs",0,"Language Packs",0,"Extras",0,"Artwork",0,"Covers",0,"Videos",0)
 	PlatformList:=Object("Windows",0,"Mac OS X",0,"Linux",0)
 	LinuxList:=Object("Tarball Archive",0,"Debian Package",0)
+	MovieList:=Object("1080p",0,"720p",0,"576p",0)
 	;---- Resources dir
 	IfNotExist %A_ScriptDir%\Resources
 		FileCreateDir,%A_ScriptDir%\Resources
@@ -18,7 +19,10 @@ Resources(){
 	{
 		tt("No Config File Found. Opening Configuration page....")
 		Config.ConfigFound:=0
-		Config.MainX:=200,Config.MainY:=200,Config.MainW:=350,Config.MainH:=200
+		Config.MainX:=200
+		Config.MainY:=200
+		Config.MainW:=350
+		Config.MainH:=300
 		
 	}
 	
@@ -70,5 +74,6 @@ Resources(){
 	Config.Downloads:=TypeList
 	Config.Platforms:=PlatformList
 	Config.Linux:=LinuxList
+	Config.Movies:=MovieList
 	Return, Config
 }

@@ -5,12 +5,16 @@ Get_GameInfo(GameName){
 	global List,Config,HTTP,API
 	DEBUG_GetGames:=0 ;---- Set to debug this module
 	Extras:=[],DLC:=[]
-	Name := List[GameName].Folder
+	If List[GameName].Folder
+		Name := List[GameName].Folder
+	else
+		Name:=List[GameName].Name
 	GameFolder := List[GameName].Folder
 	URL := "https://www.gog.com/en/account/ajax?a=gamesListDetails&g=" . List[GameName].GameId
 	HTTPRequest(url, InOutData := "", InOutHeader := Headers(Http.GoGCookie),Options)
 	StringReplace,InOutData,InOutData,\,,All
 	StringReplace, InOutData, InOutData, a>, a>`n, All
+	Name:=RegExReplace(Name,"\W")
 	FileDelete,GameInfo-%Name%.txt
 	FileAppend,%InOutData%,GameInfo-%Name%.txt
 	ExtraNum := 0
@@ -69,6 +73,8 @@ Get_GameInfo(GameName){
 				IfInString, DLCSize, GB
 					DLCSize1 := Round(DLCSize1*1000, 0)
 				SplitPath, DLCLink1, DLCID
+				if DLCID contains subtitle ;---- Remove extra links for movies
+					continue
 				if FoundLink
 				{
 					

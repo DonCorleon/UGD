@@ -1,6 +1,6 @@
 Gui_Config(){
 	global Config,ConfigTree,ConfigSave,ConfigCancel
-	static Locations,Languages,Platforms,Linux,Downloads,UserID,PassID,BaseDir,PatchDir,DLCDir,ArtworkDir,VideoDir
+	static Locations,Languages,Platforms,Linux,Downloads,Movies,UserID,PassID,BaseDir,PatchDir,DLCDir,ArtworkDir,VideoDir
 	IniRead,X,%A_ScriptDir%\Resources\Config.ini,ConfigGui,X,% Config.MainX
 	IniRead,Y,%A_ScriptDir%\Resources\Config.ini,ConfigGui,Y,% Config.MainY
 	IniRead,W,%A_ScriptDir%\Resources\Config.ini,ConfigGui,W,200
@@ -12,13 +12,13 @@ Gui_Config(){
 	Gui,Config:Add,TreeView,% "w" Config.ConfigW " h" Config.ConfigH-35 " AltSubmit x0 y0 vConfigTree gConfigCheckClick checked +Wrap"
 	Gui,Config:Add,Button,% "xp y" Config.ConfigH-30 " w" Config.ConfigW*.48 " vconfigsave gConfigSave",Save
 	Gui,Config:Add,Button,% "x" Config.ConfigW*.52 " y" Config.ConfigH-30 " w" Config.ConfigW*.48 " vConfigCancel gConfigCancel",Cancel
+	
 	Credentials:=TV_Add("Credentials")
 	UserID:=TV_Add("User = " Config.Username,Credentials)
 	PassID:=TV_Add("Pass = " Config.Password,Credentials)
 	Location:=["Base","Patches","DLC","Artwork","Videos"]
+	
 	Locations:=TV_Add("Locations")
-	;for a,b in Location
-	;%b%Dir:=TV_Add(b " = " Config[b "Dir"],Locations)
 	BaseDir:=TV_Add("Base Dir = " Config.Location,Locations)
 	PatchDir:=TV_Add("Patches = " Config.Patch,Locations)
 	DLCDir:=TV_Add("DLC = " Config.DLC,Locations)
@@ -28,6 +28,9 @@ Gui_Config(){
 	Downloads:=TV_Add("Downloads")
 	for a,b in Config.Downloads
 		TV_Add(a,Downloads,"vDownload_%b% +check" b),Config.DownloadCount:=A_Index ;----Create initial count for select all status
+	Movies:=TV_Add("Movies")
+	for a,b in Config.Movies
+		TV_Add(a,Movies,"vMovie_%b% +noSort +check" b),Config.MovieCount:=A_Index ;----Create initial count for select all status
 	Platforms:=TV_Add("Platforms")
 	for a,b in Config.Platforms
 	{
@@ -42,7 +45,7 @@ Gui_Config(){
 	For a,b in Config.Linux
 		TV_Add(a,Linux,"vPlatform_Tarballs +check" Config.Linux[a])
 	Gui,Config:Show,% "x" Config.ConfigX " y" Config.ConfigY " w" Config.ConfigW " h"  Config.ConfigH,Configuration
-	UncheckList:=[Credentials,UserID,PassID,Downloads,Platforms,Languages,Locations,BaseDir,PatchDir,DLCDir,ArtworkDir,VideoDir] ; taken from Maestrith >> http://www.autohotkey.com/board/topic/96840-ahk-11-hide-individual-checkboxes-in-a-treeview-x32x64/
+	UncheckList:=[Movies,Credentials,UserID,PassID,Downloads,Platforms,Languages,Locations,BaseDir,PatchDir,DLCDir,ArtworkDir,VideoDir] ; taken from Maestrith >> http://www.autohotkey.com/board/topic/96840-ahk-11-hide-individual-checkboxes-in-a-treeview-x32x64/
 	VarSetCapacity(tvitem,28)
 	for index,id in UncheckList{ ;loop through the array of id numbers
 		info:=A_PtrSize=4?{0:8,4:id,12:0xf000}:{0:8,8:id,20:0xf000} ;there are 2 different offsets for x32 and x64.  This will account for both

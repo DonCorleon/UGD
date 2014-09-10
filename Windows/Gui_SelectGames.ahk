@@ -14,7 +14,7 @@ Gui_SelectGames(){
 	GuiControl,SelectGames:-Redraw,GameListView
 	tick:=A_TickCount
 	For a,b in List
-		LV_Add("+check"b.Selected,a) ;b.name)
+		LV_Add("+check"b.Selected,b.Name) ;b.name)
 	GuiControl,SelectGames:+Redraw,GameListView
 	Return
 }
@@ -46,7 +46,14 @@ SelectGamesGuiSaveselection:
 		b.Selected:=0
 	While, RowNumber := LV_GetNext(Rownumber,"Checked"){ ;Do the checking of selections here and modify List[a].Selected
 		LV_GetText(game,Rownumber)
-		List[game].Selected:=1
+		for a,b in List
+		{
+			if (game=b.name){
+				b.Selected:=1
+				;m(game,Rownumber)
+				break
+			}
+		}
 	}
 	WinGetPos,X,Y,W,H,% "ahk_id" Config.SelectGamesHwnd
 	IniWrite,%X%,%A_ScriptDir%\Resources\Config.ini,SelectGamesGui,X
