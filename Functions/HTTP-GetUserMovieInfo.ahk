@@ -11,8 +11,8 @@ HTTP_GetUserMovieInfo(){
 	If (ErrorLevel!=200)
 		tt("Failed to Get Page with Error Code : " Errorlevel),Return
 	StringReplace,InOutData,InOutData,\,,All
-	FileDelete,MovieInfo-Page%Page%.txt
-	FileAppend,%InOutData%,MovieInfo-Page%Page%.txt
+	;FileDelete,MovieInfo-Page%Page%.txt
+	;FileAppend,%InOutData%,MovieInfo-Page%Page%.txt
 	html.write(InOutData)
 	PageInfo:=html.getelementsbytagname("div")
 	while,ll:=PageInfo.item[A_Index-1]
