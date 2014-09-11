@@ -15,8 +15,8 @@ Get_GameInfo(GameName){
 	StringReplace,InOutData,InOutData,\,,All
 	StringReplace, InOutData, InOutData, a>, a>`n, All
 	Name:=RegExReplace(Name,"\W")
-	FileDelete,GameInfo-%Name%.txt
-	FileAppend,%InOutData%,GameInfo-%Name%.txt
+	;FileDelete,GameInfo-%Name%.txt
+	;FileAppend,%InOutData%,GameInfo-%Name%.txt
 	ExtraNum := 0
 	LangOption:=Object("ar","Arabic","bl","Bulgarian","cn","Chinese","cz","Czech","da","Danish","nl","Dutch","en","English","fi","Finnish","fr","French","de","German","gk","Greek","hu","Hungarian","it","Italian","jp","Japanese","ko","Korean","no","Norwegian","pl","Polish","pt","Portuguese","ro","Romanian","ru","Russian","sb","Serbian","sk","Slovac","es","Spanish","sv","Swedish","tr","Turkish","uk","Ukranian")
 	Loop, Parse, InOutData, `n
