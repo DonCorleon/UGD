@@ -1,4 +1,4 @@
-;Testing:=0
+Testing:=0
 
 version=;auto_version
 #SingleInstance,force
@@ -182,16 +182,6 @@ ButtonLogin:
 	}
 	If !LoggedIn
 		Return
-	if (List.Updates.1)
-		tt("Updated games as follows:")
-	for a,b in List.Updates
-	{
-		if b.notify="bdg_new"
-			badge:="New Game"
-		if b.notify="bdg_update"
-			badge:="Update Available"
-		tt(A_index ".`t[03F]" b.Folder "[/] - [Yellow]" badge "[/]")
-	}
 	GuiControl,Main:Enable,ButtonSelectGames
 	GuiControl,Main:Enable,ButtonLogin
 	GuiControl,Main:Enable,ConfigWindow
