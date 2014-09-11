@@ -33,8 +33,8 @@ HTTP_Login(UserName,UserPass){
 	if (DEBUG_HTTP>1) ;----------- DEBUG
 	{
 		;tt("HTTP:Step 2",InOutData)
-		FileDelete,HTTP-Step2.txt
-		FileAppend, URL`n%URL%`n`nHeader`n%InOutHeader%`n`nCookie`n%Cookie%`n`nInOutData`n%InOutData%,HTTP-Step2.txt
+		;FileDelete,HTTP-Step2.txt
+		;FileAppend, URL`n%URL%`n`nHeader`n%InOutHeader%`n`nCookie`n%Cookie%`n`nInOutData`n%InOutData%,HTTP-Step2.txt
 	}
 	Found:=RegExMatch(InOutHeader,"U)Location: (.*)\n",New_URL)
 	if (found){ ;----------------- Check for Redirect
@@ -43,7 +43,7 @@ HTTP_Login(UserName,UserPass){
 	}
 	FoundToken:=RegExMatch(InOutData,"U)name=""login\[_token\]"" value=""(.*)"" \/\>",Login_Token)
 	if !FoundToken
-		tt("[red]ERROR[/]:No login[token] Found"),goto HTTPFailed
+		tt("[Red]ERROR[/]:No login token Found"),goto HTTPFailed
 	FoundID:=RegExMatch(URL,"U)client_id=(.*)\&",Login_ID)
 	if !FoundID
 		tt("[red]ERROR[/]:No Client ID Found"),goto HTTPFailed
