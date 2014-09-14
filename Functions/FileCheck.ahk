@@ -26,14 +26,21 @@ FileCheck(SaveAs,MD5="",Link:=""){
 			;Store the header which holds the file size in a variable:
 			ServerSize := WebRequest.GetResponseHeader("Content-Length") ;GetAllResponseHeaders()
 			FileGetSize,ExistingSize,%SaveAs%
-			Same:=ExistingSize=ServerSize?"the Same":"Different"
-			;tt("Checking MD5 for " Filename "....")
-			;CheckMD5:=CheckFileSHA1(SaveAs)
-			;tt("[yellow]" Filename "[/] exists with the checksum [aqua]" CheckMD5 "[/]")
+			Same:=ExistingSize=ServerSize?1:0
 			If Duplicate
-				myConsole.changeLine("[green]No MD5 available for [yellow]" Filename "[/].The File is " Same ". Server= " ServerSize "  Existing= " ExistingSize "[/]", myConsole.currentLine )
+			{
+				if same
+					myConsole.changeLine("[yellow]" Filename "[/] [green]- The File is up-to-date[/]", myConsole.currentLine)
+				else
+					myConsole.changeLine("[yellow]" Filename "[/] [red]- The File is not up-to-date[/]", myConsole.currentLine)
+			}
 			else
-				tt("No MD5 available for [yellow]" Filename "[/].The File is " Same ". Server= " ServerSize "  Existing= " ExistingSize)
+			{
+				if same
+					tt("[yellow]" Filename "[/] [green]- The File is up-to-date[/]")
+				else
+					tt("[yellow]" Filename "[/] [red]- The File is not up-to-date[/]")
+			}
 			Return, 1
 		}
 	}

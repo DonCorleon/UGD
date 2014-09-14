@@ -29,7 +29,7 @@ DoLog(Level,Params*){
 	if (default="time")
 		default:= LogLength(A_Hour ":" A_Min ":" A_Sec,10) ":`t"
 	
-	tt(default "[Red]" Message "[/]")
+	tt("[aqua]" Message "[/]")
 	GuiControl,Main:,%ControlName%,%Message%|
 	;m("Default " Default,"LogFile " LogFile,"LogLevel " LogLevel,"FileLogging " FileLogging,"ControlName " ControlName,"Message " Message)
 	Return

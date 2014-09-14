@@ -26,13 +26,13 @@ HTTP_GetUserMovieInfo(){
 		goto HTTPMovienextpage
 	tt("INFO:`tYou Own " TotalMoviesOwned " Movies")
 	for a,b in List
-		Updates+=(!b.Notification)?0:1
+		Updates+=(b.Notification&&b.notification!="bdg_soon")?1:0
 	if Updates
 	{
 		tt("You Have " Updates " New/Update Notifications")
 		for a,b in List
-			if b.notification
-				tt("[yellow]" a "[/] has new content." )
+			if (b.notification)
+				tt("[yellow]" a "[/] has new content.")
 	}
 	return, List
 }

@@ -84,7 +84,8 @@ class scConsole
 			data 			:= RegExReplace( data, val[1], val[2] )
 		data 		:= this.colorData( data )
 		element 				:= this.var.createElement("p")
-		element.innerHtml		:= "<span class=""num " lineNC """>" this.currentLine ".</span>" data
+		;element.innerHtml		:= "<span class=""num " lineNC """>" this.currentLine ".</span>" data
+		element.innerHtml		:= "<span class=""num " lineNC """>" A_Hour ":" A_Min "." A_Sec "</span>" data
 		element.Id 				:= this.currentLine
 		if scroll
 			this.var.getElementById("console").appendChild( element ).scrollIntoView( true )
@@ -106,7 +107,8 @@ class scConsole
 			data 			:= RegExReplace( data, val[1], val[2] )
 		
 		data 		:= this.colorData( data )
-		newData		:= "<span class=""num " this.numC """>" lineNum ".</span>" data
+		;newData		:= "<span class=""num " this.numC """>" lineNum ".</span>" data
+		newData		:= "<span class=""num " this.numC """>" A_Hour ":" A_Min "." A_Sec "</span>" data
 		
 		this.var.getElementById( lineNum ).innerHtml 			:= newData
 	}

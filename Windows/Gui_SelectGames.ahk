@@ -9,7 +9,7 @@ Gui_SelectGames(){
 	Gui,SelectGames:New,+hwndhwnd -Caption -border +Resize +OwnerMain +MinSize400x400
 	Config.SelectGamesHwnd:=hwnd
 	Gui,SelectGames:Font, s12 q2
-	Gui,SelectGames:Add,ListView,% "+AltSubmit +NoSort -border checked Background000000 c0x00F003 +LV0x4000 -hScroll +vScroll x0 y0 w" Config.SelectGamesW " h" Config.SelectGamesH " vGameListView gListViewClick",game
+	Gui,SelectGames:Add,ListView,% "+AltSubmit +NoSort -border checked Background000000 c0x00F003 +LV0x4000 -hScroll +vScroll x0 y0 w" Config.SelectGamesW " h" Config.SelectGamesH " vGameListView gListViewClick",Games and Movies
 	Gui,SelectGames:Show,% "x" Config.SelectGamesX " y" Config.SelectGamesY " w" Config.SelectGamesW " h" Config.SelectGamesH ,Select Games
 	GuiControl,SelectGames:-Redraw,GameListView
 	tick:=A_TickCount
@@ -33,7 +33,7 @@ SelectGamesGuiSize:
 	if !GameSelectGuiSizeFirstRun{
 		GameSelectGuiSizeFirstRun:=1
 		Return
-	}LV_ModifyCol(1,A_GuiWidth-4,A_GuiWidth "/" A_GuiWidth)
+	}
 	GuiControl,SelectGames:MoveDraw,GameListView,% "h" A_Guiheight " w" A_GuiWidth
 	return
 }

@@ -89,7 +89,7 @@ ButtonGetGames:
 					Continue
 					}
 				If !(FileCheck(Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename,b.DLC[c].MD5))
-				DownloadFile(b.DLC[c].Link,Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename)
+					DownloadFile(b.DLC[c].Link,Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename)
 				FilesAlreadyDone[b.DLC[c].MD5]:=b.DLC[c].Language
 				Duplicate:=0
 				}
@@ -99,9 +99,13 @@ ButtonGetGames:
 					Link:=Get_ApiLink(b.Extras[d].Link)
 					b.Extras[d].Link:=Link.Link
 					b.Extras[d].Filename:=Link.FileName
+					info:=""
+					for e,f in b.Extras[d]
+						info.=e "-" f "`n"
+					m(info)
 					;tt(b.Extras[d].Link)
 					If !(FileCheck(Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename,,b.Extras[d].Link))
-					DownloadFile(b.Extras[d].Link,Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename)
+						DownloadFile(b.Extras[d].Link,Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename)
 					Duplicate:=0
 				}
 			;---- Artwork and Video
@@ -112,7 +116,7 @@ ButtonGetGames:
 			}
 		}
 	}
-	tt("Grabbed all links")
+	tt("Grabbed all links in [white]" Convert_Seconds(A_TickCount-tock) "[/]")
 	if errors
 		tt("Encountered [red]" Errors "[/] Errors!!")
 	Return
@@ -171,9 +175,22 @@ ButtonLogin:
 			ReUse_Login("SAVE")
 		LoggedIn:=1
 		tt("Logged in to [Yellow]HTTP[/] and [Yellow]API[/] Successfully")
-		tt("Getting a list of your games....")
+		tt("Getting Latest Definitions....")
+		Connie:=Get_FileFromOneDrive(URL:="http://1drv.ms/1nFp6OT") ;----Dat File
+		if !(Filecheck(A_ScriptDir "\resources\" connie.filename,,connie.link))
+			DownloadFile(Connie.link,A_ScriptDir "\resources\" connie.filename)
+		Config.Dat:=connie.filename
+		Connie:=Get_FileFromOneDrive(URL:="http://1drv.ms/1nFp6OT",".bat","to GOG") ;----Renamer - Folder Name to GOG.com Downloader Name
+		if !(Filecheck(A_ScriptDir "\resources\" connie.filename,,connie.link))
+			DownloadFile(Connie.link,A_ScriptDir "\resources\" connie.filename)
+		Connie:=Get_FileFromOneDrive(URL:="http://1drv.ms/1nFp6OT",".bat","to Folder") ;----Renamer - GOG.com Downloader Name to Folder Name
+		if !(Filecheck(A_ScriptDir "\resources\" connie.filename,,connie.link))
+			DownloadFile(Connie.link,A_ScriptDir "\resources\" connie.filename)
+		Config.Names:=connie.filename
 		List:=[]
+		tt("Getting a list of your [aqua]Games[/]....")
 		List:=HTTP_GetUserInfo()
+		tt("Getting a list of your [aqua]Movies[/]....")
 		Movies:=HTTP_GetUserMovieInfo()
 		for a,b in movies
 		{
@@ -263,3 +280,4 @@ Convert_Seconds(Seconds){
 #Include Windows\Gui_SelectGames.ahk
 #Include Functions\Get_ArtworkAndVideo.ahk
 #Include Functions\HTTP-GetUserMovieInfo.ahk
+#Include Functions\Get_FileFromOneDrive.ahk

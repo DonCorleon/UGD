@@ -28,7 +28,7 @@ HTTP_GetUserInfo(){
 		goto HTTPnextpage
 	DLCs:=0,Updates:=0
 	for a,b in List
-		DLCs+=(!b.HasDLC)?0:b.HasDLC,Updates+=(!b.Notification)?0:1
+		DLCs+=(!b.HasDLC)?0:b.HasDLC,Updates+=(b.Notification&&b.notification!="bdg_soon")?1:0
 	if DLCs
 		tt("INFO:`tYou Own " TotalOwned " Games & " DLCs " DLC Addons.")
 	Else
@@ -37,12 +37,11 @@ HTTP_GetUserInfo(){
 	{
 		tt("You Have " Updates " New/Update Notifications")
 		for a,b in List
-			if b.notification
-				tt("[yellow]" a "[/] has new content." )
+			if (b.notification)
+				tt("[yellow]" a "[/] has new content.")
 	}
 	;***********************************************
-	FileName:="Renamer - GOG.com Downloader Name to Folder Name (773 + 22 + 59 + 23) (20140906).bat"
-	FileRead,TempVar,%A_ScriptDir%\Resources\%Filename%
+	FileRead,TempVar,% A_ScriptDir "\Resources\" Config.names
 	Loop,Parse,TempVar,`r
 	{
 		RegExMatch(A_LoopField,"Ui)rename (\w*)\b " Chr(34) "(.*)\(((january|february|march|april|may|june|july|august|september|october|november|december).*)\)(| \[DLC\])" Chr(34),found)
