@@ -1,10 +1,10 @@
 FileCheck(SaveAs,MD5="",Link:=""){
-	global myConsole,Duplicate
+	global myConsole,Duplicate,Checksums
 	;---- Insert checking for existance of file and file hashing here
 	IfExist,%SaveAs%
 	{
 		SplitPath,SaveAs,Filename
-		if (MD5){
+		if (MD5&&Checksums){
 			If Duplicate
 				myConsole.changeLine("[green]Checking MD5 for [yellow]" Filename "[/]....[/]", myConsole.currentLine )
 			else

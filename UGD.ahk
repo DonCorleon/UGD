@@ -18,6 +18,7 @@ Config:=Resources()
 Gui,Main:New,+OwnDialogs +Resize +MinSize350x300 +hwndhwnd,Ultimate GoG Downloader v%Version%
 Config.Mainhwnd:=hwnd
 Gui,Main:Add,Checkbox,x0 y0 vChecksums gChecksums, C&ompare Checksums
+Gui,Main:Add,Checkbox,x0 y15 vDefinitions gDefinitions, &Latest Definitions
 Gui,Main:Add,Button,% "x" Config.MainW-200 " y0 w60 vButtonLogin gButtonLogin",&Login
 gui,Main:Add,Button,% "x" Config.MainW-130 " y0 w60 vConfigWindow gConfigWindow",&Configure
 Gui,Main:Add,Button,% "x" Config.MainW-60 " y0 w60 vButtonUpdate gButtonUpdate",&Update
@@ -33,7 +34,13 @@ Return
 Checksums:
 {
 	Gui,Submit,NoHide
-	tt("Compare Checksums-" Checksums)
+	tt("Compare Checksums-" CSState:=Checksums?"On":"Off")
+	Return
+}
+Definitions:
+{
+	Gui,Submit,NoHide
+	tt("Latest Definitions - " LDState:=Definitions?"On":"Off")
 	Return
 }
 ButtonGetGames:
@@ -88,7 +95,7 @@ ButtonGetGames:
 					Duplicate:=1
 					Continue
 					}
-				If !(FileCheck(Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename,b.DLC[c].MD5))
+				If !(FileCheck(Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename,b.DLC[c].MD5,b.DLC[c].Link))
 					DownloadFile(b.DLC[c].Link,Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename)
 				FilesAlreadyDone[b.DLC[c].MD5]:=b.DLC[c].Language
 				Duplicate:=0
@@ -179,18 +186,23 @@ ButtonLogin:
 			ReUse_Login("SAVE")
 		LoggedIn:=1
 		tt("Logged in to [Yellow]HTTP[/] and [Yellow]API[/] Successfully")
-		tt("Getting Latest Definitions....")
-		Connie:=Get_FileFromOneDrive(URL:="http://1drv.ms/1nFp6OT") ;----Dat File
-		if !(Filecheck(A_ScriptDir "\resources\" connie.filename,,connie.link))
-			DownloadFile(Connie.link,A_ScriptDir "\resources\" connie.filename)
-		Config.Dat:=connie.filename
-		Connie:=Get_FileFromOneDrive(URL:="http://1drv.ms/1nFp6OT",".bat","to GOG") ;----Renamer - Folder Name to GOG.com Downloader Name
-		if !(Filecheck(A_ScriptDir "\resources\" connie.filename,,connie.link))
-			DownloadFile(Connie.link,A_ScriptDir "\resources\" connie.filename)
-		Connie:=Get_FileFromOneDrive(URL:="http://1drv.ms/1nFp6OT",".bat","to Folder") ;----Renamer - GOG.com Downloader Name to Folder Name
-		if !(Filecheck(A_ScriptDir "\resources\" connie.filename,,connie.link))
-			DownloadFile(Connie.link,A_ScriptDir "\resources\" connie.filename)
-		Config.Names:=connie.filename
+		If Definitions
+		{
+			tt("Getting Latest Definitions....")
+			Connie:=Get_FileFromOneDrive(URL:="http://1drv.ms/1nFp6OT") ;----Dat File
+			if !(Filecheck(A_ScriptDir "\resources\" connie.filename,,connie.link))
+				DownloadFile(Connie.link,A_ScriptDir "\resources\" connie.filename)
+			Config.Dat:=connie.filename
+			IniWrite,% Config.Dat,%A_ScriptDir%\Resources\Config.ini,Definitions,Dat
+			Connie:=Get_FileFromOneDrive(URL:="http://1drv.ms/1nFp6OT",".bat","to GOG") ;----Renamer - Folder Name to GOG.com Downloader Name
+			if !(Filecheck(A_ScriptDir "\resources\" connie.filename,,connie.link))
+				DownloadFile(Connie.link,A_ScriptDir "\resources\" connie.filename)
+			Connie:=Get_FileFromOneDrive(URL:="http://1drv.ms/1nFp6OT",".bat","to Folder") ;----Renamer - GOG.com Downloader Name to Folder Name
+			if !(Filecheck(A_ScriptDir "\resources\" connie.filename,,connie.link))
+				DownloadFile(Connie.link,A_ScriptDir "\resources\" connie.filename)
+			Config.Names:=connie.filename
+			IniWrite,% Config.Names,%A_ScriptDir%\Resources\Config.ini,Definitions,Names
+		}
 		List:=[]
 		tt("Getting a list of your [aqua]Games[/]....")
 		List:=HTTP_GetUserInfo()
