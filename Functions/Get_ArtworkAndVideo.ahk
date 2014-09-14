@@ -6,8 +6,8 @@ Get_ArtworkAndVideo(game){
 		;******************** ARTWORK ***********************
 		;----ScreenShots
 		While (Pos:=RegExMatch(PageData,"U)pauseAll\(\)""><img src=""http:\/\/static(.*)""",Artwork,(Pos?Pos+1:1)))
-			If !(FileCheck(Config.Artwork "\" game "\ScreenShot-A" Number:=A_Index<10?"0" A_index ".jpg":A_Index ".jpg",,"http://static" Artwork1))
-				DownLoadFile("http://static" Artwork1,Config.Artwork "\" game "\ScreenShot-A" Number)
+			If !(FileCheck(Config.Artwork "\" game "\ScreenShot-" Number:=A_Index<10?"0" A_index ".jpg":A_Index ".jpg",,"http://static" Artwork1))
+				DownLoadFile("http://static" Artwork1,Config.Artwork "\" game "\ScreenShot-" Number)
 		;tt("http://static" Artwork1,Config.Artwork "\" game "\ScreenShot-" A_Index ".jpg")
 		
 		;---- B&W Background
