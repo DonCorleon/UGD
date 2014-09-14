@@ -116,7 +116,7 @@ ButtonGetGames:
 			}
 		}
 	}
-	if downloaded
+	if (downloaded[1])
 		tt(""),tt("The following files were downloaded:")
 	for a,b in Downloaded
 		tt(a ". " b)
