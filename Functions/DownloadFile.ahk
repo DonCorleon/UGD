@@ -1,5 +1,5 @@
 DownloadFile(link,SaveAs){
-	global DLSpeed:=[]
+	global DLSpeed:=[],Downloaded
 	SplitPath,SaveAs,File,Directory
 	tt("Setting Up Download....")
 	IfNotExist,%Directory%
@@ -15,6 +15,8 @@ DownloadFile(link,SaveAs){
 		AvgSpeed+=b
 	AvgSpeed:=Round(AvgSpeed/DLSpeed.MaxIndex(),0)
 	;tt("Downloaded at an average speed of [yellow]" AvgSpeed "[/] Kb/s.")
+	RegExMatch(Directory,"U)[\w-]*$",Dir)
+	Downloaded.Insert(Dir "\" File)
 	Return,InOutHeader
 }
 DownloadProgress(Percentage,Size,File){
@@ -28,5 +30,5 @@ DownloadProgress(Percentage,Size,File){
 		;DLSpeed.Insert(Speed)
 		myConsole.changeLine("[blue]" Round(Percentage*100,0) "%[/] - [Green]Downloading [/][yellow]" File "[/] - [red]" Round(Size*Percentage,0) "/" Size "[/] @ " Speed "Kb/s", myConsole.currentLine)
 	}
-	Return	
+	Return
 }

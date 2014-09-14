@@ -4,7 +4,7 @@ version=;auto_version
 #SingleInstance,force
 SetBatchLines = -1
 ;******** Global Vars
-Global Cookie,status,Config:=[]
+Global Cookie,status,Config:=[],Downloaded:=[]
 
 DEBUG_Times:=0
 
@@ -99,10 +99,10 @@ ButtonGetGames:
 					Link:=Get_ApiLink(b.Extras[d].Link)
 					b.Extras[d].Link:=Link.Link
 					b.Extras[d].Filename:=Link.FileName
-					info:=""
-					for e,f in b.Extras[d]
-						info.=e "-" f "`n"
-					m(info)
+					;info:=""
+					;for e,f in b.Extras[d]
+					;info.=e "-" f "`n"
+					;m(info)
 					;tt(b.Extras[d].Link)
 					If !(FileCheck(Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename,,b.Extras[d].Link))
 						DownloadFile(b.Extras[d].Link,Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename)
@@ -116,7 +116,11 @@ ButtonGetGames:
 			}
 		}
 	}
-	tt("Grabbed all links in [white]" Convert_Seconds(A_TickCount-tock) "[/]")
+	if downloaded
+		tt(""),tt("The following files were downloaded:")
+	for a,b in Downloaded
+		tt(a ". " b)
+	tt("Processed all links in [white]" Convert_Seconds(Round((A_TickCount-tock)/1000,0)) "[/]")
 	if errors
 		tt("Encountered [red]" Errors "[/] Errors!!")
 	Return
