@@ -13,7 +13,7 @@ Get_ArtworkAndVideo(game){
 		;---- B&W Background
 		If !(FileCheck(Config.Artwork "\" game "\Background.jpg",,List[game].Background))
 			DownLoadFile(List[game].Background,Config.Artwork "\" game "\Background.jpg")
-	
+		
 		;----Colour Background
 		While (Pos:=RegExMatch(PageData,"U)<meta name=""og\:image"" content=""(.*)"">",Artwork,(Pos?Pos+1:1)))
 			If !(FileCheck(Config.Artwork "\" game "\Background-2.jpg",,Artwork1))

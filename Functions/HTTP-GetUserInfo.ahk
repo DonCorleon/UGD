@@ -28,7 +28,7 @@ HTTP_GetUserInfo(){
 		goto HTTPnextpage
 	DLCs:=0,Updates:=0
 	for a,b in List
-		DLCs+=(!b.HasDLC)?0:b.HasDLC,Updates+=(b.Notification&&b.notification!="bdg_soon")?1:0
+		DLCs+=(!b.HasDLC)?0:b.HasDLC,Updates+=(b.Notification&&(b.notification!="bdg_soon"))?1:0
 	if DLCs
 		tt("INFO:`tYou Own " TotalOwned " Games & " DLCs " DLC Addons.")
 	Else
@@ -37,8 +37,10 @@ HTTP_GetUserInfo(){
 	{
 		tt("You Have " Updates " New/Update Notifications")
 		for a,b in List
-			if (b.notification)
-				tt("[yellow]" a "[/] has new content.")
+		if (b.notification){
+			b.Selected:=1
+			tt("[yellow]" a "[/] has new content. " b.notification)
+		}
 	}
 	;***********************************************
 	FileRead,TempVar,% A_ScriptDir "\Resources\" Config.names

@@ -1,5 +1,5 @@
 DownloadFile(link,SaveAs){
-	global DLSpeed:=[],Downloaded
+	global Downloaded,DLSpeed:=[]
 	SplitPath,SaveAs,File,Directory
 	tt("Setting Up Download....")
 	IfNotExist,%Directory%
@@ -26,7 +26,10 @@ DownloadProgress(Percentage,Size,File){
 		LastSize:=1,Speed:="???",LastTick:=A_TickCount
 	if ((A_TickCount-LastTick>=1000)||Percentage=1)
 	{
-		CurrentSize:=Round(Size*Percentage,0),Speed := Round((CurrentSize/1024-LastSize/1024)/((A_TickCount-LastTick)/1000)),LastTick:=A_TickCount,LastSize:=Round(Size*Percentage,0)
+		CurrentSize:=Round(Size*Percentage,0)
+		Speed := Round((CurrentSize/1024-LastSize/1024)/((A_TickCount-LastTick)/1000))
+		LastTick:=A_TickCount
+		LastSize:=Round(Size*Percentage,0)
 		;DLSpeed.Insert(Speed)
 		myConsole.changeLine("[blue]" Round(Percentage*100,0) "%[/] - [Green]Downloading [/][yellow]" File "[/] - [red]" Round(Size*Percentage,0) "/" Size "[/] @ " Speed "Kb/s", myConsole.currentLine)
 	}

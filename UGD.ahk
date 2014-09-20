@@ -4,7 +4,7 @@ version=;auto_version
 #SingleInstance,force
 SetBatchLines = -1
 ;******** Global Vars
-Global Cookie,status,Config:=[],Downloaded:=[]
+Global Cookie,status,Config:=[]
 
 DEBUG_Times:=0
 
@@ -45,7 +45,7 @@ Definitions:
 }
 ButtonGetGames:
 {
-	ToTalEntries:=0
+	ToTalEntries:=0,Downloaded:=[]
 	for a,b in List
 		if b.Selected
 			TotalEntries++
