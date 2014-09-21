@@ -108,6 +108,16 @@ Gui_Config(){
 			config.Linux[value]:=Chosen:=TV_Get(TreeItemID,"Checked")?1:0
 			IniWrite,%Chosen%,%A_ScriptDir%\Resources\Config.ini,Linux,%Value%
 		}
+		TreeItemID:=Movies
+		Loop
+		{
+			TreeItemID:=TV_GetNext(TreeItemID,"Full")
+			if (!TreeItemID||TV_GetParent(TreeItemID)!=Movies)
+				Break
+			TV_GetText(Value,TreeItemID)
+			config.Movies[value]:=Chosen:=TV_Get(TreeItemID,"Checked")?1:0
+			IniWrite,%Chosen%,%A_ScriptDir%\Resources\Config.ini,Movies,%Value%
+		}
 		
 		ConfigGuiEscape:
 		ConfigGuiClose:

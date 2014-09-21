@@ -87,6 +87,24 @@ Get_GameInfo(GameName){
 					Language:=LangOption[SubStr(DLCID,1,2)]
 					DLC[DLCNum] := Object("Name", DLCName1, "Type",Type,"FileName", "Not Available", "ID", DLCID, "MainFolder", GameFolder, "Folder", DLCFolder1, "Size", DLCSize1, "Platform", Platform, "Language", Language, "Link", API.get_installer_link . "/" . DLCFolder1 . "/" . DLCID . "/")
 					Last_Platform := Platform
+					if DLCName contains `(1080p`)
+					{
+						DLC[DLCNum].Quality:="1080p"
+						DLC[DLCNum].Platform:=""
+						;m(DLC[dlcnum].Name,DLC[dlcnum].Movie)
+					}
+					else if DLCName contains `(720p`)
+					{
+						DLC[DLCNum].Quality:="720p"
+						DLC[DLCNum].Platform:=""
+						;m(DLC[dlcnum].Name,DLC[dlcnum].Movie)
+					}
+					else if DLCName contains `(576p`)
+					{
+						DLC[DLCNum].Quality:="576p"
+						DLC[DLCNum].Platform:=""
+						;m(DLC[dlcnum].Name,DLC[dlcnum].Movie)
+					}
 					
 				}
 			}

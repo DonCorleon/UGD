@@ -1,5 +1,5 @@
 Headers(referer = ""){
-	global Cookie
+	Global Cookie
 	Headers =
 	( LTRIM
 	Referer: %referer%

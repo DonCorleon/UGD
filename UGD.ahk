@@ -78,14 +78,14 @@ ButtonGetGames:
 			else
 				tt("Working on [yellow]" a "[/]") ; Convert_seconds(Round((a_tickcount - tick)/1000,0))
 			for c in b.DLC ;---- Check against Platform, Language Downloads type parameters
-				if (Config.Platforms[b.DLC[c].Platform]&&Config.Languages[b.DLC[c].Language]&&((Config.Downloads[b.DLC[c].Type "s"]||Config.Downloads[b.DLC[c].Type "es"]||Config.Linux[b.DLC[c].Type])))
+				if (Config.Movies[b.DLC[c].quality]||(Config.Platforms[b.DLC[c].Platform]&&Config.Languages[b.DLC[c].Language]&&((Config.Downloads[b.DLC[c].Type "s"]||Config.Downloads[b.DLC[c].Type "es"]||Config.Linux[b.DLC[c].Type]))))
 				{
 					Link:=Get_ApiLink(b.DLC[c].Link)
 					b.DLC[c].Link:=Link.Link
 					b.DLC[c].Filename:=Link.FileName
 					
 					b.DLC[c].MD5:=Link.MD5
-					;tt(b.DLC[c].Link)
+					;tt(Config.Movies[b.DLC[c].quality] " = " b.DLC[c].quality)
 					if FilesAlreadyDone[b.DLC[c].MD5]
 					{
 					If Duplicate

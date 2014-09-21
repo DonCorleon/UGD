@@ -71,6 +71,13 @@ Resources(){
 				continue
 			LinuxList[a]:=value
 		}
+		For a in MovieList
+		{
+			IniRead,Value,%A_ScriptDir%\Resources\Config.ini,Movies,%a%
+			If (Value="ERROR")
+				continue
+			MovieList[a]:=value
+		}
 	}
 	Config.Languages:=LanguageList
 	Config.Downloads:=TypeList
