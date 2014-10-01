@@ -5,6 +5,7 @@ Get_ArtworkAndVideo(game){
 	{
 		;******************** ARTWORK ***********************
 		;----ScreenShots
+		SizeArray:=[]
 		While (Pos:=RegExMatch(PageData,"U)pauseAll\(\)""><img src=""http:\/\/static(.*)""",Artwork,(Pos?Pos+1:1)))
 			If !(FileCheck(Config.Artwork "\" game "\ScreenShot-" Number:=A_Index<10?"0" A_index ".jpg":A_Index ".jpg",,"http://static" Artwork1))
 				DownLoadFile("http://static" Artwork1,Config.Artwork "\" game "\ScreenShot-" Number)
@@ -28,21 +29,19 @@ Get_ArtworkAndVideo(game){
 	if Config.Downloads.Videos
 	{
 		tt("Download of Game Video is currently broken.")
-		/*
-			;******************** VIDEOS ***********************
-			While (Pos:=RegExMatch(PageData,"U)src=""(http|https)\:\/\/www\.youtube\.com\/embed\/(.*)\?",Youtube,(Pos?Pos+1:1)))
-			{
-				Link:=Youtube1 "://www.youtube.com/watch?v=" youtube2
-				URL:=Get_Youtube_Video(Link,"mp4,720P,360P,muxed")
-				VideoTitle:=URL[1].filename ".mp4"
-				if (VideoTitle=".mp4")
-					VideoTitle:=Folder ".mp4"
-				If !(FileCheck(Config.Videos "\" game "\" VideoTitle))
-					DownLoadFile(URL[1].link,Config.Videos "\" game "\" VideoTitle)
-				;tt(URL[1].link,Config.Videos "\" game "\" VideoTitle)
-				;URLDownloadToFile,% URL[1].link, % Config.Videos "\" game "\" VideoTitle
-			}
-		*/
+		;******************** VIDEOS ***********************
+		While (Pos:=RegExMatch(PageData,"U)src=""(http|https)\:\/\/www\.youtube\.com\/embed\/(.*)\?",Youtube,(Pos?Pos+1:1)))
+		{
+			Link:=Youtube1 "://www.youtube.com/watch?v=" youtube2
+			URL:=Get_Youtube_Video(Link,"mp4,720P,360P,muxed")
+			VideoTitle:=URL[1].filename ".mp4"
+			if (VideoTitle=".mp4")
+				VideoTitle:=Folder ".mp4"
+			If !(FileCheck(Config.Videos "\" game "\" VideoTitle))
+				DownLoadFile(URL[1].link,Config.Videos "\" game "\" VideoTitle)
+			;tt(URL[1].link,Config.Videos "\" game "\" VideoTitle)
+			;URLDownloadToFile,% URL[1].link, % Config.Videos "\" game "\" VideoTitle
+		}
 	}
 	
 }

@@ -156,6 +156,9 @@ Gui_Config(){
 			InvalidLocation:=RegExMatch(Location,"^\\\\")
 			if InvalidLocation
 				m("Network locations are not currently supported unless its is a mapped drive.`n`nComing soon to an update near you!!")
+			AddIt:=RegExMatch(Location,"\\$")
+			if !AddIt
+				Location.="\"
 			Config.Location:=Location
 			IniWrite,% Location,%A_ScriptDir%\Resources\Config.ini,Locations,Base Folder
 		}

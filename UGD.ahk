@@ -17,8 +17,10 @@ API:=Object("Consumer_Key","1f444d14ea8ec776585524a33f6ecc1c413ed4a5" ; Create t
 Config:=Resources()
 Gui,Main:New,+OwnDialogs +Resize +MinSize350x300 +hwndhwnd,Ultimate GoG Downloader v%Version%
 Config.Mainhwnd:=hwnd
-Gui,Main:Add,Checkbox,x0 y0 vChecksums gChecksums, C&ompare Checksums
-Gui,Main:Add,Checkbox,x0 y15 vDefinitions gDefinitions, &Latest Definitions
+Gui,Main:Add,Checkbox,x0 y0 vChecksums gChecksums			, Compare Check&sums (Slow)
+Gui,Main:Add,Checkbox,xp yp+15 vDefinitions gDefinitions	, &Latest Definitions
+Gui,Main:Add,Checkbox,xp yp+15 vOrphans gOrphans, Check For &Orphans
+Gui,Main:Add,Checkbox,xp+120 yp disabled vMoveOrphans gMoveOrphans, &Move Orphans
 Gui,Main:Add,Button,% "x" Config.MainW-200 " y0 w60 vButtonLogin gButtonLogin",&Login
 gui,Main:Add,Button,% "x" Config.MainW-130 " y0 w60 vConfigWindow gConfigWindow",&Configure
 Gui,Main:Add,Button,% "x" Config.MainW-60 " y0 w60 vButtonUpdate gButtonUpdate",&Update
@@ -43,6 +45,25 @@ Definitions:
 	tt("Latest Definitions - " LDState:=Definitions?"On":"Off")
 	Return
 }
+Orphans:
+{
+	Gui,Submit,NoHide
+	tt("Check For Orphans - " OState:=Orphans?"On":"Off")
+	If Orphans
+		GuiControl,Main:Enable,MoveOrphans
+	Else
+	{
+		GuiControl,Main:Disable,MoveOrphans
+		GuiControl,Main:,MoveOrphans,0
+	}
+	Return
+}
+MoveOrphans:
+{
+	Gui,Submit,NoHide
+	tt("Move Orphans - " MOState:=MoveOrphans?"On":"Off")
+	Return
+}
 ButtonGetGames:
 {
 	ToTalEntries:=0,Downloaded:=[]
@@ -50,29 +71,29 @@ ButtonGetGames:
 		if b.Selected
 			TotalEntries++
 	tt("Found " TotalEntries " selections.")
-	tt("")
+	;tt("")
 	tock:=A_TickCount
 	
 	Counter:=0
 	TotalExtras:=TotalInstallers:=0 ;---- Reset Var so multiple runs always starts at 0
-	For a,b in List ;----Get all the games base info for the selected games
-	{
-		if b.Selected
-		{
-			Counter++,game:=a,tick:=A_TickCount
-			Get_GameInfo(game)
-			myConsole.changeLine("[blue]" Round((100/(TotalEntries))*Counter,0) "%[/] [red]" Counter "/" TotalEntries "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/] " Convert_Seconds(Round((a_tickcount - tock)/1000,0)), myConsole.currentLine )
-			TotalExtras+=b.Extras.MaxIndex()?b.Extras.MaxIndex():0
-			TotalInstallers+=b.DLC.MaxIndex()?b.DLC.MaxIndex():0
-		}
-	}
-	tt("Process Complete. Collection time was " Round((a_tickcount - tock)/1000,1) " seconds")
-	tt("Total Files counted and added was [yellow]" TotalInstallers " Installers and " TotalExtras " Extras" "[/]")
+	;For a,b in List ;----Get all the games base info for the selected games
+	;{
+	;if b.Selected
+	;{
+	;Counter++,game:=a,tick:=A_TickCount
+	;myConsole.changeLine("[blue]" Round((100/(TotalEntries))*Counter,0) "%[/] [red]" Counter "/" TotalEntries "[/][green]`tInfo Retrieved for [Yellow]" game "[/] in " Round((a_tickcount - tick)/1000,1) " seconds[/] " Convert_Seconds(Round((a_tickcount - tock)/1000,0)), myConsole.currentLine )
+	;TotalExtras+=b.Extras.MaxIndex()?b.Extras.MaxIndex():0
+	;TotalInstallers+=b.DLC.MaxIndex()?b.DLC.MaxIndex():0
+	;}
+	;}
+	;tt("Process Complete. Collection time was " Round((a_tickcount - tock)/1000,1) " seconds")
+	;tt("Total Files counted and added was [yellow]" TotalInstallers " Installers and " TotalExtras " Extras" "[/]")
 	FilesAlreadyDone:=[]
 	For a,b in List ;----Get the Links for installers, patches, language packs and DLC's then grab the extras links
 	{
 		if b.Selected ;----Only Process if it has been selected
 		{
+			Get_GameInfo(a)
 			If Duplicate
 				myConsole.changeLine("[green]Working on [yellow]" a "[/][/]", myConsole.currentLine )
 			else
@@ -86,6 +107,7 @@ ButtonGetGames:
 					
 					b.DLC[c].MD5:=Link.MD5
 					;tt(Config.Movies[b.DLC[c].quality] " = " b.DLC[c].quality)
+					;if !Orphans
 					if FilesAlreadyDone[b.DLC[c].MD5]
 					{
 					If Duplicate
@@ -95,6 +117,7 @@ ButtonGetGames:
 					Duplicate:=1
 					Continue
 					}
+				;if !Orphans
 				If !(FileCheck(Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename,b.DLC[c].MD5,b.DLC[c].Link))
 					DownloadFile(b.DLC[c].Link,Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename)
 				FilesAlreadyDone[b.DLC[c].MD5]:=b.DLC[c].Language
@@ -111,6 +134,7 @@ ButtonGetGames:
 					;info.=e "-" f "`n"
 					;m(info)
 					;tt(b.Extras[d].Link)
+					;if !Orphans
 					If !(FileCheck(Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename,,b.Extras[d].Link))
 						DownloadFile(b.Extras[d].Link,Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename)
 					Duplicate:=0
@@ -130,6 +154,30 @@ ButtonGetGames:
 	tt("Processed all links in [white]" Convert_Seconds(Round((A_TickCount-tock)/1000,0)) "[/]")
 	if errors
 		tt("Encountered [red]" Errors "[/] Errors!!")
+	if Orphans
+	{
+		tt("Checking for Orphan Files")
+		OrphanFiles:=Orphans()
+		for a,b in OrphanFiles
+			for c,d in b
+				tt(a "/" d)
+		tt("Orphan Check Complete")
+	}
+	If MoveOrphans
+	{
+		tt("Moving Orphaned Files")
+		ifNotExist % Config.Location "\Cleaned"
+			FileCreateDir, % Config.Location "\Cleaned"
+		for a,b in OrphanFiles
+			for c,d in b
+			{
+				tt("Moving " a "\" d)
+				ifNotExist % Config.Location "\Cleaned\" a 
+					FileCreateDir, % Config.Location "\Cleaned\" a
+				FileMove,% Config.Location a "\" d,% Config.Location "Cleaned\" a "\" d
+			}
+		tt("Moving Complete")
+	}
 	Return
 }
 ButtonSelectGames:
@@ -189,11 +237,14 @@ ButtonLogin:
 		If Definitions
 		{
 			tt("Getting Latest Definitions....")
-			Connie:=Get_FileFromOneDrive(URL:="http://1drv.ms/1nFp6OT") ;----Dat File
+			Connie:=Get_FileFromOneDrive(URL:="http://1drv.ms/1nFp6OT",".dat","Games") ;----Games Dat File
 			if !(Filecheck(A_ScriptDir "\resources\" connie.filename,,connie.link))
 				DownloadFile(Connie.link,A_ScriptDir "\resources\" connie.filename)
 			Config.Dat:=connie.filename
 			IniWrite,% Config.Dat,%A_ScriptDir%\Resources\Config.ini,Definitions,Dat
+			Connie:=Get_FileFromOneDrive(URL:="http://1drv.ms/1nFp6OT",".dat","Movies") ;----Movies Dat File
+			if !(Filecheck(A_ScriptDir "\resources\" connie.filename,,connie.link))
+				DownloadFile(Connie.link,A_ScriptDir "\resources\" connie.filename)
 			Connie:=Get_FileFromOneDrive(URL:="http://1drv.ms/1nFp6OT",".bat","to GOG") ;----Renamer - Folder Name to GOG.com Downloader Name
 			if !(Filecheck(A_ScriptDir "\resources\" connie.filename,,connie.link))
 				DownloadFile(Connie.link,A_ScriptDir "\resources\" connie.filename)
@@ -297,3 +348,5 @@ Convert_Seconds(Seconds){
 #Include Functions\Get_ArtworkAndVideo.ahk
 #Include Functions\HTTP-GetUserMovieInfo.ahk
 #Include Functions\Get_FileFromOneDrive.ahk
+#Include Functions\Orphans.ahk
+#Include Functions\Gui_ConfirmOrphans.ahk
