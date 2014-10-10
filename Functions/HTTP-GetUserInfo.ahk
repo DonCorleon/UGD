@@ -41,7 +41,9 @@ HTTP_GetUserInfo(){
 			b.Selected:=1
 			tt("[yellow]" a "[/] has new content. " b.notification)
 		}
+		GuiControl,Main:Enable,ButtonGetGames
 	}
+	
 	;***********************************************
 	FileRead,TempVar,% A_ScriptDir "\Resources\" Config.names
 	Loop,Parse,TempVar,`r

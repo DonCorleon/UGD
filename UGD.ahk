@@ -4,7 +4,7 @@ version=;auto_version
 #SingleInstance,force
 SetBatchLines = -1
 ;******** Global Vars
-Global Cookie,status,Config:=[]
+Global Cookie,status,Config:=[],Exclusions:=[]
 
 DEBUG_Times:=0
 
@@ -19,13 +19,14 @@ Gui,Main:New,+OwnDialogs +Resize +MinSize350x300 +hwndhwnd,Ultimate GoG Download
 Config.Mainhwnd:=hwnd
 Gui,Main:Add,Checkbox,x0 y0 vChecksums gChecksums			, Compare Check&sums (Slow)
 Gui,Main:Add,Checkbox,xp yp+15 vDefinitions gDefinitions	, &Latest Definitions
-Gui,Main:Add,Checkbox,xp yp+15 vOrphans gOrphans, Check For &Orphans
-Gui,Main:Add,Checkbox,xp+120 yp disabled vMoveOrphans gMoveOrphans, &Move Orphans
-Gui,Main:Add,Button,% "x" Config.MainW-200 " y0 w60 vButtonLogin gButtonLogin",&Login
-gui,Main:Add,Button,% "x" Config.MainW-130 " y0 w60 vConfigWindow gConfigWindow",&Configure
-Gui,Main:Add,Button,% "x" Config.MainW-60 " y0 w60 vButtonUpdate gButtonUpdate",&Update
-Gui,Main:Add,Button,% "x" Config.MainW-200 " y22 w60 Disabled vButtonSelectGames gButtonSelectGames",&Selection
-Gui,Main:Add,Button,% "x" Config.MainW-130 " y22 w60 Disabled vButtonGetGames gButtonGetGames",&Download
+Gui,Main:Add,Checkbox,xp yp+15 vOrphans gOrphans, Check &Orphans only
+Gui,Main:Add,Checkbox,xp+160 yp-30, &Use Previous Login
+Gui,Main:Add,Button,% "x" Config.MainW-200 " y0 w80 vButtonLogin gButtonLogin",&Login
+gui,Main:Add,Button,% "x" Config.MainW-130 " y0 w80 vConfigWindow gConfigWindow",&Configure
+Gui,Main:Add,Button,% "x" Config.MainW-60 " y0 w80 vButtonUpdate gButtonUpdate",&Update
+Gui,Main:Add,Button,% "x" Config.MainW-200 " y22 w80 Disabled vButtonSelectGames gButtonSelectGames",&Selection
+Gui,Main:Add,Button,% "x" Config.MainW-130 " y22 w80 Disabled vButtonGetGames gButtonGetGames",&Download
+Gui,Main:Add,Button,% "x" Config.MainW-60 " y22 w80  Disabled vButtonOrphans gButtonOrphans",&Orphans
 myConsole:= new scConsole({"PosX":"1","PosY":"50","Gui Number":"Main","Control Width": Config.MainW, "Control Height": Config.MainH-50,"Font":Courier New,"Line Number Color":"yellow"})
 Gui,Main:Show,% "x" Config.MainX " y" Config.MainY " w" Config.MainW " h" Config.MainH
 DoLog(1,"LogFile:Log.txt","Downloader Started")
@@ -45,25 +46,29 @@ Definitions:
 	tt("Latest Definitions - " LDState:=Definitions?"On":"Off")
 	Return
 }
+ButtonOrphans:
+{
+	Gui_ConfirmOrphans(OrphanFiles)
+	return
+}
+
 Orphans:
 {
 	Gui,Submit,NoHide
-	tt("Check For Orphans - " OState:=Orphans?"On":"Off")
+	tt("Check Orphans Only - " OState:=Orphans?"On":"Off")
 	If Orphans
-		GuiControl,Main:Enable,MoveOrphans
+		GuiControl,Main:,ButtonGetGames,C&heck Orphans
 	Else
-	{
-		GuiControl,Main:Disable,MoveOrphans
-		GuiControl,Main:,MoveOrphans,0
-	}
+		GuiControl,Main:,ButtonGetGames,&Download
 	Return
 }
-MoveOrphans:
-{
-	Gui,Submit,NoHide
-	tt("Move Orphans - " MOState:=MoveOrphans?"On":"Off")
-	Return
-}
+
+;MoveOrphans:
+;{
+;Gui,Submit,NoHide
+;tt("Move Orphans - " MOState:=MoveOrphans?"On":"Off")
+;Return
+;}
 ButtonGetGames:
 {
 	ToTalEntries:=0,Downloaded:=[]
@@ -99,7 +104,7 @@ ButtonGetGames:
 			else
 				tt("Working on [yellow]" a "[/]") ; Convert_seconds(Round((a_tickcount - tick)/1000,0))
 			for c in b.DLC ;---- Check against Platform, Language Downloads type parameters
-				if (Config.Movies[b.DLC[c].quality]||(Config.Platforms[b.DLC[c].Platform]&&Config.Languages[b.DLC[c].Language]&&((Config.Downloads[b.DLC[c].Type "s"]||Config.Downloads[b.DLC[c].Type "es"]||Config.Linux[b.DLC[c].Type]))))
+				if (Orphans||(Config.Movies[b.DLC[c].quality]||(Config.Platforms[b.DLC[c].Platform]&&Config.Languages[b.DLC[c].Language]&&((Config.Downloads[b.DLC[c].Type "s"]||Config.Downloads[b.DLC[c].Type "es"]||Config.Linux[b.DLC[c].Type])))))
 				{
 					Link:=Get_ApiLink(b.DLC[c].Link)
 					b.DLC[c].Link:=Link.Link
@@ -117,13 +122,13 @@ ButtonGetGames:
 					Duplicate:=1
 					Continue
 					}
-				;if !Orphans
-				If !(FileCheck(Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename,b.DLC[c].MD5,b.DLC[c].Link))
-					DownloadFile(b.DLC[c].Link,Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename)
-				FilesAlreadyDone[b.DLC[c].MD5]:=b.DLC[c].Language
-				Duplicate:=0
+				if !Orphans
+					If !(FileCheck(Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename,b.DLC[c].MD5,b.DLC[c].Link))
+						DownloadFile(b.DLC[c].Link,Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename)
+					FilesAlreadyDone[b.DLC[c].MD5]:=b.DLC[c].Language
+					Duplicate:=0
 				}
-			if (Config.Downloads.Extras)
+			if (Orphans||Config.Downloads.Extras)
 				for d in b.Extras
 				{
 					Link:=Get_ApiLink(b.Extras[d].Link)
@@ -134,10 +139,10 @@ ButtonGetGames:
 					;info.=e "-" f "`n"
 					;m(info)
 					;tt(b.Extras[d].Link)
-					;if !Orphans
-					If !(FileCheck(Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename,,b.Extras[d].Link))
-						DownloadFile(b.Extras[d].Link,Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename)
-					Duplicate:=0
+					if !Orphans
+						If !(FileCheck(Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename,,b.Extras[d].Link))
+							DownloadFile(b.Extras[d].Link,Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename)
+						Duplicate:=0
 				}
 			;---- Artwork and Video
 			if (Config.Downloads.Artwork||Config.Downloads.Videos)
@@ -154,30 +159,24 @@ ButtonGetGames:
 	tt("Processed all links in [white]" Convert_Seconds(Round((A_TickCount-tock)/1000,0)) "[/]")
 	if errors
 		tt("Encountered [red]" Errors "[/] Errors!!")
-	if Orphans
+	
+	;if Orphans
+	;{
+	tt("Checking for Orphaned Files")
+	OrphanFiles:=Orphans()
+	OrphanCount:=0
+	for a,b in OrphanFiles
+		for c,d in b
+			OrphanCount++ ;tt(a "/" d)
+	if !OrphanCount
+		tt("No Orphan Files Found")
+	else
 	{
-		tt("Checking for Orphan Files")
-		OrphanFiles:=Orphans()
-		for a,b in OrphanFiles
-			for c,d in b
-				tt(a "/" d)
-		tt("Orphan Check Complete")
+		tt("Found " OrphanCount " files that dont currently exist on GoG.com Servers")
+		GuiControl,Main:Enable,ButtonOrphans
 	}
-	If MoveOrphans
-	{
-		tt("Moving Orphaned Files")
-		ifNotExist % Config.Location "\Cleaned"
-			FileCreateDir, % Config.Location "\Cleaned"
-		for a,b in OrphanFiles
-			for c,d in b
-			{
-				tt("Moving " a "\" d)
-				ifNotExist % Config.Location "\Cleaned\" a 
-					FileCreateDir, % Config.Location "\Cleaned\" a
-				FileMove,% Config.Location a "\" d,% Config.Location "Cleaned\" a "\" d
-			}
-		tt("Moving Complete")
-	}
+	;Gui_ConfirmOrphans(OrphanFiles)
+	;}
 	Return
 }
 ButtonSelectGames:
@@ -198,6 +197,7 @@ MainGuiSize:
 	GuiControl,Main:MoveDraw,ButtonUpdate,% "x"A_Guiwidth*.82
 	GuiControl,Main:MoveDraw,ButtonSelectGames,% "x"A_Guiwidth*.44
 	GuiControl,Main:MoveDraw,ButtonGetGames,% "x"A_Guiwidth*.63
+	GuiControl,Main:MoveDraw,ButtonOrphans,% "x"A_Guiwidth*.82
 	myConsole.Resize(A_GuiWidth,A_GuiHeight)
 	
 	Return

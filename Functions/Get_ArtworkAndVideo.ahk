@@ -1,6 +1,9 @@
 Get_ArtworkAndVideo(game){
 	Global Config,List
-	PageData:=URLDownloadToVar("http://www.gog.com/game/" game)
+	if List[game].Name contains Movie
+		PageData:=URLDownloadToVar("http://www.gog.com/movie/" game)
+	else
+		PageData:=URLDownloadToVar("http://www.gog.com/game/" game)
 	if Config.Downloads.Artwork
 	{
 		;******************** ARTWORK ***********************

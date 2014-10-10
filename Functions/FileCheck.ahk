@@ -17,6 +17,7 @@ FileCheck(SaveAs,MD5="",Link:=""){
 			}else{
 				;tt("[Red]Fail " CheckMD5 "[/]")
 				myConsole.changeLine("[Red]Fail[/] " FileName "[red] MD5 = [/][aqua]" CheckMD5 "[/]", myConsole.currentLine )
+				FileMove,%SaveAs%,%SaveAs%.old,1
 				Return,0
 			}
 		}else{
@@ -32,14 +33,22 @@ FileCheck(SaveAs,MD5="",Link:=""){
 				if same
 					myConsole.changeLine("[yellow]" Filename "[/] [green]- The File is up-to-date[/]", myConsole.currentLine)
 				else
+				{
 					myConsole.changeLine("[yellow]" Filename "[/] [red]- The File is not up-to-date[/]", myConsole.currentLine)
+					FileMove,%SaveAs%,%SaveAs%.old,1
+					Return,0
+				}
 			}
 			else
 			{
 				if same
 					tt("[yellow]" Filename "[/] [green]- The File is up-to-date[/]")
 				else
+				{
 					tt("[yellow]" Filename "[/] [red]- The File is not up-to-date[/]")
+					FileMove,%SaveAs%,%SaveAs%.old,1
+					return,0
+				}
 			}
 			Return, 1
 		}

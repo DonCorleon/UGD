@@ -1,7 +1,11 @@
 DownloadFile(link,SaveAs){
-	global Downloaded,DLSpeed:=[]
+	global Downloaded,Duplicate,myConsole,DLSpeed:=[]
 	SplitPath,SaveAs,File,Directory
-	tt("Setting Up Download....")
+	If Duplicate
+		myConsole.changeLine("[green]Setting Up Download....[/]", myConsole.currentLine )
+	else
+		tt("Setting Up Download....")
+	Duplicate:=0
 	IfNotExist,%Directory%
 		FileCreateDir,%Directory%
 	HttpRequest(URL:=link,InOutData,InOutHeader,options:="SAVEAS:" SaveAs "`nBINARY`nCallBack:DownloadProgress," File)
