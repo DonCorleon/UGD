@@ -149,7 +149,7 @@ ButtonGetGames:
 					if !Orphans
 						If !(FileCheck(Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename,,b.Extras[d].Link))
 							DownloadFile(b.Extras[d].Link,Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename)
-						Duplicate:=0
+						-			Duplicate:=0
 				}
 			;---- Artwork and Video
 			if (!Orphans&&(Config.Downloads.Artwork||Config.Downloads.Videos))
@@ -263,7 +263,7 @@ ButtonLogin:
 			IniWrite,% Config.Names,%A_ScriptDir%\Resources\Config.ini,Definitions,Names
 		}
 		List:=[]
-		If !UsePreviousLogin
+		If (!FileExist(A_ScriptDir "\Resources\GameList.ini")||!UsePreviousLogin)
 		{
 			tt("Getting a list of your [aqua]Games[/]....")
 			List:=HTTP_GetUserInfo()

@@ -30,12 +30,15 @@ Orphans(){
 					ExistingFiles[d.folder].Remove(A_Index)
 	}
 	TempArray:=[]
-	TempArray:=ExistingFiles
-	for a,b in TempArray
+	;TempArray:=ExistingFiles
+	for a,b in ExistingFiles
 	{
-		if !b[1]
-			ExistingFiles.Remove(a)
+		if b[1]
+			TempArray[a]:=b
+		;if !b[1]
+		;ExistingFiles.Remove(a)
 	}
+	ExistingFiles:=TempArray
 	return ExistingFiles
 	
 }
