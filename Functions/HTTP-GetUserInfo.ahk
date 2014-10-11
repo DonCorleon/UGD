@@ -49,7 +49,8 @@ HTTP_GetUserInfo(){
 	Loop,Parse,TempVar,`r
 	{
 		RegExMatch(A_LoopField,"Ui)rename (\w*)\b " Chr(34) "(.*)\(((january|february|march|april|may|june|july|august|september|october|november|december).*)\)(| \[DLC\])" Chr(34),found)
-		List[Found1].Name:=Found2
+		if List[Found1].Name
+			List[Found1].Name:=Found2
 	}
 	;***********************************************
 	return, List

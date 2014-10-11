@@ -1,5 +1,5 @@
 HTTP_GetUserMovieInfo(){
-	Global API,HTTP,Updates:=[],myConsole,Testing:=0
+	Global Config,API,HTTP,Updates:=[],myConsole,Testing:=0
 	page:=0,IndexNum:=0,TotalOwned:=0,UpdateNotifications:=0,List:=[]
 	html:=ComObjCreate("htmlfile")
 	ComObjError(0)
@@ -32,27 +32,10 @@ HTTP_GetUserMovieInfo(){
 		tt("You Have " Updates " New/Update Notifications")
 		for a,b in List
 			if (b.notification)
+			{
+				b.Selected:=1
 				tt("[yellow]" a "[/] has new content.")
+			}
 	}
 	return, List
 }
-/*
-	<div class=\"game-item\" 
-	data-title=\"gamer age animatronic ackbar animatronic ackbar unknown unknown unknown\" 
-	id=\"game_li_1207665321\" 
-	data-background=\"\/upload\/images\/2014\/08\/78993806270413ff0b16f6c1470376d0aa39e05d.jpg\" 
-	data-orderid=\"97e91e6b8f28\"> 
-	<img class=\"list_image\" src=\"\/upload\/images\/2014\/08\/27fc9f1c85fef6be1908f46d87e5dc4239b1629c.jpg\" alt=\"\" \/> 
-	<div class=\"progress_track css3pie\"> <div class=\"progress_bar css3pie\">
-	<\/div> 
-	<\/div> 
-	<div class=\"list_arrow\">
-	<\/div> 
-	<div class=\"game-item-title\"> 
-	<div class=\"game-item-title-in\"> 
-	<span class=\"game-title-link\"> Gamer Age <\/span> 
-	<span class="list_badges"> <i class="bdg_new"></i> </span>
-	<\/div> 
-	<\/div> 
-	<\/div> 
-*/
