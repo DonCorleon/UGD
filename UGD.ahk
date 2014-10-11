@@ -20,7 +20,7 @@ Config.Mainhwnd:=hwnd
 Gui,Main:Add,Checkbox,x0 y0 vChecksums gChecksums			, Compare Check&sums (Slow)
 Gui,Main:Add,Checkbox,xp yp+15 vDefinitions gDefinitions	, &Latest Definitions
 Gui,Main:Add,Checkbox,xp yp+15 vOrphans gOrphans, Check &Orphans only
-Gui,Main:Add,Checkbox,xp+160 yp-30, &Use Previous Login
+Gui,Main:Add,Checkbox,xp+160 yp-30 vUsePreviousLogin gUsePreviousLogin, &Use Previous Login
 Gui,Main:Add,Button,% "x" Config.MainW-200 " y0 w80 vButtonLogin gButtonLogin",&Login
 gui,Main:Add,Button,% "x" Config.MainW-130 " y0 w80 vConfigWindow gConfigWindow",&Configure
 Gui,Main:Add,Button,% "x" Config.MainW-60 " y0 w80 vButtonUpdate gButtonUpdate",&Update
@@ -38,6 +38,12 @@ Checksums:
 {
 	Gui,Submit,NoHide
 	tt("Compare Checksums-" CSState:=Checksums?"On":"Off")
+	Return
+}
+UsePreviousLogin:
+{
+	Gui,Submit,NoHide
+	tt("Using Previous Login Information - " UPLState:=UsePreviousLogin?"On":"Off")
 	Return
 }
 Definitions:
@@ -113,20 +119,21 @@ ButtonGetGames:
 					b.DLC[c].MD5:=Link.MD5
 					;tt(Config.Movies[b.DLC[c].quality] " = " b.DLC[c].quality)
 					;if !Orphans
-					if FilesAlreadyDone[b.DLC[c].MD5]
-					{
-					If Duplicate
-						myConsole.changeLine("[green][Red]Duplicate[/] : " b.DLC[c].Filename "," b.DLC[c].Language " is the same as the " FilesAlreadyDone[b.DLC[c].MD5]" Version[/]", myConsole.currentLine )
-					else
-						tt("[Red]Duplicate[/] : " b.DLC[c].Filename "," b.DLC[c].Language " is the same as the " FilesAlreadyDone[b.DLC[c].MD5]" Version")
-					Duplicate:=1
-					Continue
-					}
-				if !Orphans
-					If !(FileCheck(Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename,b.DLC[c].MD5,b.DLC[c].Link))
-						DownloadFile(b.DLC[c].Link,Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename)
-					FilesAlreadyDone[b.DLC[c].MD5]:=b.DLC[c].Language
-					Duplicate:=0
+					if !Orphans
+						if FilesAlreadyDone[b.DLC[c].MD5]
+						{
+						If Duplicate
+							myConsole.changeLine("[green][Red]Duplicate[/] : " b.DLC[c].Filename "," b.DLC[c].Language " is the same as the " FilesAlreadyDone[b.DLC[c].MD5]" Version[/]", myConsole.currentLine )
+						else
+							tt("[Red]Duplicate[/] : " b.DLC[c].Filename "," b.DLC[c].Language " is the same as the " FilesAlreadyDone[b.DLC[c].MD5]" Version")
+						Duplicate:=1
+						Continue
+						}
+					if !Orphans
+						If !(FileCheck(Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename,b.DLC[c].MD5,b.DLC[c].Link))
+							DownloadFile(b.DLC[c].Link,Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename)
+						FilesAlreadyDone[b.DLC[c].MD5]:=b.DLC[c].Language
+						Duplicate:=0
 				}
 			if (Orphans||Config.Downloads.Extras)
 				for d in b.Extras
@@ -145,7 +152,7 @@ ButtonGetGames:
 						Duplicate:=0
 				}
 			;---- Artwork and Video
-			if (Config.Downloads.Artwork||Config.Downloads.Videos)
+			if (!Orphans&&(Config.Downloads.Artwork||Config.Downloads.Videos))
 			{
 				Get_ArtworkAndVideo(a)
 				Duplicate:=0
@@ -222,7 +229,8 @@ ButtonLogin:
 	GuiControl,Main:+Redraw,ButtonUpdate
 	Username:=Config.Username
 	Password:=Config.Password
-	ReUsingLogin:=ReUse_Login("LOAD")
+	If UsePreviousLogin
+		ReUsingLogin:=ReUse_Login("LOAD")
 	if (!Username||!Password) ;----Break if no Username or password
 		tt("[Red]Username[/] or [Red]Password[/] isn't set."),tt("Set your Credentials in [red]Configuration[/]."),Return
 	if (!Loggedin&&!ReUsingLogin) ;---- Do The Http login if not already logged in
@@ -255,14 +263,27 @@ ButtonLogin:
 			IniWrite,% Config.Names,%A_ScriptDir%\Resources\Config.ini,Definitions,Names
 		}
 		List:=[]
-		tt("Getting a list of your [aqua]Games[/]....")
-		List:=HTTP_GetUserInfo()
-		tt("Getting a list of your [aqua]Movies[/]....")
-		Movies:=HTTP_GetUserMovieInfo()
-		for a,b in movies
+		If !UsePreviousLogin
 		{
-			List[a]:=b
+			tt("Getting a list of your [aqua]Games[/]....")
+			List:=HTTP_GetUserInfo()
+			tt("Getting a list of your [aqua]Movies[/]....")
+			Movies:=HTTP_GetUserMovieInfo()
+			for a,b in movies
+			{
+				List[a]:=b
+			}
+			tt("Writing List to file for faster future logins.")
+			Obj2File(List,A_ScriptDir "\Resources\GameList.ini")
+			myConsole.changeLine("[green]Writing List to file for faster future logins....Complete[/]", myConsole.currentLine )
 		}
+	}
+	If UsePreviousLogin
+	{
+		tt("Loading Previous Login Database.")
+		List:=File2Obj(List,A_ScriptDir "\Resources\GameList.ini")
+		myConsole.changeLine("[green]Loading Previous Database....Complete[/]", myConsole.currentLine )
+		
 	}
 	If !LoggedIn
 		Return
@@ -279,6 +300,7 @@ IniWrite,%X%,%A_ScriptDir%\Resources\Config.ini,MainGui,X
 IniWrite,%Y%,%A_ScriptDir%\Resources\Config.ini,MainGui,Y
 IniWrite,% W-16,%A_ScriptDir%\Resources\Config.ini,MainGui,W
 IniWrite,% H-38,%A_ScriptDir%\Resources\Config.ini,MainGui,H
+;Obj2File(List,A_ScriptDir "\Resources\GameList.ini")
 ExitApp
 ;****** Time Saver Functions
 m(x*){
@@ -350,3 +372,4 @@ Convert_Seconds(Seconds){
 #Include Functions\Get_FileFromOneDrive.ahk
 #Include Functions\Orphans.ahk
 #Include Functions\Gui_ConfirmOrphans.ahk
+#Include Functions\Obj2File.ahk

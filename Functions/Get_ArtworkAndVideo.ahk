@@ -1,33 +1,40 @@
 Get_ArtworkAndVideo(game){
 	Global Config,List
 	if List[game].Name contains Movie
-		PageData:=URLDownloadToVar("http://www.gog.com/movie/" game)
+	{
+		URL:="http://www.gog.com/movie/" List[Game].Folder
+		;List[game].DLC.1.Folder
+	}
 	else
-		PageData:=URLDownloadToVar("http://www.gog.com/game/" game)
+		URL:="http://www.gog.com/game/" List[Game].Folder
+	PageData:=URLDownloadToVar(URL)
+	;tt("Link - " URL List[Game].Folder)
 	if Config.Downloads.Artwork
 	{
 		;******************** ARTWORK ***********************
 		;----ScreenShots
 		SizeArray:=[]
 		While (Pos:=RegExMatch(PageData,"U)pauseAll\(\)""><img src=""http:\/\/static(.*)""",Artwork,(Pos?Pos+1:1)))
-			If !(FileCheck(Config.Artwork "\" game "\ScreenShot-" Number:=A_Index<10?"0" A_index ".jpg":A_Index ".jpg",,"http://static" Artwork1))
-				DownLoadFile("http://static" Artwork1,Config.Artwork "\" game "\ScreenShot-" Number)
+			If !(FileCheck(Config.Artwork "\" List[Game].Folder "\ScreenShot-" Number:=A_Index<10?"0" A_index ".jpg":A_Index ".jpg",,"http://static" Artwork1))
+				DownLoadFile("http://static" Artwork1,Config.Artwork "\" List[Game].Folder "\ScreenShot-" Number)
 		;tt("http://static" Artwork1,Config.Artwork "\" game "\ScreenShot-" A_Index ".jpg")
 		
 		;---- B&W Background
-		If !(FileCheck(Config.Artwork "\" game "\Background.jpg",,List[game].Background))
-			DownLoadFile(List[game].Background,Config.Artwork "\" game "\Background.jpg")
+		If !(FileCheck(Config.Artwork "\" List[Game].Folder "\Background.jpg",,List[game].Background))
+			DownLoadFile(List[game].Background,Config.Artwork "\" List[Game].Folder "\Background.jpg")
+		;tt(List[game].Background)
 		
 		;----Colour Background
 		While (Pos:=RegExMatch(PageData,"U)<meta name=""og\:image"" content=""(.*)"">",Artwork,(Pos?Pos+1:1)))
-			If !(FileCheck(Config.Artwork "\" game "\Background-2.jpg",,Artwork1))
-				DownLoadFile(Artwork1,Config.Artwork "\" game "\Background-2.jpg")
-		;tt(Artwork1,Config.Artwork "\" game "\Background.jpg")
+			If !(FileCheck(Config.Artwork "\" List[Game].Folder "\Background-2.jpg",,Artwork1))
+				DownLoadFile(Artwork1,Config.Artwork "\" List[Game].Folder "\Background-2.jpg")
+		;tt(Artwork1)
 		
 		;----BoxArt
 		;While (Pos:=RegExMatch(PageData,"U)",Artwork,(Pos?Pos+1:1)))
-		If !(FileCheck(Config.Artwork "\" game "\BoxArt.jpg",,List[game].GameBox))
-			DownLoadFile(List[game].GameBox,Config.Artwork "\" game "\BoxArt.jpg")
+		If !(FileCheck(Config.Artwork "\" List[Game].Folder "\BoxArt.jpg",,List[game].GameBox))
+			DownLoadFile(List[game].GameBox,Config.Artwork "\" List[Game].Folder "\BoxArt.jpg")
+		;tt(List[game].GameBox)
 	}
 	if Config.Downloads.Videos
 	{
@@ -40,8 +47,8 @@ Get_ArtworkAndVideo(game){
 			VideoTitle:=URL[1].filename ".mp4"
 			if (VideoTitle=".mp4")
 				VideoTitle:=Folder ".mp4"
-			If !(FileCheck(Config.Videos "\" game "\" VideoTitle))
-				DownLoadFile(URL[1].link,Config.Videos "\" game "\" VideoTitle)
+			If !(FileCheck(Config.Videos "\" List[Game].Folder "\" VideoTitle))
+				DownLoadFile(URL[1].link,Config.Videos "\" List[Game].Folder "\" VideoTitle)
 			;tt(URL[1].link,Config.Videos "\" game "\" VideoTitle)
 			;URLDownloadToFile,% URL[1].link, % Config.Videos "\" game "\" VideoTitle
 		}

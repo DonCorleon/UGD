@@ -12,6 +12,8 @@ DownloadFile(link,SaveAs){
 	If (ErrorLevel!=200)
 	{
 		tt("Download Failed with Error Code : " Errorlevel)
+		tt("URL: " URL)
+		tt("File: " SaveAs)
 		Return
 	}
 	AvgSpeed:=0

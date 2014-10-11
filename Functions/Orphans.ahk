@@ -29,8 +29,13 @@ Orphans(){
 				if (d.filename=f)
 					ExistingFiles[d.folder].Remove(A_Index)
 	}
-	;for a in FoldersToCheck
-		;tt("Checked " a)
+	TempArray:=[]
+	TempArray:=ExistingFiles
+	for a,b in TempArray
+	{
+		if !b[1]
+			ExistingFiles.Remove(a)
+	}
 	return ExistingFiles
 	
 }

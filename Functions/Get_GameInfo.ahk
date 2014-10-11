@@ -2,7 +2,7 @@ Get_GameInfo(GameName){
 	/*
 		This Needs to be refined and add the gather DLC, Installers, LanguagePacks,
 	*/
-	global List,Config,HTTP,API
+	global List,Config,HTTP,API,Orphans
 	DEBUG_GetGames:=0 ;---- Set to debug this module
 	Extras:=[],DLC:=[]
 	If List[GameName].Folder
@@ -35,7 +35,7 @@ Get_GameInfo(GameName){
 			Found_Extras = 0
 			Found_DLC = 1
 		}
-		If (Found_Extras&&Config.Downloads.Extras)
+		If (Found_Extras&&(Config.Downloads.Extras||Orphans))
 		{
 			FoundID := RegExMatch(A_LoopField, "U)www.gog.com\/downlink\/file\/(.*)\/(.*)""", ExtraID)
 			FoundName := RegExMatch(A_LoopField, "U)details-underline"">(.*)<", ExtraName)
@@ -45,7 +45,7 @@ Get_GameInfo(GameName){
 				Extras[ExtraNum] := Object("Folder", ExtraId1, "ID", ExtraId2, "Name", ExtraName1, "FileName", FileName, "Size", ExtraSize1, "Link", API.get_extra_link . "/" . ExtraID1 . "/" ExtraID2)
 			}
 		}
-		If (Found_DLC&&(Config.Downloads.Downloadable_Content||Config.Downloads.Installers||Config.Downloads.LanguagePacks||Config.Downloads.Patches))
+		If (Found_DLC&&(Orphans||Config.Downloads.Downloadable_Content||Config.Downloads.Installers||Config.Downloads.LanguagePacks||Config.Downloads.Patches))
 		{
 			FoundFolder		:= RegExMatch( A_LoopField, "U)data-gameindex=""(.*)""", DLCFolder)
 			FoundLink 		:= RegExMatch( A_LoopField, "U)list_game_item"" href=""(.*)"">", DLCLink)	;	1 = Link to get DLC Link. Add to API_get_installer_link
@@ -114,6 +114,8 @@ Get_GameInfo(GameName){
 	}
 	List[GameName].DLC := DLC
 	List[GameName].Extras := Extras ;----Put the new info into the Object
+	If !List[GameName].Folder
+		List[GameName].Folder:=DLC[1].Folder
 	return, Success
 }
 

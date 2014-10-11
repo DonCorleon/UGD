@@ -18,7 +18,7 @@ HTTP_GetUserMovieInfo(){
 	while,ll:=PageInfo.item[A_Index-1]
 	if ll.getattribute("id"){
 		ll2:=ll.getelementsbytagname("div")
-		List[Trim(ll2.item[4].innertext)]:=Object("Name","Movie:" Trim(ll2.item[4].innertext),"OrderID",ll["data-orderid"],"GameID",RegExReplace(ll.id,"game_li_"),"Background","http://static.gog.com" ll["data-background"],"MovieBox","http://static.gog.com" RegExReplace(ll.getelementsbytagname("img").item[0].src,"about:"),"Notification",Trim(ll.getelementsbyTagName("i").item[0].classname),"Selected",Testing)
+		List[Trim(ll2.item[4].innertext)]:=Object("Name","Movie:" Trim(ll2.item[4].innertext),"OrderID",ll["data-orderid"],"GameID",RegExReplace(ll.id,"game_li_"),"Background","http://static.gog.com" ll["data-background"],"GameBox","http://static.gog.com" RegExReplace(ll.getelementsbytagname("img").item[0].src,"about:"),"Notification",Trim(ll.getelementsbyTagName("i").item[0].classname),"Selected",Testing)
 	}
 	RegExMatch( InOutData, "U)count"":(.*)\,",  TotalMovies)	; get the number of games returned in the last call
 	TotalMoviesOwned +=TotalMovies1 ;----Add the the number of games found to the total number
