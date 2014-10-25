@@ -1,6 +1,6 @@
 Gui_Config(){
 	global Config,ConfigTree,ConfigSave,ConfigCancel
-	static Locations,Languages,Platforms,Linux,Downloads,Movies,UserID,PassID,BaseDir,PatchDir,DLCDir,ArtworkDir,VideoDir
+	static Locations,Languages,Platforms,Linux,Downloads,Movies,UserID,PassID,BaseDir,PatchDir,DLCDir,ArtworkDir,VideoDir,OrphansDir
 	IniRead,X,%A_ScriptDir%\Resources\Config.ini,ConfigGui,X,% Config.MainX
 	IniRead,Y,%A_ScriptDir%\Resources\Config.ini,ConfigGui,Y,% Config.MainY
 	IniRead,W,%A_ScriptDir%\Resources\Config.ini,ConfigGui,W,200
@@ -16,7 +16,7 @@ Gui_Config(){
 	Credentials:=TV_Add("Credentials")
 	UserID:=TV_Add("User = " Config.Username,Credentials)
 	PassID:=TV_Add("Pass = " Config.Password,Credentials)
-	Location:=["Base","Patches","DLC","Artwork","Videos"]
+	Location:=["Base","Patches","DLC","Artwork","Videos","Orphans"]
 	
 	Locations:=TV_Add("Locations")
 	BaseDir:=TV_Add("Base Dir = " Config.Location,Locations)
@@ -24,6 +24,7 @@ Gui_Config(){
 	DLCDir:=TV_Add("DLC = " Config.DLC,Locations)
 	ArtworkDir:=TV_Add("Artwork = " Config.Artwork,Locations)
 	VideoDir:=TV_Add("Videos = " Config.Videos,Locations)
+	OrphansDir:=TV_Add("Orphans = " Config.Orphans,Locations)
 	
 	Downloads:=TV_Add("Downloads")
 	for a,b in Config.Downloads
@@ -45,7 +46,7 @@ Gui_Config(){
 	For a,b in Config.Linux
 		TV_Add(a,Linux,"vPlatform_Tarballs +check" Config.Linux[a])
 	Gui,Config:Show,% "x" Config.ConfigX " y" Config.ConfigY " w" Config.ConfigW " h"  Config.ConfigH,Configuration
-	UncheckList:=[Movies,Credentials,UserID,PassID,Downloads,Platforms,Languages,Locations,BaseDir,PatchDir,DLCDir,ArtworkDir,VideoDir] ; taken from Maestrith >> http://www.autohotkey.com/board/topic/96840-ahk-11-hide-individual-checkboxes-in-a-treeview-x32x64/
+	UncheckList:=[Movies,Credentials,UserID,PassID,Downloads,Platforms,Languages,Locations,BaseDir,PatchDir,DLCDir,ArtworkDir,VideoDir,OrphansDir] ; taken from Maestrith >> http://www.autohotkey.com/board/topic/96840-ahk-11-hide-individual-checkboxes-in-a-treeview-x32x64/
 	VarSetCapacity(tvitem,28)
 	for index,id in UncheckList{ ;loop through the array of id numbers
 		info:=A_PtrSize=4?{0:8,4:id,12:0xf000}:{0:8,8:id,20:0xf000} ;there are 2 different offsets for x32 and x64.  This will account for both

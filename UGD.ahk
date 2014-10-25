@@ -4,8 +4,7 @@ version=;auto_version
 #SingleInstance,force
 SetBatchLines = -1
 ;******** Global Vars
-Global Cookie,status,Config:=[],Exclusions:=[]
-
+Global Cookie,status,Config:=[]
 DEBUG_Times:=0
 
 HTTP:=Object("GoGCookie","") ;----Create the basic HTTP Object
@@ -19,8 +18,8 @@ Gui,Main:New,+OwnDialogs +Resize +MinSize350x300 +hwndhwnd,Ultimate GoG Download
 Config.Mainhwnd:=hwnd
 Gui,Main:Add,Checkbox,x0 y0 vChecksums gChecksums			, Compare Check&sums (Slow)
 Gui,Main:Add,Checkbox,xp yp+15 vDefinitions gDefinitions	, &Latest Definitions
-Gui,Main:Add,Checkbox,xp yp+15 vOrphans gOrphans, Check &Orphans only
-Gui,Main:Add,Checkbox,xp+160 yp-30 vUsePreviousLogin gUsePreviousLogin, &Use Previous Login
+Gui,Main:Add,Checkbox,xp yp+15 vOrphans gOrphans, Check Orp&hans only
+Gui,Main:Add,Checkbox,xp+160 yp-30 vUsePreviousLogin gUsePreviousLogin, Use &Previous Login
 Gui,Main:Add,Button,% "x" Config.MainW-200 " y0 w80 vButtonLogin gButtonLogin",&Login
 gui,Main:Add,Button,% "x" Config.MainW-130 " y0 w80 vConfigWindow gConfigWindow",&Configure
 Gui,Main:Add,Button,% "x" Config.MainW-60 " y0 w80 vButtonUpdate gButtonUpdate",&Update
@@ -106,9 +105,9 @@ ButtonGetGames:
 		{
 			Get_GameInfo(a)
 			If Duplicate
-				myConsole.changeLine("[green]Working on [yellow]" a "[/][/]", myConsole.currentLine )
+				myConsole.changeLine("[green]Working on [yellow]" b.Name "[/][/]", myConsole.currentLine )
 			else
-				tt("Working on [yellow]" a "[/]") ; Convert_seconds(Round((a_tickcount - tick)/1000,0))
+				tt("Working on [yellow]" b.Name "[/]") ; Convert_seconds(Round((a_tickcount - tick)/1000,0))
 			for c in b.DLC ;---- Check against Platform, Language Downloads type parameters
 				if (Orphans||(Config.Movies[b.DLC[c].quality]||(Config.Platforms[b.DLC[c].Platform]&&Config.Languages[b.DLC[c].Language]&&((Config.Downloads[b.DLC[c].Type "s"]||Config.Downloads[b.DLC[c].Type "es"]||Config.Linux[b.DLC[c].Type])))))
 				{
@@ -135,9 +134,11 @@ ButtonGetGames:
 						FilesAlreadyDone[b.DLC[c].MD5]:=b.DLC[c].Language
 						Duplicate:=0
 				}
+			
 			if (Orphans||Config.Downloads.Extras)
 				for d in b.Extras
 				{
+					;Duplicate:=0
 					Link:=Get_ApiLink(b.Extras[d].Link)
 					b.Extras[d].Link:=Link.Link
 					b.Extras[d].Filename:=Link.FileName
@@ -148,16 +149,19 @@ ButtonGetGames:
 					;tt(b.Extras[d].Link)
 					if !Orphans
 						If !(FileCheck(Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename,,b.Extras[d].Link))
-							DownloadFile(b.Extras[d].Link,Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename)
-						-			Duplicate:=0
+						{
+						DownloadFile(b.Extras[d].Link,Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename)
+						}
+					Duplicate:=0
 				}
 			;---- Artwork and Video
 			if (!Orphans&&(Config.Downloads.Artwork||Config.Downloads.Videos))
 			{
-				Get_ArtworkAndVideo(a)
 				Duplicate:=0
+				Get_ArtworkAndVideo(a)
 			}
 		}
+		;Duplicate:=0
 	}
 	if (downloaded[1])
 		tt(""),tt("The following files were downloaded:")
@@ -170,8 +174,8 @@ ButtonGetGames:
 	;if Orphans
 	;{
 	tt("Checking for Orphaned Files")
+	OrphanFiles:=,OrphanCount:=0
 	OrphanFiles:=Orphans()
-	OrphanCount:=0
 	for a,b in OrphanFiles
 		for c,d in b
 			OrphanCount++ ;tt(a "/" d)
@@ -283,7 +287,16 @@ ButtonLogin:
 		tt("Loading Previous Login Database.")
 		List:=File2Obj(List,A_ScriptDir "\Resources\GameList.ini")
 		myConsole.changeLine("[green]Loading Previous Database....Complete[/]", myConsole.currentLine )
-		
+		{
+			tt("You Have " Updates " New/Update Notifications")
+			for a,b in List
+			if (b.notification){
+				b.Selected:=1
+				UpdateType:=b.notification=bdg_update?"has updated content":"is available for download"
+				tt("[yellow]" b.Name "[/] " UpdateType ". ")
+				GuiControl,Main:Enable,ButtonGetGames
+			}
+		}
 	}
 	If !LoggedIn
 		Return
@@ -373,3 +386,4 @@ Convert_Seconds(Seconds){
 #Include Functions\Orphans.ahk
 #Include Functions\Gui_ConfirmOrphans.ahk
 #Include Functions\Obj2File.ahk
+#Include Class_TreeView.ahk

@@ -8,6 +8,8 @@ API_Login(Username, Password){
 		tt("API:Step 1",API.oauth_get_urls,InOutHeader)
 	if (DEBUG_API>1) ;----------- DEBUG
 		tt("API:Step 1",InOutData)
+	;FileDelete, APIStep1.txt
+	;FileAppend,%InOutData%,APIStep1.txt
 	for a,b in ["status","version","url","mac_signature","mac_length","mac_sparkle_bundle","current_timestamp","oauth_get_temp_token","oauth_authorize_temp_token","oauth_get_token","get_user_details","get_user_games","get_game_details","get_installer_link","get_extra_link","set_app_status","error_log_endpoint","status_update_timer","link_expiration"]{
 		RegExMatch(InOutData,"U)\b" b "\b.*:(.*)(,|})",found)
 		value:=RegExReplace(found1,"(" Chr(34) "|\\)")

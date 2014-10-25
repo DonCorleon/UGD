@@ -39,7 +39,8 @@ HTTP_GetUserInfo(){
 		for a,b in List
 		if (b.notification){
 			b.Selected:=1
-			tt("[yellow]" a "[/] has new content. " b.notification)
+			UpdateType:=b.notification=bdg_update?"has updated content":"is available for download"
+			tt("[yellow]" b.Name "[/] " UpdateType ". ")
 		}
 		GuiControl,Main:Enable,ButtonGetGames
 	}

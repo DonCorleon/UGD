@@ -1,5 +1,11 @@
 Gui_ConfirmOrphans(OrphanList){
-	global Config,OrphanTree,MoveOrphans,DeleteOrphans,CancelOrphans,List,exclusions
+	global Config,List,OrphanTree,MoveOrphans,DeleteOrphans,CancelOrphans
+	Static FolderColour:="0xff0000",ExclusionColour:="0x0000ff",OrphanColour:="0x00ff00",TV,Exclusions,
+	Static TheList:=[],UncheckList,OrphanGuiSizeFirstRun
+	TheList:=OrphanList
+	
+	Config.OrphanExtras:=1
+	
 	IniRead,X,%A_ScriptDir%\Resources\Config.ini,OrphanGui,X,% Config.MainX
 	IniRead,Y,%A_ScriptDir%\Resources\Config.ini,OrphanGui,Y,% Config.MainY
 	IniRead,W,%A_ScriptDir%\Resources\Config.ini,OrphanGui,W,400
@@ -8,61 +14,127 @@ Gui_ConfirmOrphans(OrphanList){
 	Gui,Main:+Disabled
 	Gui,Orphan:New,+hwndhwnd -DPIScale +ToolWindow +Resize +OwnerMain +MinSize400x400
 	Config.OrphanHwnd:=Hwnd
-	Gui,Orphan:Add,TreeView,% "w" W-20 " h" H-50 " AltSubmit vOrphanTree gOrphanTree +hwndhwnd +Checked"
+	Gui,Orphan:Add,TreeView,% "w" W-20 " h" H-50 " AltSubmit vOrphanTree gOrphanTree BackgroundBlack +hwndhwnd +Checked"
 	Config.OrphanTVHwnd:=Hwnd
 	Gui,Orphan:Add,Button,% "x10 y" H-40 " h30 w" W/3-20 " vMoveOrphans gMoveOrphans", Move
 	Gui,Orphan:Add,Button,% "xp+" W/3 " y" H-40 " h30 w" W/3-20 " vDeleteOrphans", Delete
 	Gui,Orphan:Add,Button,% "xp+" W/3 " y" H-40 " h30 w" W/3-20 " vCancelOrphans gOrphanButtonCancel", Cancel
-	Gui,Orphan:Treeview,% hwnd
+	tv:=new treeview(Config.OrphanTVHwnd)
+	;Gui,TreeView,SysTreeView321
+	
 	;---- Load Exclusion List if it exists
 	ifExist,% A_ScriptDir "\Resources\ExclusionList.Txt"
 	{
-		FileRead,Exclusions,% A_ScriptDir "\Resources\ExclusionList.Txt"
-		Exclusions:=StrSplit(Exclusions,"`n"," `r`n")
+		FileRead,Temp,% A_ScriptDir "\Resources\ExclusionList.Txt"
+		Exclusions:=StrSplit(Temp,"`n"," `r`n")
 	}
+	UncheckList:=[]
 	For a,b in OrphanList
 	{
-		Parent:=TV_Add(a) ;List[a].Name)
+		if !Exclusions.1
+			Node:=TV.Add({Label:a,Fore:OrphanColour})
+		else
+		{
+			for j,k in Exclusions
+			{
+				SetColour:=FolderColour
+				If (k=Config.Location a )
+				{
+					SetColour:=ExclusionColour
+					break
+				}
+			}
+			Node:=TV.Add({Label:a,Fore:SetColour})
+		}
+		UnCheckList.Insert(Node)
 		for c,d in b
 		{
 			If !Exclusions.1
-				Child:=TV_Add(d,parent,"+Check")
+				Child:=Tv.Add({Label:d,Fore:OrphanColour,parent:node,option:"+Check"})
 			else
 			{
 				InList:=1
 				for e,f in Exclusions
 				{
-					If (f=Config.Location a "\" d||f=Config.Location a )
+					SetColour:=OrphanColour
+					FoundFolder:=RegExMatch(f,"^" Config.Location a "\\")
+					;If FoundFolder
+					;m("Found It ",f,Config.Location a "\\")
+					If (f=Config.Location a "\" d||FoundFolder )
 					{
 						InList:=0
-						;m(Config.Location a "\" d,">" f "<","+Check" InList)
+						SetColour:=ExclusionColour
+						Tv.modify({hwnd:node,fore:ExclusionColour})
+						;m(Config.Location a "\" d,">" f "<","+Check" InList,"Colour - " SetColour,"Node - " Node)
 						break
 					}
 				}
-				Child:=TV_Add(d,parent,"+Check" InList)
+				;Child:=TV_Add(d,parent,"+Check" InList)
+				Child:=Tv.Add({Label:d,Fore:SetColour,parent:node,option:"Vis +Check" InList})
+				;m(d,SetColour,Node,InList,a)
 			}
 		}
 	}
 	Gui,Orphan:Show,% "x" X " y" Y " w" W " h" H,Orphan Confirmation
+	
+	VarSetCapacity(tvitem,28)
+	for index,id in UncheckList
+	{ ;loop through the array of id numbers
+		info:=A_PtrSize=4?{0:8,4:id,12:0xf000}:{0:8,8:id,20:0xf000} ;there are 2 different offsets for x32 and x64.  This will account for both
+		for offset,value in info
+			NumPut(value,tvitem,offset)
+		SendMessage,4415,0,&tvitem,SysTreeView321,% "ahk_id" Config.OrphanHwnd
+		;4415 is tvm_setitemw which is tv_first=0x1100 + 63
+	}
+	;for a,b in Unchecklist
+	;Listing.=a "=" b "`n"
+	;m(Listing)
 	Return
+	
 	MoveOrphans:
 	{
+		OrphanCount:=0
+		FolderCount:=0
 		tt("Moving Orphaned Files")
+		for a,b in TheList
+		{
+			FolderCount++
+			for c,d in b
+				OrphanCount++
+		}
 		ifNotExist % Config.Location "\Cleaned"
 			FileCreateDir, % Config.Location "\Cleaned"
-		for a,b in OrphanFiles
-			for c,d in b
+		ItemID = 0
+		OrphanMoved:=0
+		Looper:=OrphanCount+FolderCount
+		Loop,% Looper
+		{
+			ItemID := TV_GetNext(ItemID, "Full")  ; Replace "Full" with "Checked" to find all checkmarked items.
+			ParentID:=TV_GetParent(ItemID)
+			if !ParentID
+				Continue
+			TV_GetText(ParentText,ParentID)
+			If TV_Get(ItemID,"Check")
 			{
-				tt("Moving " a "\" d)
-				ifNotExist % Config.Location "\Cleaned\" a 
-					FileCreateDir, % Config.Location "\Cleaned\" a
-				FileMove,% Config.Location a "\" d,% Config.Location "Cleaned\" a "\" d
+				TV_GetText(ItemText, ItemID)
+				Splitpath,ItemText,,,FileExt
+				if (Config.OrphanExtras&&FileExt="zip")
+					continue
+				tt("Moving " ParentText "\" ItemText)
+				OrphanMoved++
+				tv.Remove(ItemID)
+				;ifNotExist % Config.Location "\Cleaned\" a 
+				;FileCreateDir, % Config.Location "\Cleaned\" a
+				;FileMove,% Config.Location a "\" d,% Config.Location "Cleaned\" a "\" d
 			}
-		tt("Moving Complete")
+		}
+		tt("Moved " OrphanMoved " of " OrphanCount " orphaned files.")
+		return
 	}
 	
 	OrphanTree:
 	{
+		
 		Gui,Orphan:Treeview,% Config.OrphanTVHwnd
 		if (A_GuiEvent&&A_GuiEvent = "RightClick")
 		{
@@ -77,30 +149,34 @@ Gui_ConfirmOrphans(OrphanList){
 					{
 						if (b=Config.Location ExcludeFolder)
 						{
-							Exclusions.Remove(a)
-							;m("Removing " b " from excluded list")
-							found:=1
 							TV_Modify(A_EventInfo,"+Select +Check")
+							Exclusions.Remove(a)
+							found:=1
+							Tv.modify({hwnd:A_EventInfo,fore:OrphanColour})
+							;m("Removing " b " from excluded list",A_EventInfo)
 						}
 					}
 					if !found
 					{
-						Exclusions.Insert(Config.Location ExcludeFolder)
-						;m("Added Exclude folder : " Config.Location ExcludeFolder)
 						TV_Modify(A_EventInfo,"+Select -Check")
+						Exclusions.Insert(Config.Location ExcludeFolder)
+						Tv.modify({hwnd:A_EventInfo,fore:ExclusionColour})
+						;m("Added Exclude folder : " Config.Location ExcludeFolder,A_EventInfo)
 					}
 				}
 				else 
 				{
-					;m("Exclude folder : " Config.Location ExcludeFolder)
-					Exclusions.Insert(Config.Location ExcludeFolder)
 					TV_Modify(A_EventInfo,"+Select -Check")
+					Exclusions.Insert(Config.Location ExcludeFolder)
+					Tv.modify({hwnd:A_EventInfo,fore:ExclusionColour})
+					;m("Exclude folder : " Config.Location ExcludeFolder,A_EventInfo)
 				}
 				
 				;---- Add to Exclusion List and change colour to red Here
 			}
 			else
 			{
+				ParentFolder:=ExcludeFolder
 				TV_GetText(ExcludeFolder,ExcludeFolder)
 				TV_GetText(ExcludeFile,A_EventInfo)
 				if Exclusions.1
@@ -108,29 +184,34 @@ Gui_ConfirmOrphans(OrphanList){
 					found:=0
 					for a,b in Exclusions
 					{
-						if (b=Config.Location ExcludeFolder "\" ExcludeFile)
+						if (b=Config.Location ExcludeFolder "\" ExcludeFile||b=Config.Location ExcludeFolder )
 						{
-							Exclusions.Remove(a)
-							;m("Removing " b " from excluded list")
-							found:=1
 							TV_Modify(A_EventInfo,"+Select +Check")
+							Tv.modify({hwnd:A_EventInfo,fore:OrphanColour})
+							Exclusions.Remove(a)
+							;m("Removing " b " from excluded list",A_EventInfo,OrphanColour)
+							found:=1
 							break
 						}
 					}
 					if !found
 					{
-						Exclusions.Insert(Config.Location ExcludeFolder "\" ExcludeFile)
-						;m("Added Exclude file : " Config.Location ExcludeFolder "\" ExcludeFile)
 						TV_Modify(A_EventInfo,"+Select -Check")
+						Exclusions.Insert(Config.Location ExcludeFolder "\" ExcludeFile)
+						Tv.modify({hwnd:A_EventInfo,fore:ExclusionColour})
+						;m("Added Exclude file : " Config.Location ExcludeFolder "\" ExcludeFile,A_EventInfo,ExclusionColour)
 					}
 				}
 				else
 				{
-					;m("Exclude File : " Config.Location ExcludeFolder "\" ExcludeFile)
-					Exclusions.Insert(Config.Location ExcludeFolder "\" ExcludeFile)
 					TV_Modify(A_EventInfo,"+Select -Check")
+					Exclusions.Insert(Config.Location ExcludeFolder "\" ExcludeFile)
+					Tv.modify({hwnd:A_EventInfo,fore:ExclusionColour})
+					;m("Exclude File : " Config.Location ExcludeFolder "\" ExcludeFile)
 				}
 				;---- Add to Exclusion List and change colour to red Here
+				;m("Here")
+				;WinSet,Redraw,,% "ahk_id" Config.OrphanTVHwnd
 			}
 		}
 		return
@@ -148,23 +229,25 @@ Gui_ConfirmOrphans(OrphanList){
 		Gui,Main:-Disabled
 		Gui,Orphan:Destroy
 		for a,b in Exclusions
-			EList.=Trim(b) "`n"
-		m(">" EList "<")
+			if b
+				EList.=Trim(b) "`n"
+		;m(">" EList "<")
 		FileDelete,% A_ScriptDir "\Resources\ExclusionList.Txt"
 		FileAppend,% Trim(EList),% A_ScriptDir "\Resources\ExclusionList.Txt"
 		Return
 	}
 	OrphanGuiSize:
 	{
-		if !OrphanGuiSizeFirstRun{
+		if !OrphanGuiSizeFirstRun
+		{
 			OrphanGuiSizeFirstRun:=1
 			Return
 		}
-		GuiControl,Orphan:MoveDraw,OrphanTree,% "w" A_GuiWidth-20 " h" A_GuiHeight-50
+		;TrayTip,Gui Size,W %A_GuiWidth%`nH %A_GuiHeight%,2
+		GuiControl,Orphan:MoveDraw,OrphanTree,% "x5 w" A_GuiWidth-10 " h" A_GuiHeight-50
 		GuiControl,Orphan:MoveDraw,MoveOrphans,% "x10 y" A_GuiHeight-40 " h30 w" A_GuiWidth/3-20
-		GuiControl,Orphan:MoveDraw,DeleteOrphans,% "xp+" A_GuiWidth/3 " y" A_GuiHeight-40 " h30 w" A_GuiWidth/3-20
-		GuiControl,Orphan:MoveDraw,CancelOrphans,% "xp+" A_GuiWidth/3 " y" A_GuiHeight-40 " h30 w" A_GuiWidth/3-20
-		
+		GuiControl,Orphan:MoveDraw,DeleteOrphans,% "x" A_GuiWidth/3+10 " y" A_GuiHeight-40 " h30 w" A_GuiWidth/3-20
+		GuiControl,Orphan:MoveDraw,CancelOrphans,% "x" A_GuiWidth/3*2+10 " y" A_GuiHeight-40 " h30 w" A_GuiWidth/3-20
 		return
 	}
 }

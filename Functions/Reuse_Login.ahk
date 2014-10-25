@@ -19,9 +19,9 @@ Reuse_Login(option)
 	if (Option="LOAD")
 	{
 		IniRead,LastLogin,%A_ScriptDir%\Resources\Config.ini,Login,LastLogin,0
-		if(LastLogin&&(A_Now-LastLogin)<1000000)
+		if(LastLogin&&(A_Now-LastLogin)<2000000)
 		{
-			tt("Attempting to Reuse Last Login from " LastLogin)
+			tt("Attempting to use previous login cookies...")
 			IniRead,IniAPI,%A_ScriptDir%\Resources\Config.ini,LoginAPI
 			IniRead,IniHTTP,%A_ScriptDir%\Resources\Config.ini,LoginHTTP
 			API:=[]
@@ -40,7 +40,22 @@ Reuse_Login(option)
 				HTTP[Ini1]:=Ini2
 			}
 			Cookie:=HTTP.GoGCookie
-			Return 1
+			
+			URL:="https://www.gog.com/account"
+			Options := "+Flag: INTERNET_FLAG_NO_COOKIES`n+NO_AUTO_REDIRECT"
+			. (A_IsUnicode ? "`nCharset: UTF-8" : "")
+			Redo4a:
+			HTTPRequest(URL, InOutData, InOutHeader:=Headers(), Options "`nx-requested-with: XMLHttpRequest")
+			Found:=RegExMatch(InOutHeader,"U)Location: (.*)`n",New_URL)
+			if (found){ ;----------------- Check for Redirect
+				url:=New_URL1
+				goto Redo4a
+			}	
+			If RegExMatch(InOutData, "U)id=""currentUsername"" value=""(.*)""", NickName)
+			{
+				tt("Previous Cookies Successful. Welcome " NickName1)
+				Return 1
+			}
 		}
 	}
 	
