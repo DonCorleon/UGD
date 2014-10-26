@@ -292,7 +292,7 @@ ButtonLogin:
 			for a,b in List
 			if (b.notification){
 				b.Selected:=1
-				UpdateType:=b.notification=bdg_update?"has updated content":"is available for download"
+				UpdateType:=b.notification="bdg_update"?"has updated content":"is available for download"
 				tt("[yellow]" b.Name "[/] " UpdateType ". ")
 				GuiControl,Main:Enable,ButtonGetGames
 			}
