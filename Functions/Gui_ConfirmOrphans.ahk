@@ -17,7 +17,7 @@ Gui_ConfirmOrphans(OrphanList){
 	Gui,Orphan:Add,TreeView,% "w" W-20 " h" H-50 " AltSubmit vOrphanTree gOrphanTree BackgroundBlack +hwndhwnd +Checked"
 	Config.OrphanTVHwnd:=Hwnd
 	Gui,Orphan:Add,Button,% "x10 y" H-40 " h30 w" W/3-20 " vMoveOrphans gMoveOrphans", Move
-	Gui,Orphan:Add,Button,% "xp+" W/3 " y" H-40 " h30 w" W/3-20 " vDeleteOrphans", Delete
+	Gui,Orphan:Add,Button,% "xp+" W/3 " y" H-40 " h30 w" W/3-20 " vDeleteOrphans gDeleteOrphans", Delete
 	Gui,Orphan:Add,Button,% "xp+" W/3 " y" H-40 " h30 w" W/3-20 " vCancelOrphans gOrphanButtonCancel", Cancel
 	tv:=new treeview(Config.OrphanTVHwnd)
 	;Gui,TreeView,SysTreeView321
@@ -102,8 +102,8 @@ Gui_ConfirmOrphans(OrphanList){
 			for c,d in b
 				OrphanCount++
 		}
-		ifNotExist % Config.Location "\Cleaned"
-			FileCreateDir, % Config.Location "\Cleaned"
+		ifNotExist % Config.Orphans
+			FileCreateDir, % Config.Orphans
 		ItemID = 0
 		OrphanMoved:=0
 		Looper:=OrphanCount+FolderCount
@@ -120,15 +120,98 @@ Gui_ConfirmOrphans(OrphanList){
 				Splitpath,ItemText,,,FileExt
 				if (Config.OrphanExtras&&FileExt="zip")
 					continue
-				tt("Moving " ParentText "\" ItemText)
+				;tt("Moving " ParentText "\" ItemText)
 				OrphanMoved++
-				tv.Remove(ItemID)
-				;ifNotExist % Config.Location "\Cleaned\" a 
-				;FileCreateDir, % Config.Location "\Cleaned\" a
-				;FileMove,% Config.Location a "\" d,% Config.Location "Cleaned\" a "\" d
+				TV_Delete(ItemID)
+				for a,b in TheList
+				{
+					for c,d in b
+						if (d=ItemText)
+						{
+							TheList[a].Remove(c)
+							break
+						}
+					if !b.1
+					{
+						TheList.Remove(a)
+						TV_Delete(ParentID)
+						break
+					}
+				}
+				ifNotExist % Config.Orphans a 
+					FileCreateDir, % Config.Orphans a
+				FileMove,% Config.Location a "\" d,% Config.Orphans "\" a "\" d,1
+				tt("Moved - " Config.Orphans "\" a "\" d)
 			}
 		}
 		tt("Moved " OrphanMoved " of " OrphanCount " orphaned files.")
+		Goto OrphanGuiClose
+		return
+	}
+	DeleteOrphans:
+	{
+		MsgBox,4404,Confirmation,Are you sure you want to delete all checked orphan files?
+		IfMsgBox,No
+		{
+			tt("Aborted Orphan Deletion")
+			return
+		}
+		IfMsgBox,Cancel
+		{
+			tt("Aborted Orphan Deletion")
+			return
+		}
+		OrphanCount:=0
+		FolderCount:=0
+		tt("Deleting Orphaned Files")
+		for a,b in TheList
+		{
+			FolderCount++
+			for c,d in b
+				OrphanCount++
+		}
+		ifNotExist % Config.Orphans
+			FileCreateDir, % Config.Orphans
+		ItemID = 0
+		OrphanMoved:=0
+		Looper:=OrphanCount+FolderCount
+		Loop,% Looper
+		{
+			ItemID := TV_GetNext(ItemID, "Full")  ; Replace "Full" with "Checked" to find all checkmarked items.
+			ParentID:=TV_GetParent(ItemID)
+			if !ParentID
+				Continue
+			TV_GetText(ParentText,ParentID)
+			If TV_Get(ItemID,"Check")
+			{
+				TV_GetText(ItemText, ItemID)
+				Splitpath,ItemText,,,FileExt
+				if (Config.OrphanExtras&&FileExt="zip")
+					continue
+				;tt("Deleting " ParentText "\" ItemText)
+				OrphanMoved++
+				TV_Delete(ItemID)
+				for a,b in TheList
+				{
+					for c,d in b
+						if (d=ItemText)
+						{
+							TheList[a].Remove(c)
+							break
+						}
+					if !b.1
+					{
+						TheList.Remove(a)
+						TV_Delete(ParentID)
+						break
+					}
+				}
+				FileDelete,% Config.Location a "\" d
+				tt("Deleted - " Config.Orphans "\" a "\" d)
+			}
+		}
+		tt("Deleted " OrphanMoved " of " OrphanCount " orphaned files.")
+		Goto OrphanGuiClose
 		return
 	}
 	
@@ -188,6 +271,7 @@ Gui_ConfirmOrphans(OrphanList){
 						{
 							TV_Modify(A_EventInfo,"+Select +Check")
 							Tv.modify({hwnd:A_EventInfo,fore:OrphanColour})
+							Tv.modify({hwnd:TV_GetParent(A_EventInfo),fore:OrphanColour})
 							Exclusions.Remove(a)
 							;m("Removing " b " from excluded list",A_EventInfo,OrphanColour)
 							found:=1

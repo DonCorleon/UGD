@@ -146,6 +146,8 @@ Gui_Config(){
 			Goto ConfigArtworkLocation
 		else if(A_GuiEvent="DoubleClick"&&A_EventInfo=VideoDir)
 			Goto ConfigVideoLocation
+		else if(A_GuiEvent="DoubleClick"&&A_EventInfo=OrphansDir)
+			Goto ConfigOrphansLocation
 		;Insert code in here to do select all/none and change check box on main parent accordingly
 		Return
 	}
@@ -198,6 +200,22 @@ Gui_Config(){
 		If !Config.Videos
 			Config.Videos:=Config.Location "\Artwork"
 		TV_Modify(VideoDir,,"Videos = " Config.Videos)
+		Return	
+	}
+	ConfigOrphansLocation:
+	{
+		FileSelectFolder,Location,,,Select a folder to move Orphaned files to....
+		if Location
+		{
+			InvalidLocation:=RegExMatch(Location,"^\\\\")
+			if InvalidLocation
+				m("Network locations are not currently supported unless its is a mapped drive.`n`nComing soon to an update near you!!")
+			Config.Orphans:=Location
+			IniWrite,% Location,%A_ScriptDir%\Resources\Config.ini,Locations,Orphans
+		}
+		If !Config.Orphans
+			Config.Orphans:=Config.Location "\Cleaned"
+		TV_Modify(OrphansDir,,"Orphans = " Config.Orphans)
 		Return	
 	}
 	ConfigUsername:

@@ -5,7 +5,7 @@ Orphans(){
 	FoldersToCheck:=[]
 	for a,b in List
 		for c,d in b.DLC
-			if !FoldersToCheck[d.Folder]
+			if (b.selected&&!FoldersToCheck[d.Folder])
 				FoldersToCheck[d.folder]:=1
 	For a in FoldersToCheck
 	{

@@ -174,7 +174,7 @@ ButtonGetGames:
 	;if Orphans
 	;{
 	tt("Checking for Orphaned Files")
-	OrphanFiles:=,OrphanCount:=0
+	OrphanFiles:=[],OrphanCount:=0
 	OrphanFiles:=Orphans()
 	for a,b in OrphanFiles
 		for c,d in b
