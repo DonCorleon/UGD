@@ -43,17 +43,117 @@ Get_ArtworkAndVideo(game){
 		While (Pos:=RegExMatch(PageData,"U)src=""(http|https)\:\/\/www\.youtube\.com\/embed\/(.*)\?",Youtube,(Pos?Pos+1:1)))
 		{
 			Link:=Youtube1 "://www.youtube.com/watch?v=" youtube2
-			URL:=Get_Youtube_Video(Link,"mp4,720P,360P,muxed")
-			VideoTitle:=URL[1].filename ".mp4"
+			;URL:=Get_Youtube_Video(Link,"mp4,720P,360P,muxed")
+			URL:=Get_Youtube_Vid(Link,"720")
+			VideoTitle:=URL.filename ".mp4"
 			if (VideoTitle=".mp4")
 				VideoTitle:=Folder ".mp4"
 			If !(FileCheck(Config.Videos "\" List[Game].Folder "\" VideoTitle))
-				DownLoadFile(URL[1].link,Config.Videos "\" List[Game].Folder "\" VideoTitle)
-			;tt(URL[1].link,Config.Videos "\" game "\" VideoTitle)
+				DownLoadFile(URL.link,Config.Videos "\" List[Game].Folder "\" VideoTitle)
+			tt(URL.link)
+			tt(url.filename)
+			tt(Config.Videos "\" game "\" VideoTitle)
 			;URLDownloadToFile,% URL[1].link, % Config.Videos "\" game "\" VideoTitle
 		}
 	}
 	
+}
+UriEncode(Uri, Enc = "UTF-8"){
+	StrPutVar(Uri, Var, Enc)
+	f := A_FormatInteger
+	SetFormat, IntegerFast, H
+	Loop
+	{
+		Code := NumGet(Var, A_Index - 1, "UChar")
+		If (!Code)
+			Break
+		If (Code >= 0x30 && Code <= 0x39 ; 0-9
+			|| Code >= 0x41 && Code <= 0x5A ; A-Z
+		|| Code >= 0x61 && Code <= 0x7A) ; a-z
+		Res .= Chr(Code)
+		Else
+			Res .= "%" . SubStr(Code + 0x100, -1)
+	}
+	SetFormat, IntegerFast, %f%
+	Return, Res
+}
+UriDecode(Uri, Enc = "UTF-8")
+{
+	Pos := 1
+	Loop
+	{
+		Pos := RegExMatch(Uri, "i)(?:%[\da-f]{2})+", Code, Pos++)
+		If (Pos = 0)
+			Break
+		VarSetCapacity(Var, StrLen(Code) // 3, 0)
+		StringTrimLeft, Code, Code, 1
+		Loop, Parse, Code, `%
+			NumPut("0x" . A_LoopField, Var, A_Index - 1, "UChar")
+		StringReplace, Uri, Uri, `%%Code%, % StrGet(&Var, Enc), All
+	}
+	Return, Uri
+}
+StrPutVar(Str, ByRef Var, Enc = "")
+{
+	Len := StrPut(Str, Enc) * (Enc = "UTF-16" || Enc = "CP1200" ? 2 : 1)
+	VarSetCapacity(Var, Len, 0)
+	Return, StrPut(Str, &Var, Enc)
+}
+
+Get_YouTube_Vid(URL,RequestedQuality="720")
+{
+	Response:=UrlDownloadToVar(URL) ; "%A_ScriptDir%\response.txt"
+	RegExMatch(Response, "U)<title>(.*) - YouTube</title>", Title)
+	TitleName:=URIEncode(Title1)
+	FileName:= Title1
+	Loop, Parse,Response,`n
+	{
+		
+		IfInString, A_LoopField, bitrate
+		{
+			Ourline:=A_LoopField
+			Break
+		}
+	}
+	LinkFields:=[]
+	taglist:=[],urllist:=[]
+	for a,b in StrSplit(ourline,","){
+		for c,d in StrSplit(b,Chr(34)){
+			if InStr(d,"quality"){
+				d:=uridecode(d)
+				d:=RegExReplace(d,"U)\\u\d\d\d\d","&")
+				for e,f in StrSplit(d,"&"){
+					if (SubStr(f,1,2)="s=")
+						f:=RegExReplace(f,"s=","signature=")
+					if InStr(f,"url=http")
+						start:=RegExReplace(f,"url=")
+					Else if !InStr(f,"type=")&&!InStr(f,"quality=")&&!InStr(f,"fallback_host=")&&!InStr(f,"size="){
+						if !taglist[f]
+							after.="&" f
+						taglist[f]:=1
+					}
+					Else if InStr(f,"type="){
+						type:=f
+						
+					}
+					if InStr(f,"quality=")
+						Quality:=f
+					
+				}
+				title:="&title=" title1
+				urllist.Insert(start after title)
+				if instr(type,"video/mp4")
+				if InStr(Quality,RequestedQuality){
+					ReturnLink:=Object("Filename",title1,"Link",start after title)	
+					break
+				}
+				;LV_Add("",Quality,start,after,title)
+				start:=after:=title:="",taglist:=[]
+				type:=""
+			}
+		}
+	}
+	Return, ReturnLink	
 }
 Get_YouTube_Video( YouTubeURL,ParsedIn:="all",GetSizes:="OFF")
 {

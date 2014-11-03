@@ -135,13 +135,12 @@ Gui_ConfirmOrphans(OrphanList){
 					{
 						TheList.Remove(a)
 						TV_Delete(ParentID)
-						break
 					}
+					ifNotExist % Config.Orphans a 
+						FileCreateDir, % Config.Orphans a
+					FileMove,% Config.Location a "\" d,% Config.Orphans "\" a "\" d,1
+					tt("Moved - " Config.Orphans "\" a "\" d)
 				}
-				ifNotExist % Config.Orphans a 
-					FileCreateDir, % Config.Orphans a
-				FileMove,% Config.Location a "\" d,% Config.Orphans "\" a "\" d,1
-				tt("Moved - " Config.Orphans "\" a "\" d)
 			}
 		}
 		tt("Moved " OrphanMoved " of " OrphanCount " orphaned files.")
