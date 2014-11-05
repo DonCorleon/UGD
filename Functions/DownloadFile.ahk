@@ -37,7 +37,7 @@ DownloadProgress(Percentage,Size,File){
 		LastTick:=A_TickCount
 		LastSize:=Round(Size*Percentage,0)
 		;DLSpeed.Insert(Speed)
-		myConsole.changeLine("[blue]" Round(Percentage*100,0) "%[/] - [Green]Downloading [/][yellow]" File "[/] - [red]" Round(Size*Percentage,0) "/" Size "[/] @ " Speed "Kb/s", myConsole.currentLine)
+		myConsole.changeLine("[Yellow]" Round(Percentage*100,0) "%[/] - [Green]Downloading [/][yellow]" File "[/] - [red]" Round(Size*Percentage,0) "/" Size "[/] @ " Speed "Kb/s", myConsole.currentLine)
 	}
 	Return
 }
