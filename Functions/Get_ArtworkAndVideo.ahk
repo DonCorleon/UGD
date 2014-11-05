@@ -38,7 +38,7 @@ Get_ArtworkAndVideo(game){
 	}
 	if Config.Downloads.Videos
 	{
-		tt("Download of Game Video is currently broken.")
+		;tt("Download of Game Videos is currently only available in 720P.")
 		;******************** VIDEOS ***********************
 		While (Pos:=RegExMatch(PageData,"U)src=""(http|https)\:\/\/www\.youtube\.com\/embed\/(.*)\?",Youtube,(Pos?Pos+1:1)))
 		{
@@ -50,9 +50,9 @@ Get_ArtworkAndVideo(game){
 				VideoTitle:=Folder ".mp4"
 			If !(FileCheck(Config.Videos "\" List[Game].Folder "\" VideoTitle))
 				DownLoadFile(URL.link,Config.Videos "\" List[Game].Folder "\" VideoTitle)
-			tt(URL.link)
-			tt(url.filename)
-			tt(Config.Videos "\" game "\" VideoTitle)
+			;tt(URL.link)
+			;tt(url.filename)
+			;tt(Config.Videos "\" game "\" VideoTitle)
 			;URLDownloadToFile,% URL[1].link, % Config.Videos "\" game "\" VideoTitle
 		}
 	}

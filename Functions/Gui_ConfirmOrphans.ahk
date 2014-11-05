@@ -118,15 +118,15 @@ Gui_ConfirmOrphans(OrphanList){
 			{
 				TV_GetText(ItemText, ItemID)
 				Splitpath,ItemText,,,FileExt
-				if (Config.OrphanExtras&&FileExt="zip")
-					continue
+				;if (Config.OrphanExtras&&FileExt="zip")
+					;continue
 				;tt("Moving " ParentText "\" ItemText)
 				OrphanMoved++
 				TV_Delete(ItemID)
 				for a,b in TheList
 				{
 					for c,d in b
-						if (d=ItemText)
+						if (d=ParentText "\" ItemText)
 						{
 							TheList[a].Remove(c)
 							break

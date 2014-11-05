@@ -21,10 +21,16 @@ FileCheck(SaveAs,MD5="",Link:=""){
 				Return,0
 			}
 		}else{
-			WebRequest := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-			WebRequest.Open("HEAD", Link)
-			WebRequest.Send()
-			;Store the header which holds the file size in a variable:
+			RetryHeaderFileCheck:
+			Try
+			{
+				WebRequest := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				WebRequest.Open("HEAD", Link)
+				WebRequest.Send()
+				;Store the header which holds the file size in a variable:
+			}
+			Catch
+				goto RetryHeaderFileCheck
 			ServerSize := WebRequest.GetResponseHeader("Content-Length") ;GetAllResponseHeaders()
 			FileGetSize,ExistingSize,%SaveAs%
 			Same:=ExistingSize=ServerSize?1:0
