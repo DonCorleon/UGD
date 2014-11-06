@@ -1,5 +1,5 @@
 Gui_ConfirmOrphans(OrphanList){
-	global Config,List,OrphanTree,MoveOrphans,DeleteOrphans,CancelOrphans
+	global Config,List,OrphanTree,MoveOrphans,DeleteOrphans,CancelOrphans,OrphanFiles
 	Static FolderColour:="0xff0000",ExclusionColour:="0x0000ff",OrphanColour:="0x00ff00",TV,Exclusions,
 	Static TheList:=[],UncheckList,OrphanGuiSizeFirstRun
 	TheList:=OrphanList
@@ -119,7 +119,7 @@ Gui_ConfirmOrphans(OrphanList){
 				TV_GetText(ItemText, ItemID)
 				Splitpath,ItemText,,,FileExt
 				;if (Config.OrphanExtras&&FileExt="zip")
-					;continue
+				;continue
 				;tt("Moving " ParentText "\" ItemText)
 				OrphanMoved++
 				TV_Delete(ItemID)
@@ -317,6 +317,7 @@ Gui_ConfirmOrphans(OrphanList){
 		;m(">" EList "<")
 		FileDelete,% A_ScriptDir "\Resources\ExclusionList.Txt"
 		FileAppend,% Trim(EList),% A_ScriptDir "\Resources\ExclusionList.Txt"
+		OrphanFiles:=TheList
 		Return
 	}
 	OrphanGuiSize:
