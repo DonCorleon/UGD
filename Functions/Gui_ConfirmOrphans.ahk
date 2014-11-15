@@ -30,7 +30,7 @@ Gui_ConfirmOrphans(OrphanList){
 		Exclusions:=StrSplit(Temp,"`n"," `r`n")
 	}
 	UncheckList:=[]
-	For a,b in OrphanList
+	For a,b in TheList
 	{
 		if !Exclusions.1
 			Node:=TV.Add({Label:a,Fore:OrphanColour})
@@ -122,8 +122,6 @@ Gui_ConfirmOrphans(OrphanList){
 				;if (Config.OrphanExtras&&FileExt="zip")
 				;continue
 				;tt("Moving " ParentText "\" ItemText)
-				OrphanMoved++
-				TV_Delete(ItemID)
 				for a,b in TheList
 				{
 					for c,d in b
@@ -137,11 +135,15 @@ Gui_ConfirmOrphans(OrphanList){
 						TheList.Remove(a)
 						TV_Delete(ParentID)
 					}
-					ifNotExist % Config.Orphans a 
+					ifNotExist % Config.Orphans "\" a 
 						FileCreateDir, % Config.Orphans "\" a
-					FileMove,% Config.Location a "\" d,% Config.Orphans "\" a "\" d,1
+					FileMove,% Config.Location "\" a "\" d,% Config.Orphans "\" a "\" d,1
 					if !ErrorLevel
+					{
+						OrphanMoved++
+						TV_Delete(ItemID)
 						tt("Moved - " Config.Orphans "\" a "\" d)
+					}
 					else
 						tt("Error moving - " Config.Orphans "\" a "\" d)
 				}
