@@ -2,6 +2,7 @@ Gui_ConfirmOrphans(OrphanList){
 	global Config,List,OrphanTree,MoveOrphans,DeleteOrphans,CancelOrphans,OrphanFiles
 	Static FolderColour:="0xff0000",ExclusionColour:="0x0000ff",OrphanColour:="0x00ff00",TV,Exclusions,
 	Static TheList:=[],UncheckList,OrphanGuiSizeFirstRun
+	TheList:=[]
 	TheList:=OrphanList
 	
 	Config.OrphanExtras:=1
@@ -139,7 +140,10 @@ Gui_ConfirmOrphans(OrphanList){
 					ifNotExist % Config.Orphans a 
 						FileCreateDir, % Config.Orphans a
 					FileMove,% Config.Location a "\" d,% Config.Orphans "\" a "\" d,1
-					tt("Moved - " Config.Orphans "\" a "\" d)
+					if !ErrorLevel
+						tt("Moved - " Config.Orphans "\" a "\" d)
+					else
+						tt("Error moving - " Config.Orphans "\" a "\" d)
 				}
 			}
 		}

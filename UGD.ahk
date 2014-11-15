@@ -4,7 +4,7 @@ version=;auto_version
 #SingleInstance,force
 SetBatchLines = -1
 ;******** Global Vars
-Global Cookie,status,Config:=[]
+Global Cookie,status,Config:=[],OrphanFiles:=[]
 DEBUG_Times:=0
 
 HTTP:=Object("GoGCookie","") ;----Create the basic HTTP Object
@@ -20,6 +20,7 @@ Gui,Main:Add,Checkbox,x0 y0 vChecksums gChecksums			, Compare Check&sums (Slow)
 Gui,Main:Add,Checkbox,xp yp+15 vDefinitions gDefinitions	, &Latest Definitions
 Gui,Main:Add,Checkbox,xp yp+15 vOrphans gOrphans, Check Orp&hans only
 Gui,Main:Add,Checkbox,xp+160 yp-30 vUsePreviousLogin gUsePreviousLogin, Use &Previous Login
+Gui,Main:Add,Checkbox,xp yp+15 vPrettyNames gPrettyNames, Use Connie's Dat names for folders
 Gui,Main:Add,Button,% "x" Config.MainW-200 " y0 w80 vButtonLogin gButtonLogin",&Login
 gui,Main:Add,Button,% "x" Config.MainW-130 " y0 w80 vConfigWindow gConfigWindow",&Configure
 Gui,Main:Add,Button,% "x" Config.MainW-60 " y0 w80 vButtonUpdate gButtonUpdate",&Update
@@ -33,6 +34,12 @@ if !(Config.ConfigFound) ;---- If there is no configuration file, go straight to
 	Gui_Config()
 Return
 
+PrettyNames:
+{
+	Gui,Submit,NoHide
+	tt("Use Connie's Pretty names for folders-" PNState:=PrettyNames?"On":"Off")
+	Return
+}
 Checksums:
 {
 	Gui,Submit,NoHide
@@ -103,6 +110,10 @@ ButtonGetGames:
 	{
 		if b.Selected ;----Only Process if it has been selected
 		{
+			if PrettyNames
+				Folder:=b.DLC[c].ConnieFolder
+			else
+				Folder:=b.DLC[c].Folder
 			Get_GameInfo(a)
 			If Duplicate
 				myConsole.changeLine("[green]Working on [yellow]" b.Name "[/][/]", myConsole.currentLine )
@@ -387,3 +398,4 @@ Convert_Seconds(Seconds){
 #Include Functions\Gui_ConfirmOrphans.ahk
 #Include Functions\Obj2File.ahk
 #Include Class_TreeView.ahk
+#Include Functions\FolderCleanUp.ahk
