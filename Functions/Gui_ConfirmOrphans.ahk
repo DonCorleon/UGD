@@ -138,7 +138,7 @@ Gui_ConfirmOrphans(OrphanList){
 						TV_Delete(ParentID)
 					}
 					ifNotExist % Config.Orphans a 
-						FileCreateDir, % Config.Orphans a
+						FileCreateDir, % Config.Orphans "\" a
 					FileMove,% Config.Location a "\" d,% Config.Orphans "\" a "\" d,1
 					if !ErrorLevel
 						tt("Moved - " Config.Orphans "\" a "\" d)
