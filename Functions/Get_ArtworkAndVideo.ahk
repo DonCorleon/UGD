@@ -26,8 +26,8 @@ Get_ArtworkAndVideo(game){
 		
 		;----Colour Background
 		While (Pos:=RegExMatch(PageData,"U)<meta name=""og\:image"" content=""(.*)"">",Artwork,(Pos?Pos+1:1)))
-			If !(FileCheck(Config.Artwork "\" List[Game].Folder "\Background-2.jpg",,Artwork1))
-				DownLoadFile(Artwork1,Config.Artwork "\" List[Game].Folder "\Background-2.jpg")
+			If !(FileCheck(Config.Artwork "\" List[Game].Folder "\Background-2.jpg",,"http:" Artwork1))
+				DownLoadFile("http:" Artwork1,Config.Artwork "\" List[Game].Folder "\Background-2.jpg")
 		;tt(Artwork1)
 		
 		;----BoxArt
@@ -48,7 +48,7 @@ Get_ArtworkAndVideo(game){
 			VideoTitle:=URL.filename ".mp4"
 			if (VideoTitle=".mp4")
 				VideoTitle:=Folder ".mp4"
-			If !(FileCheck(Config.Videos "\" List[Game].Folder "\" VideoTitle))
+			If !(FileCheck(Config.Videos "\" List[Game].Folder "\" VideoTitle,,URL.Link))
 				DownLoadFile(URL.link,Config.Videos "\" List[Game].Folder "\" VideoTitle)
 			;tt(URL.link)
 			;tt(url.filename)
@@ -105,7 +105,7 @@ Get_YouTube_Vid(URL,RequestedQuality="720")
 	Response:=UrlDownloadToVar(URL) ; "%A_ScriptDir%\response.txt"
 	RegExMatch(Response, "U)<title>(.*) - YouTube</title>", Title)
 	TitleName:=URIEncode(Title1)
-	FileName:= Title1
+	FileName:= RegExReplace(Title1,":","-")
 	Loop, Parse,Response,`n
 	{
 		

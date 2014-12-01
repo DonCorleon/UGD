@@ -41,6 +41,17 @@ Resources(){
 		IniRead,OrphanLocation,%A_ScriptDir%\Resources\Config.ini,Locations,Orphans,% BaseLocation "\Cleaned"
 		IniRead,Dat,%A_ScriptDir%\Resources\Config.ini,Definitions,Dat,""
 		IniRead,Names,%A_ScriptDir%\Resources\Config.ini,Definitions,Names,""
+		IniRead,PrettyNames,%A_ScriptDir%\Resources\Config.ini,MainGui,PrettyNames,0
+		IniRead,Checksums,%A_ScriptDir%\Resources\Config.ini,MainGui,Checksums,0
+		IniRead,UsePreviousLogin,%A_ScriptDir%\Resources\Config.ini,MainGui,UsePreviousLogin,0
+		IniRead,Definitions,%A_ScriptDir%\Resources\Config.ini,MainGui,Definitions,0
+		IniRead,CheckOrphans,%A_ScriptDir%\Resources\Config.ini,MainGui,CheckOrphans,0
+		Config.PrettyNames:=PrettyNames
+		Config.NameConvention:=PrettyNames?"Connie":"GoG"
+		Config.Checksums:=Checksums
+		Config.UsePreviousLogin:=UsePreviousLogin
+		Config.Definitions:=Definitions
+		Config.CheckOrphans:=CheckOrphans
 		Config.MainX:=X,Config.MainY:=Y,Config.MainW:=W,Config.MainH:=H
 		Config.Username:=Username,Config.Password:=Password,Config.Location:=BaseLocation,Config.Artwork:=ArtLocation,Config.Videos:=VideoLocation,Config.Orphans:=OrphanLocation,Config.Dat:=Dat,Config.Names:=Names
 		For a in LanguageList

@@ -16,11 +16,11 @@ API:=Object("Consumer_Key","1f444d14ea8ec776585524a33f6ecc1c413ed4a5" ; Create t
 Config:=Resources()
 Gui,Main:New,+OwnDialogs +Resize +MinSize350x300 +hwndhwnd,Ultimate GoG Downloader v%Version%
 Config.Mainhwnd:=hwnd
-Gui,Main:Add,Checkbox,x0 y0 vChecksums gChecksums			, Compare Check&sums (Slow)
-Gui,Main:Add,Checkbox,xp yp+15 vDefinitions gDefinitions	, &Latest Definitions
-Gui,Main:Add,Checkbox,xp yp+15 vOrphans gOrphans, Check Orp&hans only
-Gui,Main:Add,Checkbox,xp+160 yp-30 vUsePreviousLogin gUsePreviousLogin, Use &Previous Login
-Gui,Main:Add,Checkbox,xp yp+15 vPrettyNames gPrettyNames, Use Connie's Dat names for folders
+Gui,Main:Add,Checkbox,% "x0 y0 vChecksums gChecksums Checked" Config.Checksums, Compare Check&sums (Slow)
+Gui,Main:Add,Checkbox,% "xp yp+15 vDefinitions gDefinitions Checked" Config.Definitions, &Latest Definitions
+Gui,Main:Add,Checkbox,% "xp yp+15 vOrphans gOrphans Checked" Config.CheckOrphans, Check Orp&hans only
+Gui,Main:Add,Checkbox,% "xp+160 yp-30 vUsePreviousLogin gUsePreviousLogin Checked" Config.UsePreviousLogin, Use &Previous Login
+Gui,Main:Add,Checkbox,% "xp yp+15 vPrettyNames gPrettyNames Checked" Config.PrettyNames, Use Connie's Dat names for folders
 Gui,Main:Add,Button,% "x" Config.MainW-200 " y0 w80 vButtonLogin gButtonLogin",&Login
 gui,Main:Add,Button,% "x" Config.MainW-130 " y0 w80 vConfigWindow gConfigWindow",&Configure
 Gui,Main:Add,Button,% "x" Config.MainW-60 " y0 w80 vButtonUpdate gButtonUpdate",&Update
@@ -29,6 +29,9 @@ Gui,Main:Add,Button,% "x" Config.MainW-130 " y22 w80 Disabled vButtonGetGames gB
 Gui,Main:Add,Button,% "x" Config.MainW-60 " y22 w80  Disabled vButtonOrphans gButtonOrphans",&Orphans
 myConsole:= new scConsole({"PosX":"1","PosY":"50","Gui Number":"Main","Control Width": Config.MainW, "Control Height": Config.MainH-50,"Font":Courier New,"Line Number Color":"yellow"})
 Gui,Main:Show,% "x" Config.MainX " y" Config.MainY " w" Config.MainW " h" Config.MainH
+Gui,Submit,Nohide
+If Orphans
+	GuiControl,Main:,ButtonGetGames,C&heck Orphans
 DoLog(1,"LogFile:Log.txt","Downloader Started")
 if !(Config.ConfigFound) ;---- If there is no configuration file, go straight to the config window
 	Gui_Config()
@@ -38,24 +41,29 @@ PrettyNames:
 {
 	Gui,Submit,NoHide
 	tt("Use Connie's Pretty names for folders-" PNState:=PrettyNames?"On":"Off")
+	IniWrite,% PrettyNames,%A_ScriptDir%\Resources\Config.ini,MainGui,PrettyNames
+	Config.NameConvention:=PrettyNames?"GoG":"Connie"
 	Return
 }
 Checksums:
 {
 	Gui,Submit,NoHide
 	tt("Compare Checksums-" CSState:=Checksums?"On":"Off")
+	IniWrite,% Checksums,%A_ScriptDir%\Resources\Config.ini,MainGui,Checksums
 	Return
 }
 UsePreviousLogin:
 {
 	Gui,Submit,NoHide
 	tt("Using Previous Login Information - " UPLState:=UsePreviousLogin?"On":"Off")
+	IniWrite,% UsePreviousLogin,%A_ScriptDir%\Resources\Config.ini,MainGui,UsePreviousLogin
 	Return
 }
 Definitions:
 {
 	Gui,Submit,NoHide
 	tt("Latest Definitions - " LDState:=Definitions?"On":"Off")
+	IniWrite,% Definitions,%A_ScriptDir%\Resources\Config.ini,MainGui,Definitions
 	Return
 }
 ButtonOrphans:
@@ -68,6 +76,7 @@ Orphans:
 {
 	Gui,Submit,NoHide
 	tt("Check Orphans Only - " OState:=Orphans?"On":"Off")
+	IniWrite,% Orphans,%A_ScriptDir%\Resources\Config.ini,MainGui,CheckOrphans
 	If Orphans
 		GuiControl,Main:,ButtonGetGames,C&heck Orphans
 	Else

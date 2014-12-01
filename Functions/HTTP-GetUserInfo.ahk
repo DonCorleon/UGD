@@ -49,14 +49,11 @@ HTTP_GetUserInfo(){
 	FileRead,TempVar,% A_ScriptDir "\Resources\" Config.names
 	Loop,Parse,TempVar,`r
 	{
-		RegExMatch(A_LoopField,"Ui)rename (\w*)\b " Chr(34) "(.*)(| \[DLC\])" Chr(34),foundpretty)
-		RegExMatch(A_LoopField,"Ui)rename (\w*)\b " Chr(34) "(.*)\(((january|february|march|april|may|june|july|august|september|october|november|december).*)\)(| \[DLC\])" Chr(34),found)
+		RegExMatch(A_LoopField,"Ui)rename (\w*)\b " Chr(34) "(.*)(| \[DLC\])" Chr(34),found)
+		;RegExMatch(A_LoopField,"Ui)rename (\w*)\b " Chr(34) "(.*)\(((january|february|march|april|may|june|july|august|september|october|november|december).*)\)(| \[DLC\])" Chr(34),found)
 		if List[Found1].Name
-			List[Found1].Name:=Found2
-		if List[Foundpretty1].Name
 		{
-			List[Foundpretty1].FolderConnie:=FoundPretty2
-			m(List[Foundpretty1].Name,List[Foundpretty1].Folder,List[Foundpretty1].FolderConnie)
+			List[Found1].Name:=RegExReplace(Found2," \((.*)\)")
 		}
 	}
 	;***********************************************

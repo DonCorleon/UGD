@@ -1,5 +1,5 @@
 HTTP_Login(UserName,UserPass){
-	global DEBUG_HTTP,HTTP,Cookie:=""
+	global DEBUG_HTTP:=0,HTTP,Cookie:=""
 	tt("HTTP:`tLogin Started")
 	Options := "+Flag: INTERNET_FLAG_NO_COOKIES`n+NO_AUTO_REDIRECT"
 	. (A_IsUnicode ? "`nCharset: UTF-8" : "")
@@ -13,7 +13,10 @@ HTTP_Login(UserName,UserPass){
 		FileAppend, URL`n%URL%`n`nHeader`n%InOutHeader%`n`nCookie`n%Cookie%`n`nInOutData`n%InOutData%,HTTP-Step1.txt
 	}
 	if !(RegExMatch(InOutData,"U)GalaxyAccounts\(\'(.*)\'",Auth_URL))
-		tt("[red]ERROR[/]:`tNo AUTH_URL Found"),goto HTTPFailed
+	{
+		tt("[red]ERROR[/]:`tNo AUTH_URL Found")
+		goto HTTPFailed
+	}
 	;If !(RegExMatch(InOutData,"U)id=""gutm"" value=""(.*)"" />",gutm))
 	;Return tt("[red]ERROR[/]:`tNo GUTM Found")
 	;If !(RegExMatch(InOutData,"U)id=""uqid"" value=""(.*)"" />",uqid))
@@ -43,10 +46,16 @@ HTTP_Login(UserName,UserPass){
 	}
 	FoundToken:=RegExMatch(InOutData,"U)name=""login\[_token\]"" value=""(.*)"" \/\>",Login_Token)
 	if !FoundToken
-		tt("[Red]ERROR[/]:No login token Found"),goto HTTPFailed
+	{
+		tt("[Red]ERROR[/]:No login token Found")
+		goto HTTPFailed
+	}
 	FoundID:=RegExMatch(URL,"U)client_id=(.*)\&",Login_ID)
 	if !FoundID
-		tt("[red]ERROR[/]:No Client ID Found"),goto HTTPFailed
+	{
+		tt("[red]ERROR[/]:No Client ID Found")
+		goto HTTPFailed
+	}
 	tt("HTTP:`tPhase 2 passed")
 	;**************** Step 3
 	Referer:=URL
@@ -108,8 +117,14 @@ HTTP_Login(UserName,UserPass){
 	If RegExMatch(InOutData, "U)id=""currentUsername"" value=""(.*)""", NickName)
 		tt("HTTP:`tPhase 4 passed"),tt("Welcome " NickName1)
 	else
+		goto HTTPFailed
+	
+	HTTP.GoGCookie:=Cookie
+	HTTP.GoGOptions:=Options
+	return,1 tt("HTTP:`tLogin Successful")
+	
+	HTTPFailed:
 	{
-		HTTPFailed:
 		GuiControl,Main:Enable,ButtonSelectGames
 		GuiControl,Main:Enable,ButtonLogin
 		GuiControl,Main:Enable,ConfigWindow
@@ -117,8 +132,5 @@ HTTP_Login(UserName,UserPass){
 		tt("HTTP:`tLogin Failed"),
 		tt("HTTP Error:`tSkipping API login")
 		Return,0
-	}
-	HTTP.GoGCookie:=Cookie
-	HTTP.GoGOptions:=Options
-	return,1 tt("HTTP:`tLogin Successful")
+	}	
 }

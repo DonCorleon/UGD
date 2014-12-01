@@ -1,40 +1,46 @@
 FolderCleanUp(){
 	;#SingleInstance,Force
-	global Config
+	Global Config
+	;global Config:=[]
+	;Config.Location:="C:\Users\Don\Downloads\gog_downloader"
+	;Config.NameConvention:="GoG"
+	;Config.names:="Renamer - GOG.com Downloader Name to Folder Name (821 + 26 + 61 + 38) (20141101).bat"
+	;FileRead,TempVar,% "C:\AutoHotKey Studio\Projects\Ultimate GoG Downloader\Resources\" Config.names
+	FileRead,TempVar,% A_ScriptDir "\Resources\" Config.names
+	
 	GogNames:=[]
 	ConnieNames:=[]
-	ConnieNamesNoDates:=[]
 	
-	FileRead,TempVar,% A_ScriptDir "\Resources\" Config.names
 	Loop,Parse,TempVar,`r
 	{
-		RegExMatch(A_LoopField,"Ui)rename (\w*)\b " Chr(34) "(.*)(| \[DLC\])" Chr(34),foundpretty)
-		RegExMatch(A_LoopField,"Ui)rename (\w*)\b " Chr(34) "(.*)\(((january|february|march|april|may|june|july|august|september|october|november|december).*)\)(| \[DLC\])" Chr(34),found)
-		GogNames[FoundPretty1]:=FoundPretty2
-		ConnieNames[FoundPretty2]:=FoundPretty1
-		ConnieNamesNoDates[Found2]:=Found1
+		RegExMatch(A_LoopField,"Ui)rename (\w*)\b " Chr(34) "(.*)(| \[DLC\])" Chr(34),Names)
+		GogNames[Names1]:=Names2
+		ConnieNames[Names2]:=Names1
 	}
-	loop,z:\*.*,2 ;% Config.Location "\*.*",2
+	loop,% Config.Location "\*.*",2
 	{
 		if Gognames[A_LoopFileName]
-		{
-			MsgBox,GoG Standard Naming
-			if Config.NameConvention="GoG"
-				continue
-			else if Config.NameConvention="Connie"
-				m(A_LoopFileFullPath,Config.Location "\" GoGNames[A_LoopFileName])
-			;FileMoveDir,% A_LoopFileFullPath,% Config.Location "\" GoGNames[A_LoopFileName]
-			else if Config.NameConvention="Hybrid"
-				m(A_LoopFileFullPath,Config.Location "\" RegExReplace(GoGNames[A_LoopFileName],"\((.*)\)"))
-			;FileMoveDir,% A_LoopFileFullPath,% Config.Location "\" RegExReplace(GoGNames[A_LoopFileName],"\((.*)\)")
-		}
-		if Connienames[A_LoopFileName]
-		{
-			MsgBox,Connie .dat Naming
-		}
-		if ConnieNamesNoDates[A_LoopFileName]
-		{
-			MsgBox,Connie Hybrid Naming
-		}
+			if (Config.NameConvention="Connie")
+			{
+				FileMoveDir,% A_LoopFileFullPath,% Config.Location "\" GoGNames[A_LoopFileName]
+				If !ErrorLevel
+					tt("Renamed folder" A_LoopFileName " to " GoGNames[A_LoopFileName])
+			}
+		else if Connienames[A_LoopFileName]
+			if (Config.NameConvention="GoG")
+			{
+				FileMoveDir,% A_LoopFileFullPath,% Config.Location "\" ConnieNames[A_LoopFileName]
+				If !ErrorLevel
+					tt("Renamed folder" A_LoopFileName " to " ConnieNames[A_LoopFileName])
+			}			
+		else
+			continue
 	}
+	tt("Renamed all folders to [Yellow]" Config.NameConvention "[/] Convention.")	
+	return
 }
+;m(x*){
+;for a,b in x
+;list.=b "`n"
+;msgbox %list%
+;}

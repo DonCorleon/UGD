@@ -1,8 +1,7 @@
 Gui_ConfirmOrphans(OrphanList){
 	global Config,List,OrphanTree,MoveOrphans,DeleteOrphans,CancelOrphans,OrphanFiles
 	Static FolderColour:="0xff0000",ExclusionColour:="0x0000ff",OrphanColour:="0x00ff00",TV,Exclusions,
-	Static TheList:=[],UncheckList,OrphanGuiSizeFirstRun
-	TheList:=[]
+	Static TheList,UncheckList,OrphanGuiSizeFirstRun
 	TheList:=OrphanList
 	
 	Config.OrphanExtras:=1
@@ -94,8 +93,18 @@ Gui_ConfirmOrphans(OrphanList){
 	
 	MoveOrphans:
 	{
-		OrphanCount:=0
-		FolderCount:=0
+		MsgBox,4404,Confirmation,Are you sure you want to move all checked orphan files?
+		IfMsgBox,No
+		{
+			tt("Aborted Moving Orphans")
+			return
+		}
+		IfMsgBox,Cancel
+		{
+			tt("Aborted Moving Orphans")
+			return
+		}
+		OrphanCount:=0,FolderCount:=0
 		tt("Moving Orphaned Files")
 		for a,b in TheList
 		{
@@ -105,7 +114,7 @@ Gui_ConfirmOrphans(OrphanList){
 		}
 		ifNotExist % Config.Orphans
 			FileCreateDir, % Config.Orphans
-		ItemID = 0
+		ItemID:= 0
 		OrphanMoved:=0
 		Looper:=OrphanCount+FolderCount
 		Loop,% Looper
@@ -125,27 +134,27 @@ Gui_ConfirmOrphans(OrphanList){
 				for a,b in TheList
 				{
 					for c,d in b
-						if (d=ParentText "\" ItemText)
+					{
+						if (a=ParentText&&d=ItemText)
 						{
-							TheList[a].Remove(c)
-							break
+							ifNotExist % Config.Orphans "\" a 
+								FileCreateDir, % Config.Orphans "\" a
+							FileMove,% Config.Location "\" a "\" d,% Config.Orphans "\" a "\" d,1
+							if (!ErrorLevel)
+							{
+								OrphanMoved++
+								tt("[Yellow]Moved[/] - " Config.Orphans "\" a "\" d)
+								TheList[a].Remove(c)
+								break
+							}
+							else
+								tt("[red]Error moving[/] - " Config.Orphans "\" a "\" d)
 						}
-					if !b.1
+					}
+					if !(TheList[a].MaxIndex())
 					{
 						TheList.Remove(a)
-						TV_Delete(ParentID)
 					}
-					ifNotExist % Config.Orphans "\" a 
-						FileCreateDir, % Config.Orphans "\" a
-					FileMove,% Config.Location "\" a "\" d,% Config.Orphans "\" a "\" d,1
-					if !ErrorLevel
-					{
-						OrphanMoved++
-						TV_Delete(ItemID)
-						tt("Moved - " Config.Orphans "\" a "\" d)
-					}
-					else
-						tt("Error moving - " Config.Orphans "\" a "\" d)
 				}
 			}
 		}
@@ -175,10 +184,8 @@ Gui_ConfirmOrphans(OrphanList){
 			for c,d in b
 				OrphanCount++
 		}
-		ifNotExist % Config.Orphans
-			FileCreateDir, % Config.Orphans
-		ItemID = 0
-		OrphanMoved:=0
+		ItemID:= 0
+		OrphanDeleted:=0
 		Looper:=OrphanCount+FolderCount
 		Loop,% Looper
 		{
@@ -191,31 +198,32 @@ Gui_ConfirmOrphans(OrphanList){
 			{
 				TV_GetText(ItemText, ItemID)
 				Splitpath,ItemText,,,FileExt
-				if (Config.OrphanExtras&&FileExt="zip")
-					continue
-				;tt("Deleting " ParentText "\" ItemText)
-				OrphanMoved++
-				TV_Delete(ItemID)
 				for a,b in TheList
 				{
 					for c,d in b
-						if (d=ItemText)
+					{
+						if (a=ParentText&&d=ItemText)
 						{
-							TheList[a].Remove(c)
-							break
+							FileDelete,% Config.Location "\" a "\" d
+							if (!ErrorLevel)
+							{
+								OrphanDeleted++
+								tt("[yellow]Deleted[/] - " Config.Orphans "\" a "\" d)
+								TheList[a].Remove(c)
+								break
+							}
+							else
+								tt("[red]Error deleting[/] - " Config.Orphans "\" a "\" d)
 						}
-					if !b.1
+					}
+					if !(TheList[a].MaxIndex())
 					{
 						TheList.Remove(a)
-						TV_Delete(ParentID)
-						break
 					}
 				}
-				FileDelete,% Config.Location a "\" d
-				tt("Deleted - " Config.Orphans "\" a "\" d)
 			}
 		}
-		tt("Deleted " OrphanMoved " of " OrphanCount " orphaned files.")
+		tt("Deleted " OrphanDeleted " of " OrphanCount " orphaned files.")
 		Goto OrphanGuiClose
 		return
 	}
@@ -310,6 +318,8 @@ Gui_ConfirmOrphans(OrphanList){
 	OrphanButtonCancel:
 	OrphanCancel:
 	{
+		OrphanFiles:=[]
+		OrphanFiles:=TheList
 		WinGetPos,X,Y,W,H,% "ahk_id" Config.OrphanHwnd
 		IniWrite,% X,%A_ScriptDir%\Resources\Config.ini,OrphanGui,X
 		IniWrite,% Y,%A_ScriptDir%\Resources\Config.ini,OrphanGui,Y
@@ -323,7 +333,6 @@ Gui_ConfirmOrphans(OrphanList){
 		;m(">" EList "<")
 		FileDelete,% A_ScriptDir "\Resources\ExclusionList.Txt"
 		FileAppend,% Trim(EList),% A_ScriptDir "\Resources\ExclusionList.Txt"
-		OrphanFiles:=TheList
 		Return
 	}
 	OrphanGuiSize:
