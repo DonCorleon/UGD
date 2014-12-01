@@ -1,6 +1,7 @@
 Testing:=0
 
-version:=";auto_version"
+version:="Alpha"
+;auto_version
 #SingleInstance,force
 SetBatchLines = -1
 ;******** Global Vars
