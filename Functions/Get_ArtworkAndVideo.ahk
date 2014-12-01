@@ -207,6 +207,8 @@ Get_YouTube_Video( YouTubeURL,ParsedIn:="all",GetSizes:="OFF")
 					{
 						If Test=s=
 							ListTheOrder.="signature=" ParameterList[Test] "&"
+						Else if Test=ip=
+							ListTheOrder.=Test Config.IP "&"
 						Else
 							ListTheOrder.=Test ParameterList[Test] "&"
 					}

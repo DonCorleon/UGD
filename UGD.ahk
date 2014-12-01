@@ -254,6 +254,8 @@ ButtonLogin:
 	GuiControl,Main:+Redraw,ButtonUpdate
 	Username:=Config.Username
 	Password:=Config.Password
+	IP:=URLDownloadToVar("http://7fw.de/ipraw.php")
+	Config.IP:=URLDownloadToVar("http://7fw.de/ipraw.php")
 	If UsePreviousLogin
 		ReUsingLogin:=ReUse_Login("LOAD")
 	if (!Username||!Password) ;----Break if no Username or password
