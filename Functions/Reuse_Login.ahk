@@ -1,6 +1,6 @@
 Reuse_Login(option)
 {
-	global Cookie,HTTP,API
+	global Cookie,HTTP,API,version
 	if (Option="SAVE")
 	{
 		for a,b in HTTP
@@ -53,7 +53,8 @@ Reuse_Login(option)
 			}	
 			If RegExMatch(InOutData, "U)id=""currentUsername"" value=""(.*)""", NickName)
 			{
-				tt("Previous Cookies Successful. Welcome " NickName1)
+				tt("Previous Cookies Successful.")
+				Gui,Show,,Ultimate GoG Downloader v%Version% - %NickName1%
 				Return 1
 			}
 		}

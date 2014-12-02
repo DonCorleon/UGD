@@ -1,5 +1,5 @@
 HTTP_Login(UserName,UserPass){
-	global DEBUG_HTTP:=0,HTTP,Cookie:=""
+	global DEBUG_HTTP:=0,HTTP,Cookie:="",myConsole,Version
 	tt("HTTP:`tLogin Started")
 	Options := "+Flag: INTERNET_FLAG_NO_COOKIES`n+NO_AUTO_REDIRECT"
 	. (A_IsUnicode ? "`nCharset: UTF-8" : "")
@@ -21,7 +21,8 @@ HTTP_Login(UserName,UserPass){
 	;Return tt("[red]ERROR[/]:`tNo GUTM Found")
 	;If !(RegExMatch(InOutData,"U)id=""uqid"" value=""(.*)"" />",uqid))
 	;Return tt("[red]ERROR[/]:`tNo UQID Found")
-	tt("HTTP:`tPhase 1 passed")
+	myConsole.changeLine("[green]HTTP:`tPhase 1 passed[/]", myConsole.currentLine )
+	;tt("HTTP:`tPhase 1 passed")
 	;While, (Pos:=RegExMatch(InOutData,"data-gameid=""\K\d+",gameid,Pos+StrLen(gameid)))
 	;games .= "," gameid
 	;Games:=OAuth__URIEncode(Trim(games,","))
@@ -56,7 +57,8 @@ HTTP_Login(UserName,UserPass){
 		tt("[red]ERROR[/]:No Client ID Found")
 		goto HTTPFailed
 	}
-	tt("HTTP:`tPhase 2 passed")
+	myConsole.changeLine("[green]HTTP:`tPhase 2 passed[/]", myConsole.currentLine )
+	;tt("HTTP:`tPhase 2 passed")
 	;**************** Step 3
 	Referer:=URL
 	url:="https://login.gog.com/login_check"
@@ -84,7 +86,8 @@ HTTP_Login(UserName,UserPass){
 		goto Redo3
 	}	
 	Cookie.=GetCookies(InOutHeader)
-	tt("HTTP:`tPhase 3 passed")
+	myConsole.changeLine("[green]HTTP:`tPhase 3 passed[/]", myConsole.currentLine )
+	;tt("HTTP:`tPhase 3 passed")
 	;**************** Step 4
 	;data =
 	;(LTrim Join&
@@ -115,13 +118,20 @@ HTTP_Login(UserName,UserPass){
 		goto Redo4
 	}	
 	If RegExMatch(InOutData, "U)id=""currentUsername"" value=""(.*)""", NickName)
-		tt("HTTP:`tPhase 4 passed"),tt("Welcome " NickName1)
+	{
+		myConsole.changeLine("[green]HTTP:`tPhase 4 passed[/]", myConsole.currentLine )
+		;tt("HTTP:`tPhase 4 passed")
+		;tt("Welcome " NickName1)
+		Gui,Show,,Ultimate GoG Downloader v%Version% - %NickName1%
+	}
 	else
 		goto HTTPFailed
 	
 	HTTP.GoGCookie:=Cookie
 	HTTP.GoGOptions:=Options
-	return,1 tt("HTTP:`tLogin Successful")
+	myConsole.changeLine("[green]HTTP:`tLogin Successful[/]", myConsole.currentLine )
+	;tt("HTTP:`tLogin Successful")
+	return,1 
 	
 	HTTPFailed:
 	{

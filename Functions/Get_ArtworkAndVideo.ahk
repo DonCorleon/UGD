@@ -49,11 +49,11 @@ Get_ArtworkAndVideo(game){
 			if (VideoTitle=".mp4")
 				VideoTitle:=Folder ".mp4"
 			If !(FileCheck(Config.Videos "\" List[Game].Folder "\" VideoTitle,,URL.Link))
+			{
 				DownLoadFile(URL.link,Config.Videos "\" List[Game].Folder "\" VideoTitle)
-			;tt(URL.link)
-			;tt(url.filename)
-			;tt(Config.Videos "\" game "\" VideoTitle)
-			;URLDownloadToFile,% URL[1].link, % Config.Videos "\" game "\" VideoTitle
+				tt("URL : " URL.Link)
+			}
+			
 		}
 	}
 	
@@ -197,7 +197,7 @@ Get_YouTube_Video( YouTubeURL,ParsedIn:="all",GetSizes:="OFF")
 				StringReplace,Link, Link,`%3F,`?, All
 				StringReplace,Link, Link,videoplayback?,videoplayback`&, All
 				For i,param in KeyList{
-					Found:=RegExMatch(Link,"U)&\+?" Param "(.*)&",P)
+					Found:=RegExMatch(Link,"U)&\+?" Param "(.*)&?",P)
 					If Found
 						ParameterList[Param]:=P1, TagOrder[Found]:=Param
 				}

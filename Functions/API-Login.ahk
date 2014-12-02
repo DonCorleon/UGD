@@ -20,7 +20,8 @@ API_Login(Username, Password){
 		API[b]:=value
 	}
 	if (API.oauth_get_temp_token)
-		tt("API:`tPhase 1 passed")
+		myConsole.changeLine("[green]API:`tPhase 1 passed[/]", myConsole.currentLine )
+	;tt("API:`tPhase 1 passed")
 	; Step two : Get the temp keys
 	API.Basic_Credentials :="oauth_consumer_secret=" API.Consumer_Secret "`noauth_consumer_key=" API.Consumer_Key
 	URL := OAuth_Authorization( API.Basic_Credentials "`n" API.Specific_Credentials, API.oauth_get_temp_token "/", "", "GET" )
@@ -35,7 +36,8 @@ API_Login(Username, Password){
 		API[oauth1]:=oauth2
 	}
 	if (API.Temp_Token&&Api.Temp_Token_Secret)
-		tt("API:`tPhase 2 passed")
+		myConsole.changeLine("[green]API:`tPhase 2 passed[/]", myConsole.currentLine )
+	;tt("API:`tPhase 2 passed")
 	else
 		Return tt("ERROR:`tStep 2. We did not get the Temp token or the Temp Token Secret")
 	; Step three : Get the verifier token
@@ -50,7 +52,8 @@ API_Login(Username, Password){
 	While(Pos:=RegExMatch(InOutData,"U)oauth_(.*)=(.*)(&|$)",Oauth,(Pos ? Pos+1 : 1)))
 		oauth1:="Temp_" oauth1,API[oauth1]:=oauth2
 	If (API.Temp_Token&&API.Temp_Token_Secret&&API.Temp_Verifier)
-		tt("API:`tPhase 3 passed")
+		myConsole.changeLine("[green]API:`tPhase 3 passed[/]", myConsole.currentLine )
+	;tt("API:`tPhase 3 passed")
 	else
 		return tt("ERROR:`tStep 3. Did NOT confirm Temp Token or find Verifier Key")
 	; Step Four : Final Verification to get the token secret key
@@ -64,10 +67,12 @@ API_Login(Username, Password){
 	While(Pos:=RegExMatch(InOutData,"U)oauth_(.*)=(.*)(&|$)",Oauth,(Pos ? Pos+1 : 1)))
 		API[oauth1]:=oauth2
 	If (API.Token&&API.Token_Secret)
-		tt("API:`tPhase 4 passed")
+		myConsole.changeLine("[green]API:`tPhase 4 passed[/]", myConsole.currentLine )
+	;tt("API:`tPhase 4 passed")
 	else
 		return,0 tt("ERROR:`tStep 4. Did NOT confirm Temp Token or find Token Secret key")	
-	tt("API:`tLogin Successful")
+	myConsole.changeLine("[green]API:`tLogin Successful[/]", myConsole.currentLine )
+	;tt("API:`tLogin Successful")
 	Api.Specific_Credentials := "oauth_token=" API.Token "`noauth_token_secret=" API.Token_Secret
 	return,1
 }
