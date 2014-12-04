@@ -21,7 +21,7 @@ HTTP_GetUserInfo(){
 	PageInfo:=html.all
 	while,ll:=PageInfo.item[A_Index-1]
 		if game:=ll.getattribute("data-gameindex")
-			List[ll["data-gameindex"]]:=Object("Name",ll["data-gameindex"],"Folder",ll["data-gameindex"],"OrderID",ll["data-orderid"],"GameID",ll["data-gameid"],"HasDLC",RegExReplace(ll.childnodes.item[1].outertext,"[^0-9]",$1),"Notification",ll.lastchild.firstchild.classname,"Background","http://static.gog.com" ll["data-background"],"GameBox","http://static.gog.com" RegExReplace(RegExReplace(ll.firstchild.src,"about:"),"_bbC_20"),"Selected",Testing)
+			List[ll["data-gameindex"]]:=Object("Name",ll["data-gameindex"],"Folder",ll["data-gameindex"],"OrderID",ll["data-orderid"],"GameID",ll["data-gameid"],"HasDLC",RegExReplace(ll.childnodes.item[1].outertext,"[^0-9]",$1),"Notification",ll.lastchild.firstchild.classname,"Background","http://static.gog.com" ll["data-background"],"GameBox",RegExReplace(RegExReplace(ll.firstchild.src,"about:"),"_bbC_20"),"Selected",Testing)
 	RegExMatch( InOutData, "U)count"":(.*)\,",  TotalGames)	; get the number of games returned in the last call
 	TotalOwned +=TotalGames1 ;----Add the the number of games found to the total number
 	if (TotalGames1 >= 45) ;----If its greater than 45 then check the next page	
@@ -39,9 +39,10 @@ HTTP_GetUserInfo(){
 		for a,b in List
 		if (b.notification){
 			b.Selected:=1
-			UpdateType:=b.notification=bdg_update?"has updated content":"is available for download"
-			tt("[yellow]" b.Name "[/] " UpdateType ". ")
+			UpdateType:=(b.notification="bdg_update") ? "has updated content." : "is available for download"
+			tt("[yellow]" b.Name "[/] " UpdateType ".")
 		}
+		tt("The above games have been automatically selected for download")
 		GuiControl,Main:Enable,ButtonGetGames
 	}
 	
@@ -53,7 +54,9 @@ HTTP_GetUserInfo(){
 		;RegExMatch(A_LoopField,"Ui)rename (\w*)\b " Chr(34) "(.*)\(((january|february|march|april|may|june|july|august|september|october|november|december).*)\)(| \[DLC\])" Chr(34),found)
 		if List[Found1].Name
 		{
-			List[Found1].Name:=RegExReplace(Found2," \((.*)\)")
+			List[Found1].ConnieFolder:=Found2
+			List[Found1].GoGFolder:=Found1
+			List[Found1].Name:=RegExReplace(Found2 Found3,"U) \((.*)\)")
 		}
 	}
 	;***********************************************

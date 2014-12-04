@@ -45,7 +45,7 @@ File2Obj(ObjectToSave,Filename){
 	FileRead,FileMem,% Filename
 	Loop,Parse,FileMem,`n,`r`n
 	{
-		FoundBase:=RegExMatch(A_LoopField,"\[(.*)\]",Base)
+		FoundBase:=RegExMatch(A_LoopField,"^\[(.*)\]$",Base)
 		FoundEntry:=RegExMatch(A_LoopField,"^(.*)=(.*)$",Entry)
 		if FoundBase
 		{

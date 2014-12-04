@@ -10,24 +10,24 @@ Orphans(){
 	For a in FoldersToCheck
 	{
 		TempArray:=[]
-		Loop,% Config.Location "\" a "\*.*"
+		Loop,% Config.Location "\" DetermineFolder(a,"Location") "\*.*"
 		{
 			if (A_LoopFileName!="thumbs.db")
 				TempArray[A_Index]:=A_LoopFileName
 			;myConsole.changeLine("[green]Adding : " A_LoopFileName "[/]", myConsole.currentLine )
 		}		
-		ExistingFiles[a]:=TempArray
+		ExistingFiles[DetermineFolder(a,"Location")]:=TempArray
 	}
 	for a,b in List
 	{
 		for c,d in b.DLC
-			for e,f in Existingfiles[d.folder]
+			for e,f in Existingfiles[DetermineFolder(d.folder,"Location")]
 				if (d.filename=f)
-					ExistingFiles[d.folder].Remove(A_Index)
+					ExistingFiles[DetermineFolder(d.folder,"Location")].Remove(A_Index)
 		for c,d in b.Extras
-			for e,f in Existingfiles[d.folder]
+			for e,f in Existingfiles[DetermineFolder(d.folder,"Location")]
 				if (d.filename=f)
-					ExistingFiles[d.folder].Remove(A_Index)
+					ExistingFiles[DetermineFolder(d.folder,"Location")].Remove(A_Index)
 	}
 	TempArray:=[]
 	;TempArray:=ExistingFiles

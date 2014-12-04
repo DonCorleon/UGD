@@ -41,9 +41,10 @@ Return
 PrettyNames:
 {
 	Gui,Submit,NoHide
-	tt("Use Connie's Pretty names for folders-" PNState:=PrettyNames?"On":"Off")
+	Config.NameConvention:=PrettyNames?"Connie":"GoG"
+	tt("Use Connie's Pretty names for folders-" PNState:=PrettyNames?"On":"Off" )
+	;tt(Config.NameConvention)
 	IniWrite,% PrettyNames,%A_ScriptDir%\Resources\Config.ini,MainGui,PrettyNames
-	Config.NameConvention:=PrettyNames?"GoG":"Connie"
 	Return
 }
 Checksums:
@@ -98,7 +99,7 @@ ButtonGetGames:
 		if b.Selected
 			TotalEntries++
 	tt("Found " TotalEntries " selections.")
-	;tt("")
+	tt("Using " Config.NameConvention "'s naming convention for folder names.")
 	tock:=A_TickCount
 	
 	Counter:=0
@@ -120,10 +121,6 @@ ButtonGetGames:
 	{
 		if b.Selected ;----Only Process if it has been selected
 		{
-			if PrettyNames
-				Folder:=b.DLC[c].ConnieFolder
-			else
-				Folder:=b.DLC[c].Folder
 			Get_GameInfo(a)
 			If Duplicate
 				myConsole.changeLine("[green]Working on [yellow]" b.Name "[/][/]", myConsole.currentLine )
@@ -150,8 +147,8 @@ ButtonGetGames:
 						Continue
 						}
 					if !Orphans
-						If !(FileCheck(Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename,b.DLC[c].MD5,b.DLC[c].Link))
-							DownloadFile(b.DLC[c].Link,Config.Location "\" b.DLC[c].Folder "\" b.DLC[c].Filename)
+						If !(FileCheck(Config.Location "\" DetermineFolder(b.DLC[c].Folder,"Location") "\" b.DLC[c].Filename,b.DLC[c].MD5,b.DLC[c].Link))
+							DownloadFile(b.DLC[c].Link,Config.Location "\" DetermineFolder(b.DLC[c].Folder,"Location") "\" b.DLC[c].Filename)
 						FilesAlreadyDone[b.DLC[c].MD5]:=b.DLC[c].Language
 						Duplicate:=0
 				}
@@ -169,9 +166,9 @@ ButtonGetGames:
 					;m(info)
 					;tt(b.Extras[d].Link)
 					if !Orphans
-						If !(FileCheck(Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename,,b.Extras[d].Link))
+						If !(FileCheck(Config.Location "\" DetermineFolder(b.Extras[d].Folder,"Location") "\" b.Extras[d].Filename,,b.Extras[d].Link))
 						{
-						DownloadFile(b.Extras[d].Link,Config.Location "\" b.Extras[d].Folder "\" b.Extras[d].Filename)
+						DownloadFile(b.Extras[d].Link,Config.Location "\" DetermineFolder(b.Extras[d].Folder,"Location") "\" b.Extras[d].Filename)
 						}
 					Duplicate:=0
 				}
@@ -254,8 +251,9 @@ ButtonLogin:
 	GuiControl,Main:+Redraw,ButtonUpdate
 	Username:=Config.Username
 	Password:=Config.Password
-	IP:=URLDownloadToVar("http://7fw.de/ipraw.php")
-	Config.IP:=URLDownloadToVar("http://7fw.de/ipraw.php")
+	;IP:=URLDownloadToVar("http://7fw.de/ipraw.php")
+	;tt("Your IP is : " IP)
+	;Config.IP:=URLDownloadToVar("http://7fw.de/ipraw.php")
 	If UsePreviousLogin
 		ReUsingLogin:=ReUse_Login("LOAD")
 	if (!Username||!Password) ;----Break if no Username or password
@@ -315,10 +313,11 @@ ButtonLogin:
 			for a,b in List
 			if (b.notification){
 				b.Selected:=1
-				UpdateType:=b.notification="bdg_update"?"has updated content":"is available for download"
-				tt("[yellow]" b.Name "[/] " UpdateType ". ")
+				UpdateType:=(b.notification="bdg_update") ? "has updated content." : "is available for download"
+				tt("[yellow]" b.Name "[/] " UpdateType ".")
 				GuiControl,Main:Enable,ButtonGetGames
 			}
+			tt("The above games have been automatically selected for download")
 		}
 	}
 	If !LoggedIn
@@ -411,3 +410,4 @@ Convert_Seconds(Seconds){
 #Include Functions\Obj2File.ahk
 #Include Class_TreeView.ahk
 #Include Functions\FolderCleanUp.ahk
+#Include DetermineFolder.ahk

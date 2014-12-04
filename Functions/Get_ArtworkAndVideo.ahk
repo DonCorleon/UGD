@@ -15,26 +15,32 @@ Get_ArtworkAndVideo(game){
 		;----ScreenShots
 		SizeArray:=[]
 		While (Pos:=RegExMatch(PageData,"U)pauseAll\(\)""><img src=""http:\/\/static(.*)""",Artwork,(Pos?Pos+1:1)))
-			If !(FileCheck(Config.Artwork "\" List[Game].Folder "\ScreenShot-" Number:=A_Index<10?"0" A_index ".jpg":A_Index ".jpg",,"http://static" Artwork1))
-				DownLoadFile("http://static" Artwork1,Config.Artwork "\" List[Game].Folder "\ScreenShot-" Number)
+			If !(FileCheck(Config.Artwork "\" DetermineFolder(List[Game].Folder,"Artwork") "\ScreenShot-" Number:=A_Index<10?"0" A_index ".jpg":A_Index ".jpg",,"http://static" Artwork1))
+				DownLoadFile("http://static" Artwork1,Config.Artwork "\" DetermineFolder(List[Game].Folder,"Artwork") "\ScreenShot-" Number)
 		;tt("http://static" Artwork1,Config.Artwork "\" game "\ScreenShot-" A_Index ".jpg")
 		
 		;---- B&W Background
-		If !(FileCheck(Config.Artwork "\" List[Game].Folder "\Background.jpg",,List[game].Background))
-			DownLoadFile(List[game].Background,Config.Artwork "\" List[Game].Folder "\Background.jpg")
-		;tt(List[game].Background)
+		If !(List[game].Background="http://static.gog.com")
+		{
+			If !(FileCheck(Config.Artwork "\" DetermineFolder(List[Game].Folder,"Artwork") "\Background.jpg",,List[game].Background))
+				DownLoadFile(List[game].Background,Config.Artwork "\" DetermineFolder(List[Game].Folder,"Artwork") "\Background.jpg")
+			;tt(List[game].Background)
+		}
 		
 		;----Colour Background
 		While (Pos:=RegExMatch(PageData,"U)<meta name=""og\:image"" content=""(.*)"">",Artwork,(Pos?Pos+1:1)))
-			If !(FileCheck(Config.Artwork "\" List[Game].Folder "\Background-2.jpg",,"http:" Artwork1))
-				DownLoadFile("http:" Artwork1,Config.Artwork "\" List[Game].Folder "\Background-2.jpg")
+			If !(FileCheck(Config.Artwork "\" DetermineFolder(List[Game].Folder,"Artwork") "\Background-2.jpg",,"http:" Artwork1))
+				DownLoadFile("http:" Artwork1,Config.Artwork "\" DetermineFolder(List[Game].Folder,"Artwork") "\Background-2.jpg")
 		;tt(Artwork1)
 		
 		;----BoxArt
 		;While (Pos:=RegExMatch(PageData,"U)",Artwork,(Pos?Pos+1:1)))
-		If !(FileCheck(Config.Artwork "\" List[Game].Folder "\BoxArt.jpg",,List[game].GameBox))
-			DownLoadFile(List[game].GameBox,Config.Artwork "\" List[Game].Folder "\BoxArt.jpg")
-		;tt(List[game].GameBox)
+		If !(List[game].BoxArt="http://static.gog.com")
+		{
+			If !(FileCheck(Config.Artwork "\" DetermineFolder(List[Game].Folder,"Artwork") "\BoxArt.jpg",,List[game].GameBox))
+				DownLoadFile(List[game].GameBox,Config.Artwork "\" DetermineFolder(List[Game].Folder,"Artwork") "\BoxArt.jpg")
+			;tt(List[game].GameBox)
+		}
 	}
 	if Config.Downloads.Videos
 	{
@@ -46,12 +52,13 @@ Get_ArtworkAndVideo(game){
 			;URL:=Get_Youtube_Video(Link,"mp4,720P,360P,muxed")
 			URL:=Get_Youtube_Vid(Link,"720")
 			VideoTitle:=URL.filename ".mp4"
+			StringReplace,VideoTitle,VideoTitle,`:,-,All
 			if (VideoTitle=".mp4")
 				VideoTitle:=Folder ".mp4"
-			If !(FileCheck(Config.Videos "\" List[Game].Folder "\" VideoTitle,,URL.Link))
+			If !(FileCheck(Config.Videos "\" DetermineFolder(List[Game].Folder,"Videos") "\" VideoTitle,,URL.Link))
 			{
-				DownLoadFile(URL.link,Config.Videos "\" List[Game].Folder "\" VideoTitle)
-				tt("URL : " URL.Link)
+				DownLoadFile(URL.link,Config.Videos "\" DetermineFolder(List[Game].Folder,"Videos") "\" VideoTitle)
+				;tt("URL : " URL.Link)
 			}
 			
 		}
@@ -102,6 +109,7 @@ StrPutVar(Str, ByRef Var, Enc = "")
 
 Get_YouTube_Vid(URL,RequestedQuality="720")
 {
+	global Config
 	Response:=UrlDownloadToVar(URL) ; "%A_ScriptDir%\response.txt"
 	RegExMatch(Response, "U)<title>(.*) - YouTube</title>", Title)
 	TitleName:=URIEncode(Title1)
@@ -127,6 +135,11 @@ Get_YouTube_Vid(URL,RequestedQuality="720")
 						f:=RegExReplace(f,"s=","signature=")
 					if InStr(f,"url=http")
 						start:=RegExReplace(f,"url=")
+					;Else if InStr(f,"ip=")
+					;{
+					;after.="&ip=" Config.IP
+					;tt("Replaced " f " with &ip=" Config.IP )
+					;}
 					Else if !InStr(f,"type=")&&!InStr(f,"quality=")&&!InStr(f,"fallback_host=")&&!InStr(f,"size="){
 						if !taglist[f]
 							after.="&" f

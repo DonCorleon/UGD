@@ -38,6 +38,7 @@ FileCheck(SaveAs,MD5="",Link:=""){
 				else
 				{
 					tt("[Red]Failed to get Header for [/]" SaveAs)	
+					tt("[yellow]LINK:[/]" Link)
 					tt("[Yellow]Skipping....[/]")
 					return,1
 				}	

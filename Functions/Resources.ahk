@@ -38,7 +38,7 @@ Resources(){
 		IniRead,BaseLocation,%A_ScriptDir%\Resources\Config.ini,Locations,Base Folder,% A_ScriptDir
 		IniRead,ArtLocation,%A_ScriptDir%\Resources\Config.ini,Locations,Artwork,% BaseLocation "\Artwork"
 		IniRead,VideoLocation,%A_ScriptDir%\Resources\Config.ini,Locations,Videos,% BaseLocation "\Videos"
-		IniRead,OrphanLocation,%A_ScriptDir%\Resources\Config.ini,Locations,Orphans,% BaseLocation "\Cleaned"
+		IniRead,OrphanLocation,%A_ScriptDir%\Resources\Config.ini,Locations,Orphans,% BaseLocation "\Orphans"
 		IniRead,Dat,%A_ScriptDir%\Resources\Config.ini,Definitions,Dat,""
 		IniRead,Names,%A_ScriptDir%\Resources\Config.ini,Definitions,Names,""
 		IniRead,PrettyNames,%A_ScriptDir%\Resources\Config.ini,MainGui,PrettyNames,0
