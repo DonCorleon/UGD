@@ -54,7 +54,7 @@ Get_ArtworkAndVideo(game){
 			VideoTitle:=URL.filename ".mp4"
 			StringReplace,VideoTitle,VideoTitle,`:,-,All
 			if (VideoTitle=".mp4")
-				VideoTitle:=Folder ".mp4"
+				VideoTitle:=game ".mp4"
 			If !(FileCheck(Config.Videos "\" DetermineFolder(List[Game].Folder,"Videos") "\" VideoTitle,,URL.Link))
 			{
 				DownLoadFile(URL.link,Config.Videos "\" DetermineFolder(List[Game].Folder,"Videos") "\" VideoTitle)

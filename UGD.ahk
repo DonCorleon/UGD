@@ -408,6 +408,6 @@ Convert_Seconds(Seconds){
 #Include Functions\Orphans.ahk
 #Include Functions\Gui_ConfirmOrphans.ahk
 #Include Functions\Obj2File.ahk
-#Include Class_TreeView.ahk
+#Include Classes\Class_TreeView.ahk
 #Include Functions\FolderCleanUp.ahk
-#Include DetermineFolder.ahk
+#Include Functions\DetermineFolder.ahk
