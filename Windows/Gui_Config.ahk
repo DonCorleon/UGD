@@ -9,7 +9,8 @@ Gui_Config(){
 	Gui,Main:+Disabled
 	Gui,Config:New,+hwndhwnd -DPIScale +ToolWindow +Resize +OwnerMain +MinSize200x200,Configuration
 	Config.ConfigHwnd:=hwnd
-	Gui,Config:Add,TreeView,% "w" Config.ConfigW " h" Config.ConfigH-35 " AltSubmit x0 y0 vConfigTree gConfigCheckClick checked +Wrap"
+	Gui,Config:Add,TreeView,% "w" Config.ConfigW " h" Config.ConfigH-35 " AltSubmit x0 y0 vConfigTree gConfigCheckClick checked HwndHwnd +0x0800"
+	Config.TreeHwnd:=Hwnd
 	Gui,Config:Add,Button,% "xp y" Config.ConfigH-30 " w" Config.ConfigW*.48 " vconfigsave gConfigSave",Save
 	Gui,Config:Add,Button,% "x" Config.ConfigW*.52 " y" Config.ConfigH-30 " w" Config.ConfigW*.48 " vConfigCancel gConfigCancel",Cancel
 	
@@ -52,7 +53,7 @@ Gui_Config(){
 		info:=A_PtrSize=4?{0:8,4:id,12:0xf000}:{0:8,8:id,20:0xf000} ;there are 2 different offsets for x32 and x64.  This will account for both
 		for offset,value in info
 			NumPut(value,tvitem,offset)
-		SendMessage,4415,0,&tvitem,SysTreeView321,ahk_id%hwnd%
+		SendMessage,4415,0,&tvitem,SysTreeView321,% "ahk_id" Config.ConfigHwnd
 		;4415 is tvm_setitemw which is tv_first=0x1100 + 63
 	}
 	Return

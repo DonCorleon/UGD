@@ -1,5 +1,5 @@
 API_Login(Username, Password){
-	global DEBUG_API,API,myConsole
+	global DEBUG_API:=0,API,myConsole
 	tt("API:`tLogin Started")
 	; Step one : Get the URL's and a few other bits of info
 	HTTPRequest(API.oauth_get_urls "/",InOutData:="",InOutHeader:="")

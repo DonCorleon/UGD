@@ -6,6 +6,7 @@ Gui_ConfirmOrphans(OrphanList){
 	
 	Config.OrphanExtras:=1
 	
+	OnMessage(0x004E, "WM_NOTIFY_BOTH")
 	IniRead,X,%A_ScriptDir%\Resources\Config.ini,OrphanGui,X,% Config.MainX
 	IniRead,Y,%A_ScriptDir%\Resources\Config.ini,OrphanGui,Y,% Config.MainY
 	IniRead,W,%A_ScriptDir%\Resources\Config.ini,OrphanGui,W,400
@@ -14,7 +15,7 @@ Gui_ConfirmOrphans(OrphanList){
 	Gui,Main:+Disabled
 	Gui,Orphan:New,+hwndhwnd -DPIScale +ToolWindow +Resize +OwnerMain +MinSize400x400
 	Config.OrphanHwnd:=Hwnd
-	Gui,Orphan:Add,TreeView,% "w" W-20 " h" H-50 " AltSubmit vOrphanTree gOrphanTree BackgroundBlack +hwndhwnd +Checked"
+	Gui,Orphan:Add,TreeView,% "w" W-20 " h" H-50 " AltSubmit vOrphanTree gOrphanTree BackgroundBlack +0x0800 hwndHwnd +Checked"
 	Config.OrphanTVHwnd:=Hwnd
 	Gui,Orphan:Add,Button,% "x10 y" H-40 " h30 w" W/3-20 " vMoveOrphans gMoveOrphans", Move
 	Gui,Orphan:Add,Button,% "xp+" W/3 " y" H-40 " h30 w" W/3-20 " vDeleteOrphans gDeleteOrphans", Delete
@@ -230,7 +231,11 @@ Gui_ConfirmOrphans(OrphanList){
 	
 	OrphanTree:
 	{
-		
+		;OldFunction:=OnMessage(0x004E)
+		;if (OldFunction!="WM_NOTIFY"){
+		;OnMessage(0x004E,"WM_NOTIFY")
+		;tt("Onmessage 0x004E - Set to WM_NOTIFY - OrphanTree")
+		;}
 		Gui,Orphan:Treeview,% Config.OrphanTVHwnd
 		if (A_GuiEvent&&A_GuiEvent = "RightClick")
 		{
@@ -311,6 +316,11 @@ Gui_ConfirmOrphans(OrphanList){
 				;WinSet,Redraw,,% "ahk_id" Config.OrphanTVHwnd
 			}
 		}
+		WinSet,Redraw,,% "ahk_id" Config.Orphanhwnd
+		;if (OldFunction!="WM_NOTIFY"){
+		;OnMessage(0x004E, OldFunction)
+		;tt("Onmessage 0x004E - Set to " OldFunction " - OrphanTree")
+		;}
 		return
 	}
 	OrphanGuiEscape:
@@ -333,6 +343,7 @@ Gui_ConfirmOrphans(OrphanList){
 		;m(">" EList "<")
 		FileDelete,% A_ScriptDir "\Resources\ExclusionList.Txt"
 		FileAppend,% Trim(EList),% A_ScriptDir "\Resources\ExclusionList.Txt"
+		OnMessage(0x004E, "WM_NOTIFY_TT")
 		Return
 	}
 	OrphanGuiSize:
@@ -347,6 +358,14 @@ Gui_ConfirmOrphans(OrphanList){
 		GuiControl,Orphan:MoveDraw,MoveOrphans,% "x10 y" A_GuiHeight-40 " h30 w" A_GuiWidth/3-20
 		GuiControl,Orphan:MoveDraw,DeleteOrphans,% "x" A_GuiWidth/3+10 " y" A_GuiHeight-40 " h30 w" A_GuiWidth/3-20
 		GuiControl,Orphan:MoveDraw,CancelOrphans,% "x" A_GuiWidth/3*2+10 " y" A_GuiHeight-40 " h30 w" A_GuiWidth/3-20
+		;OnMessage(0x004E, "WM_NOTIFY_TT")
 		return
 	}
+}
+
+WM_Notify_BOTH(Param*)
+{
+	WM_NOTIFY_TT(Param.1,Param.2,Param.3,Param.4)
+	WM_NOTIFY(Param.1,Param.2,Param.3,Param.4)
+	return
 }

@@ -29,8 +29,8 @@ Get_ArtworkAndVideo(game){
 		
 		;----Colour Background
 		While (Pos:=RegExMatch(PageData,"U)<meta name=""og\:image"" content=""(.*)"">",Artwork,(Pos?Pos+1:1)))
-			If !(FileCheck(Config.Artwork "\" DetermineFolder(List[Game].Folder,"Artwork") "\Background-2.jpg",,"http:" Artwork1))
-				DownLoadFile("http:" Artwork1,Config.Artwork "\" DetermineFolder(List[Game].Folder,"Artwork") "\Background-2.jpg")
+			If !(FileCheck(Config.Artwork "\" DetermineFolder(List[Game].Folder,"Artwork") "\Background-2.jpg",,"http:" RegExReplace(URIDecode(Artwork1),"\/\/(.*)\/\/","//")))
+				DownLoadFile("http:" RegExReplace(URIDecode(Artwork1),"\/\/(.*)\/\/","//"),Config.Artwork "\" DetermineFolder(List[Game].Folder,"Artwork") "\Background-2.jpg")
 		;tt(Artwork1)
 		
 		;----BoxArt

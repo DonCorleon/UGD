@@ -1,7 +1,7 @@
 Update(){
 	global version
-	;static BaseURL:="http://doncorleon.no-ip.org"
-	static BaseURL:="http://10.1.1.52:8081" ;----for local testing only
+	static BaseURL:="http://doncorleon.no-ip.org"
+	;static BaseURL:="http://10.1.1.52:8081" ;----for local testing only
 	GuiControl,Main:Disable,ButtonUpdate
 	HTTPRequest(URL:=BaseURL "/ahk/ugd/ugd.text",InOutData,InOutHeader)
 	GuiControl,Main:Enable,ButtonUpdate

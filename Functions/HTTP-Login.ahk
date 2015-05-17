@@ -21,7 +21,7 @@ HTTP_Login(UserName,UserPass){
 	;Return tt("[red]ERROR[/]:`tNo GUTM Found")
 	;If !(RegExMatch(InOutData,"U)id=""uqid"" value=""(.*)"" />",uqid))
 	;Return tt("[red]ERROR[/]:`tNo UQID Found")
-	myConsole.changeLine("[green]HTTP:`tPhase 1 passed[/]", myConsole.currentLine )
+	tto("[green]HTTP:`tPhase 1 passed[/]")
 	;tt("HTTP:`tPhase 1 passed")
 	;While, (Pos:=RegExMatch(InOutData,"data-gameid=""\K\d+",gameid,Pos+StrLen(gameid)))
 	;games .= "," gameid
@@ -30,19 +30,20 @@ HTTP_Login(UserName,UserPass){
 	StringReplace,Clean_Auth_URL,Auth_URL1,&amp;,&,All
 	url := Clean_Auth_URL
 	Cookie:= GetCookies(InOutHeader)
-	redo2: ;----------------- Redirect
+	Redo2: ;----------------- Redirect
 	HTTPRequest(url, InOutData := "", InOutHeader := Headers() , Options)
 	if (DEBUG_HTTP) ;--------------- DEBUG
 		tt("HTTP:Step 2","URL : "URL,"Cookie : "cookie,"Header`n"InOutHeader)
 	if (DEBUG_HTTP>1) ;----------- DEBUG
 	{
 		;tt("HTTP:Step 2",InOutData)
-		;FileDelete,HTTP-Step2.txt
-		;FileAppend, URL`n%URL%`n`nHeader`n%InOutHeader%`n`nCookie`n%Cookie%`n`nInOutData`n%InOutData%,HTTP-Step2.txt
+		FileDelete,HTTP-Step2.txt
+		FileAppend, URL`n%URL%`n`nHeader`n%InOutHeader%`n`nCookie`n%Cookie%`n`nInOutData`n%InOutData%,HTTP-Step2.txt
 	}
 	Found:=RegExMatch(InOutHeader,"U)Location: (.*)\n",New_URL)
 	if (found){ ;----------------- Check for Redirect
 		url:=New_URL1
+		tto("[Red]Redirecting[/]")
 		goto Redo2
 	}
 	FoundToken:=RegExMatch(InOutData,"U)name=""login\[_token\]"" value=""(.*)"" \/\>",Login_Token)
@@ -54,11 +55,10 @@ HTTP_Login(UserName,UserPass){
 	FoundID:=RegExMatch(URL,"U)client_id=(.*)\&",Login_ID)
 	if !FoundID
 	{
-		tt("[red]ERROR[/]:No Client ID Found")
+		tt("[Red]ERROR[/]:No Client ID Found")
 		goto HTTPFailed
 	}
-	myConsole.changeLine("[green]HTTP:`tPhase 2 passed[/]", myConsole.currentLine )
-	;tt("HTTP:`tPhase 2 passed")
+	tto("[green]HTTP:`tPhase 2 passed[/]")
 	;**************** Step 3
 	Referer:=URL
 	url:="https://login.gog.com/login_check"
@@ -80,46 +80,39 @@ HTTP_Login(UserName,UserPass){
 		FileDelete,HTTP-Step3.txt
 		FileAppend, URL`n%URL%`n`nHeader`n%InOutHeader%`n`nData`n%Data%`n`nCookie`n%Cookie%`n`nInOutData`n%InOutData%,HTTP-Step3.txt
 	}
-	Found:=RegExMatch(InOutHeader,"U)Location: (.*)`n",New_URL)
+	Found:=RegExMatch(InOutHeader,"U)Location: (.*)\n",New_URL)
 	if (found){ ;----------------- Check for Redirect
 		url:=New_URL1
+		tto("[Red]Redirecting[/]")
 		goto Redo3
-	}	
+	}
 	Cookie.=GetCookies(InOutHeader)
-	myConsole.changeLine("[green]HTTP:`tPhase 3 passed[/]", myConsole.currentLine )
-	;tt("HTTP:`tPhase 3 passed")
+	tto("[green]HTTP:`tPhase 3 passed[/]")
 	;**************** Step 4
-	;data =
-	;(LTrim Join&
-	;a=get
-	;c=frontpage
-	;p1=false
-	;p2=false
-	;auth=
-	;games=%games%
-	;gutm=%gutm1%
-	;pp=
-	;)
-	;HTTPRequest(URL:="http://www.gog.com/user/ajax", InOutData := data, InOutHeader:=Headers("http://www.gog.com/"), Options "`nx-requested-with: XMLHttpRequest`nMethod: POST")
-	URL:="https://www.gog.com/account"
+	
+	URL:="https://www.gog.com/account/settings/personal"
+	Referer:=URL
 	Redo4:
-	HTTPRequest(URL, InOutData, InOutHeader:=Headers(), Options "`nx-requested-with: XMLHttpRequest")
+	HTTPRequest(URL, InOutData, InOutHeader := Headers(Referer), Options)
 	if (DEBUG_HTTP) ;--------------- DEBUG
 		tt("HTTP:Step 4","URL : "URL,"Cookie : "cookie,"Header`n"InOutHeader)
 	if (DEBUG_HTTP>1) ;----------- DEBUG
 	{
-		;tt("HTTP:Step 4",InOutData)
+		tt("HTTP:Step 4",InOutData)
 		FileDelete,HTTP-Step4.txt
 		FileAppend, URL`n%URL%`n`nHeader`n%InOutHeader%`n`nData`n%InOutData%,HTTP-Step4.txt
 	}
-	Found:=RegExMatch(InOutHeader,"U)Location: (.*)`n",New_URL)
+	Found:=RegExMatch(InOutHeader,"U)Location: (.*)\n",New_URL)
 	if (found){ ;----------------- Check for Redirect
+		;if (New_URL1 != "/")
 		url:=New_URL1
+		Cookie.=GetCookies(InOutHeader)
+		tto("[Red]Redirecting[/]")
 		goto Redo4
-	}	
-	If RegExMatch(InOutData, "U)id=""currentUsername"" value=""(.*)""", NickName)
+	}
+	If RegExMatch(InOutData, "U)Username<\/span><strong class=""settings-item__value settings-item__section"">(.*)<\/strong>", NickName)
 	{
-		myConsole.changeLine("[green]HTTP:`tPhase 4 passed[/]", myConsole.currentLine )
+		tto("[green]HTTP:`tPhase 4 passed[/]")
 		;tt("HTTP:`tPhase 4 passed")
 		;tt("Welcome " NickName1)
 		Gui,Show,,Ultimate GoG Downloader v%Version% - %NickName1%
@@ -129,9 +122,9 @@ HTTP_Login(UserName,UserPass){
 	
 	HTTP.GoGCookie:=Cookie
 	HTTP.GoGOptions:=Options
-	myConsole.changeLine("[green]HTTP:`tLogin Successful[/]", myConsole.currentLine )
+	tto("[green]HTTP:`tLogin Successful[/]")
 	;tt("HTTP:`tLogin Successful")
-	return,1 
+	return,1
 	
 	HTTPFailed:
 	{
@@ -142,5 +135,5 @@ HTTP_Login(UserName,UserPass){
 		tt("HTTP:`tLogin Failed"),
 		tt("HTTP Error:`tSkipping API login")
 		Return,0
-	}	
+	}
 }

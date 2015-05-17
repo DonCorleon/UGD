@@ -9,12 +9,17 @@ Gui_SelectGames(){
 	Gui,SelectGames:New,+hwndhwnd -Caption -border +Resize +OwnerMain +MinSize400x400
 	Config.SelectGamesHwnd:=hwnd
 	Gui,SelectGames:Font, s12 q2
-	Gui,SelectGames:Add,ListView,% "+AltSubmit +NoSort -border checked Background000000 c0x00F003 +LV0x4000 -hScroll +vScroll x0 y0 w" Config.SelectGamesW " h" Config.SelectGamesH " vGameListView gListViewClick",Games and Movies
+	Gui,SelectGames:Add,ListView,% "AltSubmit +NoSort -border checked Background000000 c0x00F003 +LV0x400 -hScroll +vScroll x0 y0 w" Config.SelectGamesW " h" Config.SelectGamesH " vGameListView gListViewClick HWNDhwnd",Games and Movies
+	Config.ListHwnd:=hwnd
 	Gui,SelectGames:Show,% "x" Config.SelectGamesX " y" Config.SelectGamesY " w" Config.SelectGamesW " h" Config.SelectGamesH ,Select Games
 	GuiControl,SelectGames:-Redraw,GameListView
-	tick:=A_TickCount
-	For a,b in List
-		LV_Add("+check"b.Selected,b.Name) ;b.name)
+	;tick:=A_TickCount
+	ToolTipArray:=[]
+	For a,b in List{
+		LV_Add("+NoSort +check"b.Selected,b.Name) ;b.name)
+		TooltipArray[A_Index]:=a
+	}
+	Config.TooltipArray:=TooltipArray
 	GuiControl,SelectGames:+Redraw,GameListView
 	Return
 }

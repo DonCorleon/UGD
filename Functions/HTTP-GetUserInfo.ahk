@@ -19,9 +19,10 @@ HTTP_GetUserInfo(){
 	StringReplace,InOutData,InOutData,\,,All
 	html.write(InOutData)
 	PageInfo:=html.all
+	;Need to add rating, genre and description scraping
 	while,ll:=PageInfo.item[A_Index-1]
 		if game:=ll.getattribute("data-gameindex")
-			List[ll["data-gameindex"]]:=Object("Name",ll["data-gameindex"],"Folder",ll["data-gameindex"],"OrderID",ll["data-orderid"],"GameID",ll["data-gameid"],"HasDLC",RegExReplace(ll.childnodes.item[1].outertext,"[^0-9]",$1),"Notification",ll.lastchild.firstchild.classname,"Background","http://static.gog.com" ll["data-background"],"GameBox",RegExReplace(RegExReplace(ll.firstchild.src,"about:"),"_bbC_20"),"Selected",Testing)
+			List[ll["data-gameindex"]]:=Object("Rating","Unknown","Description","DRM Free Game","Genre","Game","Name",ll["data-gameindex"],"Folder",ll["data-gameindex"],"OrderID",ll["data-orderid"],"GameID",ll["data-gameid"],"HasDLC",RegExReplace(ll.childnodes.item[1].outertext,"[^0-9]",$1),"Notification",ll.lastchild.firstchild.classname,"Background","http://static.gog.com" ll["data-background"],"GameBox",RegExReplace(RegExReplace(ll.firstchild.src,"about:"),"_bbC_20"),"Selected",Testing)
 	RegExMatch( InOutData, "U)count"":(.*)\,",  TotalGames)	; get the number of games returned in the last call
 	TotalOwned +=TotalGames1 ;----Add the the number of games found to the total number
 	if (TotalGames1 >= 45) ;----If its greater than 45 then check the next page	
