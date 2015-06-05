@@ -1,15 +1,8 @@
 Get_APILink(Origlink){
-	global API,DEBUG_Times
-	DEBUG_GetAPILink:=1
-	If (DEBUG_Times)
+	global API
+	If (DebugMode)
 		tick:=A_tickcount
 	HTTPRequest(URL := OAuth_Authorization( API.Basic_Credentials "`n" API.Specific_Credentials, Origlink, "", "GET" ),InOutData:="",InOutHeader:="")
-	;if (ErrorLevel!=200){
-		;tt("Get_APILink:`tError code ""[red]" ErrorLevel "[/]""")
-		;if DEBUG_GetAPILink
-			;tt("Get_APILink:","URL: " URL,"Header: " InOutHeader),tt("Get_APILink:","Response: " InOutData)
-		;Return
-	;}
 	StringReplace, InOutData, InOutData, \,, All
 	RegExMatch(InOutData, "U)link"":""(.*)""", Link)
 	RegExMatch( Link1, "([^/]*)\?", LinkFileName )
@@ -20,7 +13,7 @@ Get_APILink(Origlink){
 	CRC:=new XML("crc")
 	CRC.xml.loadxml(InOutData)
 	MD5:=crc.ssn("//file/@md5").text
-	If (DEBUG_Times)
+	If (DebugMode)
 		tt("Retrieved in " A_TickCount-tick " ms")
 	Return {FileName:LinkFileName1,Link:Link1,MD5:MD5}
 }

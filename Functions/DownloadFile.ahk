@@ -20,7 +20,7 @@ DownloadFile(link,SaveAs){
 	for a,b in DLSpeed
 		AvgSpeed+=b
 	AvgSpeed:=Round(AvgSpeed/DLSpeed.MaxIndex(),0)
-	;tt("Downloaded at an average speed of [yellow]" AvgSpeed "[/] Kb/s.")
+	tto("[Yellow]100%[/] - [Green]Downloaded [/][yellow]" File "[/] @ [Green]" AvgSpeed "Kb/s[/]")
 	RegExMatch(Directory,"U)[\w-]*$",Dir)
 	Downloaded.Insert(Dir "\" File)
 	Return,InOutHeader
@@ -36,7 +36,7 @@ DownloadProgress(Percentage,Size,File){
 		Speed := Round((CurrentSize/1024-LastSize/1024)/((A_TickCount-LastTick)/1000))
 		LastTick:=A_TickCount
 		LastSize:=Round(Size*Percentage,0)
-		;DLSpeed.Insert(Speed)
+		DLSpeed.Insert(Speed)
 		myConsole.changeLine("[Yellow]" Round(Percentage*100,0) "%[/] - [Green]Downloading [/][yellow]" File "[/] - [red]" Round(Size*Percentage,0) "/" Size "[/] @ " Speed "Kb/s", myConsole.currentLine)
 	}
 	Return

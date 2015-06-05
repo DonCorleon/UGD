@@ -1,48 +1,32 @@
 HTTP_Login(UserName,UserPass){
-	global DEBUG_HTTP:=0,HTTP,Cookie:="",myConsole,Version
+	global DebugMode,HTTP,Cookie:="",myConsole,Version
 	tt("HTTP:`tLogin Started")
 	Options := "+Flag: INTERNET_FLAG_NO_COOKIES`n+NO_AUTO_REDIRECT"
 	. (A_IsUnicode ? "`nCharset: UTF-8" : "")
 	HTTPRequest(url:="http://www.gog.com/", InOutData := "", InOutHeader := Headers(), Options "`nMETHOD:POST") ; first request to get a gutm and game Ids for initial login request
-	if (DEBUG_HTTP) ;--------------- DEBUG
-		tt("HTTP:Step 1","URL : "URL,"Cookie : "cookie,"Header`n"InOutHeader)
-	if (DEBUG_HTTP>1) ;----------- DEBUG
-	{
-		;tt("HTTP:Step 1",InOutData)
-		FileDelete,HTTP-Step1.txt
-		FileAppend, URL`n%URL%`n`nHeader`n%InOutHeader%`n`nCookie`n%Cookie%`n`nInOutData`n%InOutData%,HTTP-Step1.txt
-	}
+	if (DebugMode) ;--------------- DEBUG
+		tt("HTTP:Step 1","URL : " URL,"Header`n" InOutHeader)
 	if !(RegExMatch(InOutData,"U)GalaxyAccounts\(\'(.*)\'",Auth_URL))
 	{
 		tt("[red]ERROR[/]:`tNo AUTH_URL Found")
 		goto HTTPFailed
 	}
-	;If !(RegExMatch(InOutData,"U)id=""gutm"" value=""(.*)"" />",gutm))
-	;Return tt("[red]ERROR[/]:`tNo GUTM Found")
-	;If !(RegExMatch(InOutData,"U)id=""uqid"" value=""(.*)"" />",uqid))
-	;Return tt("[red]ERROR[/]:`tNo UQID Found")
+	if (DebugMode) ;--------------- DEBUG
+		tt("Debug Mode")
 	tto("[green]HTTP:`tPhase 1 passed[/]")
-	;tt("HTTP:`tPhase 1 passed")
-	;While, (Pos:=RegExMatch(InOutData,"data-gameid=""\K\d+",gameid,Pos+StrLen(gameid)))
-	;games .= "," gameid
-	;Games:=OAuth__URIEncode(Trim(games,","))
 	;*************** Step 2
 	StringReplace,Clean_Auth_URL,Auth_URL1,&amp;,&,All
 	url := Clean_Auth_URL
 	Cookie:= GetCookies(InOutHeader)
 	Redo2: ;----------------- Redirect
 	HTTPRequest(url, InOutData := "", InOutHeader := Headers() , Options)
-	if (DEBUG_HTTP) ;--------------- DEBUG
-		tt("HTTP:Step 2","URL : "URL,"Cookie : "cookie,"Header`n"InOutHeader)
-	if (DEBUG_HTTP>1) ;----------- DEBUG
-	{
-		;tt("HTTP:Step 2",InOutData)
-		FileDelete,HTTP-Step2.txt
-		FileAppend, URL`n%URL%`n`nHeader`n%InOutHeader%`n`nCookie`n%Cookie%`n`nInOutData`n%InOutData%,HTTP-Step2.txt
-	}
+	if (DebugMode) ;--------------- DEBUG
+		tt("HTTP:Step 2","URL : " URL,"Cookie : " cookie,"Header`n" InOutHeader)
 	Found:=RegExMatch(InOutHeader,"U)Location: (.*)\n",New_URL)
 	if (found){ ;----------------- Check for Redirect
 		url:=New_URL1
+		if (DebugMode) ;--------------- DEBUG
+			tt("Debug Mode")
 		tto("[Red]Redirecting[/]")
 		goto Redo2
 	}
@@ -58,6 +42,8 @@ HTTP_Login(UserName,UserPass){
 		tt("[Red]ERROR[/]:No Client ID Found")
 		goto HTTPFailed
 	}
+	if (DebugMode) ;--------------- DEBUG
+		tt("Debug Mode")
 	tto("[green]HTTP:`tPhase 2 passed[/]")
 	;**************** Step 3
 	Referer:=URL
@@ -72,49 +58,42 @@ HTTP_Login(UserName,UserPass){
 	Redo3: ;----------------- Redirect
 	Cookie.=GetCookies(InOutHeader)
 	HTTPRequest(url, InOutData := data, InOutHeader := Headers(Referer), Options "`nMethod:POST")
-	if (DEBUG_HTTP) ;--------------- DEBUG
-		tt("HTTP:Step 3","URL : "URL,"Data : " data ,"Cookie : "cookie,"Header`n"InOutHeader)
-	if (DEBUG_HTTP>1) ;----------- DEBUG
-	{
-		;tt("HTTP:Step 3",InOutData)
-		FileDelete,HTTP-Step3.txt
-		FileAppend, URL`n%URL%`n`nHeader`n%InOutHeader%`n`nData`n%Data%`n`nCookie`n%Cookie%`n`nInOutData`n%InOutData%,HTTP-Step3.txt
-	}
+	if (DebugMode) ;--------------- DEBUG
+		tt("HTTP:Step 3","URL : " URL,"Cookie : " cookie,"Header`n" InOutHeader)
 	Found:=RegExMatch(InOutHeader,"U)Location: (.*)\n",New_URL)
 	if (found){ ;----------------- Check for Redirect
 		url:=New_URL1
+		if (DebugMode) ;--------------- DEBUG
+			tt("Debug Mode")
 		tto("[Red]Redirecting[/]")
 		goto Redo3
 	}
 	Cookie.=GetCookies(InOutHeader)
+	if DebugMode ;--------------- DEBUG
+		tt("Debug Mode")
 	tto("[green]HTTP:`tPhase 3 passed[/]")
 	;**************** Step 4
-	
+	tt("[Aqua]*DebugMode : [/]" DebugMode)
 	URL:="https://www.gog.com/account/settings/personal"
 	Referer:=URL
 	Redo4:
 	HTTPRequest(URL, InOutData, InOutHeader := Headers(Referer), Options)
-	if (DEBUG_HTTP) ;--------------- DEBUG
-		tt("HTTP:Step 4","URL : "URL,"Cookie : "cookie,"Header`n"InOutHeader)
-	if (DEBUG_HTTP>1) ;----------- DEBUG
-	{
-		tt("HTTP:Step 4",InOutData)
-		FileDelete,HTTP-Step4.txt
-		FileAppend, URL`n%URL%`n`nHeader`n%InOutHeader%`n`nData`n%InOutData%,HTTP-Step4.txt
-	}
+	if DebugMode ;--------------- DEBUG
+		tt("HTTP:[Red]Step 4[/]","URL : " URL,"Cookie : " cookie,"Header`n" InOutHeader)
 	Found:=RegExMatch(InOutHeader,"U)Location: (.*)\n",New_URL)
 	if (found){ ;----------------- Check for Redirect
-		;if (New_URL1 != "/")
 		url:=New_URL1
 		Cookie.=GetCookies(InOutHeader)
+		if (DebugMode) ;--------------- DEBUG
+			tt("Debug Mode")
 		tto("[Red]Redirecting[/]")
 		goto Redo4
 	}
 	If RegExMatch(InOutData, "U)Username<\/span><strong class=""settings-item__value settings-item__section"">(.*)<\/strong>", NickName)
 	{
+		if (DebugMode) ;--------------- DEBUG
+			tt("Debug Mode")
 		tto("[green]HTTP:`tPhase 4 passed[/]")
-		;tt("HTTP:`tPhase 4 passed")
-		;tt("Welcome " NickName1)
 		Gui,Show,,Ultimate GoG Downloader v%Version% - %NickName1%
 	}
 	else
@@ -122,6 +101,8 @@ HTTP_Login(UserName,UserPass){
 	
 	HTTP.GoGCookie:=Cookie
 	HTTP.GoGOptions:=Options
+	if (DebugMode) ;--------------- DEBUG
+		tt("Debug Mode")
 	tto("[green]HTTP:`tLogin Successful[/]")
 	;tt("HTTP:`tLogin Successful")
 	return,1

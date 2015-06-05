@@ -3,7 +3,6 @@ Get_GameInfo(GameName){
 		This Needs to be refined and add the gather DLC, Installers, LanguagePacks,
 	*/
 	global List,Config,HTTP,API,Orphans
-	DEBUG_GetGames:=0 ;---- Set to debug this module
 	Extras:=[],DLC:=[]
 	If List[GameName].Folder
 		Name := List[GameName].Folder
@@ -15,8 +14,11 @@ Get_GameInfo(GameName){
 	StringReplace,InOutData,InOutData,\,,All
 	StringReplace, InOutData, InOutData, a>, a>`n, All
 	Name:=RegExReplace(Name,"\W")
-	;FileDelete,GameInfo-%Name%.txt
-	;FileAppend,%InOutData%,GameInfo-%Name%.txt
+	if (DebugMode){
+		tt("Writing Game info to GameInfo-" Name ".txt")
+		FileDelete,% "GameInfo-" Name ".txt"
+		FileAppend,%InOutData%,% "GameInfo-" Name ".txt"
+	}
 	ExtraNum := 0
 	LangOption:=Object("ar","Arabic","bl","Bulgarian","cn","Chinese","cz","Czech","da","Danish","nl","Dutch","en","English","fi","Finnish","fr","French","de","German","gk","Greek","hu","Hungarian","it","Italian","jp","Japanese","ko","Korean","no","Norwegian","pl","Polish","pt","Portuguese","ro","Romanian","ru","Russian","sb","Serbian","sk","Slovac","es","Spanish","sv","Swedish","tr","Turkish","uk","Ukranian")
 	Loop, Parse, InOutData, `n
@@ -24,7 +26,7 @@ Get_GameInfo(GameName){
 		FoundPurchaseDate:=RegExMatch(A_LoopField,"U)""list_purchased""> Purchased on (.*)<",PurchaseDate)
 		If FoundPurchaseDate
 			List[GameName].Purchased:=PurchaseDate1
-		IfInString, A_LoopField, bonus_content_list browser		
+		IfInString, A_LoopField, bonus_content_list browser
 		{
 			Found_DLC = 0
 			Found_Extras = 1
@@ -57,7 +59,7 @@ Get_GameInfo(GameName){
 				Type:="Tarball Archive",DLCPlatform1:="Linux"
 			Else IfInString,DLCName,Linux
 				Type:="Debian Package",DLCPlatform1:="Linux"
-			Else 
+			Else
 				Type:="Installer"
 			If (FoundDLC||DLCFolder1!=GameName)
 				Type:="DLC"

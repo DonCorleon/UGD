@@ -1,6 +1,6 @@
 Gui_ConfirmOrphans(OrphanList){
 	global Config,List,OrphanTree,MoveOrphans,DeleteOrphans,CancelOrphans,OrphanFiles
-	Static FolderColour:="0xff0000",ExclusionColour:="0x0000ff",OrphanColour:="0x00ff00",TV,Exclusions,
+	global FolderColour:="0xff0000",ExclusionColour:="0x0000ff",OrphanColour:="0x00ff00",TV,Exclusions,
 	Static TheList,UncheckList,OrphanGuiSizeFirstRun
 	TheList:=OrphanList
 	
@@ -21,7 +21,7 @@ Gui_ConfirmOrphans(OrphanList){
 	Gui,Orphan:Add,Button,% "xp+" W/3 " y" H-40 " h30 w" W/3-20 " vDeleteOrphans gDeleteOrphans", Delete
 	Gui,Orphan:Add,Button,% "xp+" W/3 " y" H-40 " h30 w" W/3-20 " vCancelOrphans gOrphanButtonCancel", Cancel
 	tv:=new treeview(Config.OrphanTVHwnd)
-	;Gui,TreeView,SysTreeView321
+	Gui,TreeView,SysTreeView321
 	
 	;---- Load Exclusion List if it exists
 	ifExist,% A_ScriptDir "\Resources\ExclusionList.Txt"
@@ -138,7 +138,7 @@ Gui_ConfirmOrphans(OrphanList){
 					{
 						if (a=ParentText&&d=ItemText)
 						{
-							ifNotExist % Config.Orphans "\" a 
+							ifNotExist % Config.Orphans "\" a
 								FileCreateDir, % Config.Orphans "\" a
 							FileMove,% Config.Location "\" a "\" d,% Config.Orphans "\" a "\" d,1
 							if (!ErrorLevel)
@@ -233,7 +233,7 @@ Gui_ConfirmOrphans(OrphanList){
 	{
 		;OldFunction:=OnMessage(0x004E)
 		;if (OldFunction!="WM_NOTIFY"){
-		;OnMessage(0x004E,"WM_NOTIFY")
+		OnMessage(0x004E,"WM_NOTIFY")
 		;tt("Onmessage 0x004E - Set to WM_NOTIFY - OrphanTree")
 		;}
 		Gui,Orphan:Treeview,% Config.OrphanTVHwnd
@@ -265,7 +265,7 @@ Gui_ConfirmOrphans(OrphanList){
 						;m("Added Exclude folder : " Config.Location ExcludeFolder,A_EventInfo)
 					}
 				}
-				else 
+				else
 				{
 					TV_Modify(A_EventInfo,"+Select -Check")
 					Exclusions.Insert(Config.Location ExcludeFolder)
