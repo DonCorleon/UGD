@@ -73,7 +73,6 @@ HTTP_Login(UserName,UserPass){
 		tt("Debug Mode")
 	tto("[green]HTTP:`tPhase 3 passed[/]")
 	;**************** Step 4
-	tt("[Aqua]*DebugMode : [/]" DebugMode)
 	URL:="https://www.gog.com/account/settings/personal"
 	Referer:=URL
 	Redo4:
